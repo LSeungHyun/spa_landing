@@ -1,0 +1,148 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# 🌐 언어 사용 규칙 (Language Usage Rules)
+
+**기본 언어**: 한국어
+- 모든 답변과 설명은 한국어로 제공
+- 코드 주석과 변수명은 영어 사용 (개발 표준)
+- 기술 문서는 한국어 우선, 필요시 영어 병기
+
+---
+
+description: Migration naming rules
+globs: supabase/migrations/*.sql
+alwaysApply: true
+
+**중요**: 모든 답변과 설명은 한국어로 제공해주세요.
+
+# 📦 마이그레이션 파일 명명 규칙 (Migration File Naming Convention)
+
+## 🔍 개요
+
+마이그레이션 파일은 반드시 **순번 기반 명명 규칙**을 따라야 합니다. 이는 데이터베이스 스키마 변경의 순서와 추적을 위해 중요합니다.
+
+## ✅ 필수 명명 규칙
+
+**모든 마이그레이션 파일은 다음 형식을 따라야 합니다:**
+
+```
+NNN_feature_description.sql
+```
+
+- `NNN`: 순차적인 번호 (001, 002, 003, ...)
+- `feature_description`: 마이그레이션의 목적을 케밥 케이스로 설명
+
+**예시:**
+```
+001_user_suggestions.sql
+002_create_partner_tables.sql
+003_add_vendor_images_bucket.sql
+```
+
+## ⚠️ 경고 및 제한 사항
+
+- 날짜 형식(`YYYYMMDD_`)을 사용하지 마세요.
+- 순차적인 숫자만 사용하세요.
+- 마이그레이션 파일을 생성할 때는 항상 `create-migration.ps1` 스크립트를 사용하세요.
+
+## 🛠️ 올바른 마이그레이션 파일 생성 방법
+
+마이그레이션 파일을 생성하려면 다음 명령어를 사용하세요:
+
+```powershell
+.\supabase\create-migration.ps1 "기능_설명"
+```
+
+## 📋 마이그레이션 헤더 형식
+
+모든 마이그레이션 파일은 다음 형식의 헤더를 포함해야 합니다:
+
+```sql
+-- Migration: NNN_feature_description
+-- Description: 이 마이그레이션의 목적에 대한 설명
+-- Author: 작성자 이름
+-- Date: YYYY-MM-DD
+-- 
+-- Changes:
+-- 1. 변경 사항 1
+-- 2. 변경 사항 2
+```
+
+## 🔄 유효성 검사
+
+마이그레이션 파일이 규칙을 준수하는지 확인하려면 다음 명령어를 실행하세요:
+
+```powershell
+.\supabase\validate-migrations.ps1
+```
+
+---
+
+# 📦 Migration File Naming Convention
+
+## 🔍 Overview
+
+Migration files must follow a **sequence-based naming convention**. This is crucial for tracking the order of database schema changes.
+
+## ✅ Required Naming Rules
+
+**All migration files must follow this format:**
+
+```
+NNN_feature_description.sql
+```
+
+- `NNN`: Sequential number (001, 002, 003, ...)
+- `feature_description`: Purpose of the migration in kebab-case
+
+**Examples:**
+```
+001_user_suggestions.sql
+002_create_partner_tables.sql
+003_add_vendor_images_bucket.sql
+```
+
+## ⚠️ Warnings and Restrictions
+
+- Do not use date formats (`YYYYMMDD_`).
+- Use sequential numbers only.
+- Always use the `create-migration.ps1` script to create migration files.
+
+## 🛠️ How to Create Migration Files Correctly
+
+To create a migration file, use the following command:
+
+```powershell
+.\supabase\create-migration.ps1 "feature_description"
+```
+
+## 📋 Migration Header Format
+
+All migration files must include a header in the following format:
+
+```sql
+-- Migration: NNN_feature_description
+-- Description: Purpose of this migration
+-- Author: Author's name
+-- Date: YYYY-MM-DD
+-- 
+-- Changes:
+-- 1. Change 1
+-- 2. Change 2
+```
+
+## 🔄 Validation
+
+To verify that your migration files comply with the rules, run:
+
+```powershell
+.\supabase\validate-migrations.ps1
+```
+```
+.
+
+
+

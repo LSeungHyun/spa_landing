@@ -1,0 +1,235 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# 🌐 언어 사용 규칙 (Language Usage Rules)
+
+**기본 언어**: 한국어
+- 모든 답변과 설명은 한국어로 제공
+- 코드 주석과 변수명은 영어 사용 (개발 표준)
+- 기술 문서는 한국어 우선, 필요시 영어 병기
+
+---
+
+<!-- ruleType: always -->
+
+# ⚡ TypeScript 강제 규칙 (TypeScript Enforcement Rules)
+
+**중요**: 모든 답변과 설명은 한국어로 제공해주세요.
+
+## 🎯 핵심 원칙
+**이 프로젝트는 100% TypeScript로 개발됩니다. 사용자가 별도로 TypeScript 사용을 언급하지 않아도 항상 TypeScript로 코드를 작성해야 합니다.**
+
+## ✅ 무조건 적용 규칙 (Always Applied)
+
+### 1. 파일 확장자 강제 (Required)
+```
+✅ 항상 사용해야 하는 확장자:
+- .tsx (React 컴포넌트)
+- .ts (일반 TypeScript 파일)
+- .d.ts (타입 정의 파일)
+
+❌ 절대 사용하지 않는 확장자:
+- .jsx (사용 금지)
+- .js (사용 금지)
+```
+
+### 2. 모든 코드는 TypeScript로 작성 (Required)
+- 사용자가 "컴포넌트 만들어줘"라고 하면 → 자동으로 `.tsx`로 생성
+- 사용자가 "함수 만들어줘"라고 하면 → 자동으로 `.ts`로 생성
+- 사용자가 "JavaScript로"라고 명시해도 → TypeScript로 변환해서 제공
+- **예외 없음**: 모든 새 파일은 TypeScript여야 함
+
+### 3. 강제 타입 정의 (Required)
+```typescript
+// ✅ 모든 함수 매개변수와 반환값에 타입 지정
+function createUser(name: string, email: string): User {
+  return { id: generateId(), name, email };
+}
+
+// ✅ 모든 변수에 명시적 타입 (추론이 명확하지 않은 경우)
+const users: User[] = [];
+const config: AppConfig = loadConfig();
+
+// ✅ 인터페이스와 타입 정의 활용
+interface User {
+  id: string;
+  name: string;
+  email: string;
+}
+
+type ButtonVariant = 'primary' | 'secondary' | 'danger';
+```
+
+### 4. React 컴포넌트 타입 강제 (Required)
+```typescript
+// ✅ Props 인터페이스 정의 필수
+interface ButtonProps {
+  children: React.ReactNode;
+  variant?: 'primary' | 'secondary';
+  onClick?: () => void;
+  disabled?: boolean;
+}
+
+// ✅ 컴포넌트 타입 명시
+const Button: React.FC<ButtonProps> = ({ 
+  children, 
+  variant = 'primary', 
+  onClick, 
+  disabled = false 
+}) => {
+  return (
+    <button 
+      className={`btn btn-${variant}`}
+      onClick={onClick}
+      disabled={disabled}
+    >
+      {children}
+    </button>
+  );
+};
+
+export default Button;
+```
+
+### 5. 훅 타입 강제 (Required)
+```typescript
+// ✅ 커스텀 훅 타입 정의
+interface UseToastReturn {
+  toast: (message: string, type?: 'success' | 'error' | 'info') => void;
+  toasts: Toast[];
+  removeToast: (id: string) => void;
+}
+
+function useToast(): UseToastReturn {
+  const [toasts, setToasts] = useState<Toast[]>([]);
+  
+  const toast = useCallback((message: string, type: 'success' | 'error' | 'info' = 'info') => {
+    // 구현...
+  }, []);
+
+  return { toast, toasts, removeToast };
+}
+```
+
+### 6. API 및 외부 데이터 타입 강제 (Required)
+```typescript
+// ✅ API 응답 타입 정의
+interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  error?: string;
+}
+
+interface UserData {
+  id: string;
+  name: string;
+  email: string;
+  createdAt: string;
+}
+
+// ✅ 비동기 함수 타입 명시
+async function fetchUser(id: string): Promise<ApiResponse<UserData>> {
+  const response = await fetch(`/api/users/${id}`);
+  return response.json();
+}
+```
+
+### 7. 이벤트 핸들러 타입 강제 (Required)
+```typescript
+// ✅ 이벤트 핸들러 타입 명시
+const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  event.preventDefault();
+  // 처리 로직
+};
+
+const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  setValue(event.target.value);
+};
+
+const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  // 클릭 처리
+};
+```
+
+## 🚫 절대 금지 사항 (Forbidden)
+
+### 1. any 타입 사용 금지
+```typescript
+// ❌ 절대 금지
+const data: any = fetchData();
+
+// ✅ 올바른 방법
+const data: UserData = fetchData();
+// 또는 타입을 모르는 경우
+const data: unknown = fetchData();
+```
+
+### 2. 암시적 any 허용 금지
+```typescript
+// ❌ 암시적 any (금지)
+function processData(data) {
+  return data.map(item => item.value);
+}
+
+// ✅ 명시적 타입 지정
+function processData(data: DataItem[]): string[] {
+  return data.map(item => item.value);
+}
+```
+
+### 3. JavaScript 파일 생성 금지
+- 모든 새 파일은 `.ts` 또는 `.tsx`여야 함
+- 기존 `.js` 파일도 점진적으로 `.ts`로 마이그레이션
+- 설정 파일 등 특수한 경우를 제외하고는 JavaScript 사용 금지
+
+## 🔧 자동 적용 메커니즘
+
+### 1. 파일 생성 시 자동 TypeScript 적용
+사용자가 다음과 같이 요청하면:
+- "버튼 컴포넌트 만들어줘" → `src/components/ui/button.tsx` 생성
+- "유틸리티 함수 만들어줘" → `src/lib/utils.ts` 생성
+- "훅 만들어줘" → `src/hooks/use-something.ts` 생성
+
+### 2. 코드 수정 시 TypeScript 강제
+- 기존 JavaScript 코드 수정 요청 시 TypeScript로 변환
+- 타입이 없는 코드 발견 시 자동으로 타입 추가
+- any 타입 발견 시 구체적 타입으로 변경
+
+### 3. 에러 방지를 위한 자동 검증
+```typescript
+// 코드 생성 후 자동으로 다음 검증 실행
+npx tsc --noEmit  // TypeScript 컴파일 에러 검사
+npm run lint      // ESLint 검사
+```
+
+## 📋 명명 규칙 (Required)
+
+### 1. 파일명
+- 컴포넌트: `kebab-case.tsx` (예: `user-profile.tsx`)
+- 훅: `use-kebab-case.ts` (예: `use-local-storage.ts`)
+- 유틸리티: `kebab-case.ts` (예: `date-utils.ts`)
+- 타입 정의: `kebab-case.types.ts` (예: `api.types.ts`)
+
+### 2. 타입/인터페이스명
+- 인터페이스: `PascalCase` (예: `UserProfile`, `ApiResponse`)
+- 타입 별칭: `PascalCase` (예: `ButtonVariant`, `ThemeColor`)
+- 제네릭: `T`, `K`, `V` 등 단일 대문자
+
+### 3. 변수/함수명
+- 변수: `camelCase` (예: `userData`, `isLoading`)
+- 함수: `camelCase` (예: `handleSubmit`, `fetchUserData`)
+- 상수: `SCREAMING_SNAKE_CASE` (예: `API_BASE_URL`, `MAX_RETRY_COUNT`)
+
+## 🎯 목표 달성 확인
+
+이 규칙이 적용되면:
+1. ✅ 사용자가 "컴포넌트 만들어줘"라고 하면 자동으로 TypeScript로 생성
+2. ✅ 사용자가 "JavaScript로 만들어줘"라고 해도 TypeScript로 변환해서 제공
+3. ✅ 모든 새 파일은 `.ts` 또는 `.tsx` 확장자
+4. ✅ 모든 함수, 변수, 컴포넌트에 적절한 타입 정의
+5. ✅ any 타입 사용 없이 구체적인 타입 정의
+6. ✅ 일관된 코딩 스타일과 명명 규칙 적용
+
+**이제 앞으로 별도의 TypeScript 지시 없이도 모든 코드가 자동으로 TypeScript로 생성됩니다!**

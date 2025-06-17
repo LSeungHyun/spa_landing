@@ -1,0 +1,140 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# 🌐 언어 사용 규칙 (Language Usage Rules)
+
+**기본 언어**: 한국어
+- 모든 답변과 설명은 한국어로 제공
+- 코드 주석과 변수명은 영어 사용 (개발 표준)
+- 기술 문서는 한국어 우선, 필요시 영어 병기
+
+---
+
+<!-- ruleType: always -->
+
+# 📦 Library Management Rules (라이브러리 관리 규칙)
+
+**중요**: 모든 답변과 설명은 한국어로 제공해주세요.
+
+## 🎯 목적
+라이브러리 충돌을 방지하고, 일관된 기술 스택을 유지합니다.
+
+## ✅ 승인된 라이브러리 목록
+
+### UI 컴포넌트
+- **Toast**: `sonner` (전역 단일 인스턴스)
+- **UI 기본**: `shadcn-ui` + `@radix-ui/*`
+- **애니메이션**: `framer-motion`
+- **아이콘**: `lucide-react` (유일한 아이콘 라이브러리)
+- **캐러셀**: `embla-carousel-react`
+- **차트**: `recharts`
+
+### 상태 관리
+- **서버 상태**: `swr` (메인 상태 관리)
+- **폼**: `react-hook-form` + `@hookform/resolvers`
+- **로컬 상태**: `React.useState` + `localStorage` 조합
+
+### 유틸리티
+- **날짜**: `date-fns` (기존 프로젝트 유지)
+- **클래스명**: `clsx` + `tailwind-merge`
+- **검증**: `zod`
+- **UUID**: `uuid`
+
+### HTTP 클라이언트
+- **공식**: `lib/api` 클라이언트 사용 (axios 기반)
+- **Supabase**: `@supabase/supabase-js`
+
+## ⛔ 금지 라이브러리
+- `react-icons` (lucide-react 사용)
+- `@tanstack/react-query` (SWR 사용)
+- `zustand` (SWR 사용)
+- `redux` / `redux-toolkit` (SWR 사용)
+- `moment.js` (date-fns 사용)
+- `react-toastify` (sonner 사용)
+- `axios` 직접 사용 (lib/api 클라이언트 사용)
+- 별도의 CSS-in-JS 라이브러리 (Tailwind CSS 사용)
+- `@radix-ui/react-toast` (sonner와 충돌)
+- `heroicons` (lucide-react 사용)
+- `feather-icons` (lucide-react 사용)
+
+## 🎨 아이콘 라이브러리 사용법 (필수)
+
+### ✅ 올바른 사용법
+```typescript
+// lucide-react만 사용
+import { Instagram, MessageCircle, Globe, Youtube, ExternalLink } from 'lucide-react';
+
+// 컴포넌트에서 사용
+<Instagram className="text-pink-600" size={24} />
+<MessageCircle className="text-yellow-400" size={24} />
+```
+
+### ❌ 금지된 사용법
+```typescript
+// react-icons 사용 금지
+import { FaInstagram } from 'react-icons/fa';
+import { RiKakaoTalkFill } from 'react-icons/ri';
+
+// heroicons 사용 금지
+import { HeartIcon } from '@heroicons/react/24/outline';
+```
+
+### 🔄 아이콘 매핑 가이드
+| react-icons | lucide-react |
+|-------------|--------------|
+| `FaInstagram` | `Instagram` |
+| `FaYoutube` | `Youtube` |
+| `FaGlobe` | `Globe` |
+| `FaBlogger` | `Globe` |
+| `RiKakaoTalkFill` | `MessageCircle` |
+| `FaExternalLinkAlt` | `ExternalLink` |
+
+## 📋 라이브러리 추가 프로세스
+1. 기존 라이브러리로 해결 가능한지 확인
+2. 팀 리뷰 및 승인
+3. 승인된 라이브러리 목록 업데이트
+4. 전체 프로젝트에서 일관되게 사용
+
+## 🔍 충돌 검사
+```bash
+# 중복 라이브러리 검사
+npm dedupe
+npm list --depth=0 | grep -E "(toast|modal|date|http|state|icon)"
+
+# 사용하지 않는 의존성 확인
+npx depcheck
+
+# 아이콘 라이브러리 검증
+npm run check:icons
+```
+
+## 📦 버전 관리
+- Major 버전 업그레이드는 팀 합의 필요
+- Minor/Patch 업데이트는 정기적으로 수행
+- Lock 파일(package-lock.json) 항상 커밋
+
+## 🚨 일반적인 충돌 사례
+1. **Toast 라이브러리**: sonner vs react-toastify vs @radix-ui/react-toast
+2. **날짜 라이브러리**: date-fns vs moment vs dayjs
+3. **HTTP 클라이언트**: axios vs fetch vs ky
+4. **아이콘**: lucide-react vs react-icons vs heroicons
+5. **상태 관리**: SWR vs TanStack Query vs zustand vs redux
+
+## 🛡️ ESLint 규칙
+프로젝트에서 금지된 라이브러리 사용을 방지하기 위해 ESLint 규칙이 설정되어 있습니다:
+
+```javascript
+'no-restricted-imports': [
+  'error',
+  {
+    patterns: [
+      {
+        group: ['react-icons/*'],
+        message: 'react-icons는 사용할 수 없습니다. lucide-react를 사용해주세요.',
+      },
+    ],
+  },
+],
+```

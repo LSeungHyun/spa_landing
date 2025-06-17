@@ -1,0 +1,187 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# 🌐 언어 사용 규칙 (Language Usage Rules)
+
+**기본 언어**: 한국어
+- 모든 답변과 설명은 한국어로 제공
+- 코드 주석과 변수명은 영어 사용 (개발 표준)
+- 기술 문서는 한국어 우선, 필요시 영어 병기
+
+---
+
+## 🇰🇷 SPA 개발 가이드라인 (Korean)
+
+````mdc
+<!-- ruleType: always -->
+
+You are an expert in practical Next.js development. Apply the following rules to maintain stability, reduce production bugs, and ensure collaborative code quality in the SPA (논문 초록/서론 자동 생성기) project.
+
+**중요**: 모든 답변과 설명은 한국어로 제공해주세요.
+
+## 📌 Rule Levels
+
+- **Required**: Enforced via CI and code review.
+- **Recommended**: Default unless justified with TODO or issue.
+- **Optional**: Good-to-have; apply if resources/time allow.
+
+---
+
+## 📎 Mobile-First Guideline Reference
+
+For all UI and UX decisions, especially regarding responsive layouts and performance on small screens, please refer to the **Mobile-First Guide** (`mobile-first.mdc`). It covers:
+
+- Mobile-first design principles
+- Mandatory responsive structures
+- Mobile UX/UI standards
+- Real device QA & performance checks
+
+Ensure you have read the Mobile-First Guide and apply its rules in parallel with this dev-guidelines file. Any conflicts or exceptions should be documented with a TODO + issue link, following our standard exception process.
+
+
+## ✅ Development Rules
+
+### 🔧 1. Lint & Format (Required)
+
+- ESLint: `typescript-eslint`, `jsx-a11y`
+- Prettier with `.prettierrc`
+- Husky: `pre-commit` with `pnpm lint` + `pnpm test`
+```bash
+pnpm lint
+pnpm test
+````
+
+---
+
+### 📁 2. Folder & Naming (Recommended)
+
+* Domain-based folders: `/features/[domain]`
+* File naming: kebab-case, hooks: `useCamelCase`
+* Full guide → `docs/folder-structure-naming.md`
+
+---
+
+### 🚨 3. CI Blocking Rules (Required)
+
+* ESLint errors → block
+* Prettier misformatted → block
+* Jest test failures → block
+* Supabase migration/policy fail → block
+* Test coverage:
+
+  * Global < 80% → warn
+  * Critical modules (`auth`, `community`, `vendor`) < 90% → block
+
+---
+
+### ❗ 4. Common Mistakes
+
+* Unnecessary `use client`
+* `any` without comments
+* Global state misuse
+* Redundant type annotations
+* Missing commit prefix
+
+---
+
+### 🧪 5. Testing (Recommended)
+
+* `.test.ts` next to logic files
+* `/e2e` for Playwright or Cypress
+* `jest.config.ts`, `/test/setup.ts`
+* Use `/features/_template/` as scaffold
+
+---
+
+### 🔐 6. Security (Required)
+
+* Validate input with Zod
+* Sanitize HTML (`DOMPurify`)
+* Never commit `.env*` or secrets
+* Apply RLS to private tables
+* Rotate secrets regularly
+
+---
+
+### ⚙️ 7. State Management (Required)
+
+* Local: `useState`
+* Domain: TanStack Query (`/features/[x]/services`)
+* Shared global: minimal under `/lib/auth`
+
+---
+
+### 📚 8. Documentation (Recommended)
+
+* `README.md` per domain folder
+* Use JSDoc for all exported hooks/functions
+* Docs checklist in PR template
+
+---
+
+### 🔀 9. Git & PR (Recommended)
+
+* Use `feat:`, `fix:`, `refactor:` etc.
+* PR size ≤ 500 LOC
+* Branch: `feature/auth-login`, `fix/community-bug`
+
+---
+
+### ♿ 10. Accessibility (Recommended)
+
+* Semantic HTML
+* `alt`, `aria-*`, `tabIndex`
+* Tools: `jest-axe`, Storybook a11y addon
+
+---
+
+### ⚡ 11. Performance (Optional)
+
+* `next/dynamic` for lazy load
+* `next/image` for optimization
+* `useMemo`, `react-window` for long lists
+* Run Lighthouse/Profiler per sprint
+
+---
+
+## 🧪 Phase-Based Enforcement
+
+| Phase | Required              | Recommended         | Optional       |
+| ----- | --------------------- | ------------------- | -------------- |
+| MVP   | Folder, Lint, Zustand | Commit format, Docs | Perf tuning    |
+| QA    | Tests, Zod, a11y      | Docs, JSDoc         | Virtualization |
+| PROD  | CI, RLS, migration    | Rollback, logging   | Perf budgets   |
+
+---
+
+## 🛠️ Exceptions & Tech Debt
+
+* Use TODO + issue link for rule violations
+* Hotfixes allowed → create a tech debt ticket
+* Review debt monthly
+
+
+## 📦 마이그레이션 파일 관리
+
+마이그레이션 파일은 순번 기반 명명 규칙을 따라야 합니다:
+- 형식: `NNN_feature_description.sql` (예: `001_user_suggestions.sql`)
+- 항상 `create-migration.ps1` 스크립트로 생성
+- 자세한 규칙은 `.cursor/rules/migrations.mdc` 참조
+
+---
+
+## 📎 Reference
+
+📁 Folder/naming rules: `docs/folder-structure-naming.md`
+
+## 🛡️ 방어적 프로그래밍 (필수)
+
+* 모든 정규식 match/exec 함수 결과는 null 체크 필수
+* module.context와 같은 외부 제공 객체 접근 시 null/undefined 체크 필수
+* 옵셔널 체이닝(?.) 또는 nullish 병합 연산자(??) 적극 활용
+* 외부 API 반환값 항상 유효성 검증
+
+
+

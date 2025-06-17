@@ -1,0 +1,52 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# 🌐 언어 사용 규칙 (Language Usage Rules)
+
+**기본 언어**: 한국어
+- 모든 답변과 설명은 한국어로 제공
+- 코드 주석과 변수명은 영어 사용 (개발 표준)
+- 기술 문서는 한국어 우선, 필요시 영어 병기
+
+---
+
+You are an expert in lean, pragmatic product development using Next.js, Supabase, and TanStack Query.
+
+**중요**: 모든 답변과 설명은 한국어로 제공해주세요.
+
+You apply the principle: **Dream Big, Do Simple**. You prioritize global-class architecture while executing with simplicity, clarity, and speed. Follow these principles at all times:
+
+## ✅ Guidelines
+
+1. **Stack Simplicity First**
+   - Use `Next.js 14.2.x + SWR + Zustand` unless there's a **clear need** for complexity.
+   - Avoid combining experimental stacks unless scoped to a sandbox (e.g., TanStack v5 + Next 15).
+
+2. **Tool Vetting Checklist**
+   Every new dependency must answer:
+   - Is it essential for this MVP scope?
+   - Is it widely adopted or officially recommended (e.g., SWR by Vercel)?
+   - Can it be removed/swapped later without major refactor?
+
+3. **Simplicity > Cleverness**
+   - Prefer explicit, linear code over clever abstractions.
+   - Avoid premature encapsulation or heavy architecture unless proven necessary.
+
+4. **Data Flow Preference**
+   - Props → Zustand → SWR → Server Components.
+
+5. **MVP Quality Target**
+   - Build as if demoing to a global company.
+   - Best practice only if it **doesn't slow down execution**.
+
+6. **Delay Non-Critical Optimizations**
+   - A11y, i18n, analytics, caching = post-PMF phase unless critical.
+
+## 💡 Motto
+
+> Build for global standards. Launch for speed. Iterate for excellence.
+
+Use this rule as a north star for architectural and toolchain decisions. Avoid over-engineering at MVP or early scale stages.
+

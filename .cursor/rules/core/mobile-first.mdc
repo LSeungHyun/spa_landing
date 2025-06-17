@@ -1,0 +1,122 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# 🌐 언어 사용 규칙 (Language Usage Rules)
+
+**기본 언어**: 한국어
+- 모든 답변과 설명은 한국어로 제공
+- 코드 주석과 변수명은 영어 사용 (개발 표준)
+- 기술 문서는 한국어 우선, 필요시 영어 병기
+
+---
+
+You are an expert in building responsive, high-performance mobile web applications. Apply the following mobile-first principles to ensure exceptional user experience, with strong emphasis on thumb-accessible navigation, touch optimization, and content-first rendering tailored for mobile-first workflows.
+
+**중요**: 모든 답변과 설명은 한국어로 제공해주세요.
+
+## 📌 Priority Levels
+
+- **Required**: Must always be applied unless explicitly justified.
+- **Recommended**: Should generally be followed; deviations must include a TODO or justification.
+- **Optional**: Apply only if justified by data or available resources.
+
+---
+
+## 🌐 1. Mobile-First Design (Recommended)
+
+- Design from mobile screen upwards using Tailwind or custom media queries.
+- Prioritize core interactions, content readability, and vertical scroll flow.
+- Structure layouts using mobile breakpoints (`sm`, `md`, `lg`) with scalable classes.
+
+---
+
+## 📱 2. Bottom Navigation Bar (Required)
+
+- Implement a fixed bottom navigation bar for all authenticated mobile users.
+- Must use `lg:hidden` to hide on desktop and show only on small viewports.
+- Each tab should include both an icon (Lucide/Feather) and label for clarity.
+- Design navigation to fit within a `h-14` height and accommodate 5–6 main routes.
+- Example component: `components/layout/MobileNavBar.tsx`
+- Ensure `<main>` content has `pb-14` padding to avoid being hidden under the nav.
+
+---
+
+## 📏 3. Responsive Layout (Required)
+
+- Utilize Tailwind or raw CSS media queries for flexible layouts.
+- Responsive units (%, `vw`, `rem`) should scale cleanly across devices.
+- Use lazy loading for images and defer non-critical resources.
+
+---
+
+## 🚀 4. Performance Optimization (Recommended)
+
+- Dynamic imports for large or non-above-the-fold components.
+- Compress and lazy load assets (images, videos, fonts).
+- Use WebP or AVIF image formats.
+
+---
+
+## 🖐 5. Touch-Optimized UX (Recommended)
+
+- Touch targets should be at least 44x44px.
+- Key navigation and CTAs must be within thumb zones.
+- Provide visual feedback on tap (`:active`, `:focus-visible` states).
+
+---
+
+## 🧪 6. Mobile Testing & QA (Required)
+
+- Test on real devices: iPhone, Android flagship, budget Android.
+- Use Lighthouse Mobile reports in CI.
+- Simulate slow network and CPU throttling regularly.
+
+---
+
+## 📊 7. Monitoring & Optimization (Optional)
+
+- Use Vitals monitoring (e.g. TTFB, INP, LCP) for mobile segments.
+- Regularly review session recordings and heatmaps for mobile interaction flows.
+
+---
+
+## 📐 8. Thumb Zone Optimization (Recommended)
+
+- Primary CTAs, tab bars, and bottom sheets should be reachable one-handed.
+- Avoid fixed headers on mobile that reduce vertical real estate.
+
+---
+
+## 🧱 9. Component Strategy (Recommended)
+
+- Isolate mobile-only components in `components/layout/` or `components/mobile/`.
+- Use conditional rendering (`lg:hidden`, `lg:flex`) to optimize render tree.
+- Document mobile variations with storybook or screenshots in PRs.
+
+---
+
+## 🤝 10. Design & Dev Sync (Recommended)
+
+- Designers must provide mobile-first mockups and tap target guidance.
+- Developers and designers co-review bottom nav UX across iOS/Android browsers.
+
+---
+
+## 📈 Summary Table
+
+| Topic                          | Priority    |
+| ------------------------------|-------------|
+| Mobile-First Design           | Recommended |
+| Bottom Navigation Bar         | Required    |
+| Responsive Layout             | Required    |
+| Performance Optimization      | Recommended |
+| Touch-Optimized UX            | Recommended |
+| Mobile Testing & QA           | Required    |
+| Monitoring & Optimization     | Optional    |
+| Thumb Zone Optimization       | Recommended |
+| Component Strategy            | Recommended |
+| Design & Dev Sync             | Recommended |
+
+---

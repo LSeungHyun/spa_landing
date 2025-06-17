@@ -1,0 +1,126 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# 🌐 언어 사용 규칙 (Language Usage Rules)
+
+**기본 언어**: 한국어
+- 모든 답변과 설명은 한국어로 제공
+- 코드 주석과 변수명은 영어 사용 (개발 표준)
+- 기술 문서는 한국어 우선, 필요시 영어 병기
+
+---
+
+<!-- ruleType: always -->
+
+# 🌊 Hydration Safety Rules (하이드레이션 안전 규칙)
+
+**중요**: 모든 답변과 설명은 한국어로 제공해주세요.
+
+## 🎯 목적
+Next.js 애플리케이션에서 하이드레이션 에러를 사전에 방지하고, SSR/CSR 불일치를 최소화합니다.
+
+## ✅ 필수 규칙
+
+### 1. 브라우저 전용 API 격리 (Required)
+```typescript
+// ❌ 잘못된 예
+const theme = localStorage.getItem('theme');
+
+// ✅ 올바른 예
+const [theme, setTheme] = useState<string>();
+useEffect(() => {
+  setTheme(localStorage.getItem('theme') || 'light');
+}, []);
+```
+
+### 2. SWR 안전 패턴 (Required)
+```typescript
+// SWR은 자체적으로 하이드레이션을 안전하게 처리합니다
+const { data: user, isLoading } = useSWR('auth/user', fetcher, {
+  fallbackData: null, // 초기값 설정
+});
+
+// 로딩 상태 처리
+if (isLoading) return <LoadingState />;
+if (!user) return <LoginPrompt />;
+```
+
+### 3. 조건부 렌더링 시 키 사용 (Required)
+```typescript
+// ❌ 잘못된 예
+{isLoggedIn && <UserProfile />}
+
+// ✅ 올바른 예
+{isLoggedIn ? <UserProfile key="user-profile" /> : null}
+```
+
+### 4. 날짜/시간 렌더링 (Required)
+```typescript
+// ❌ 잘못된 예
+<div>{new Date().toLocaleString()}</div>
+
+// ✅ 올바른 예
+const [currentTime, setCurrentTime] = useState<string>('');
+useEffect(() => {
+  setCurrentTime(new Date().toLocaleString());
+}, []);
+```
+
+### 5. 동적 스타일 적용 (Required)
+```typescript
+// ❌ 잘못된 예
+<div style={{ height: window.innerHeight }}>
+
+// ✅ 올바른 예
+const [height, setHeight] = useState<number>(0);
+useEffect(() => {
+  setHeight(window.innerHeight);
+}, []);
+```
+
+### 6. 라이브러리 충돌 방지 (Required)
+- 동일 기능 라이브러리 중복 사용 금지
+- 새 라이브러리 추가 전 기존 라이브러리 확인
+- UI 컴포넌트는 shadcn-ui 우선 사용
+
+### 7. 'use client' 디렉티브 최소화 (Required)
+- 꼭 필요한 경우만 사용
+- 가능한 한 작은 컴포넌트 단위로 분리
+
+### 8. 서버 컴포넌트에서 클라이언트 상태 접근 금지 (Required)
+```typescript
+// ❌ 잘못된 예 - 서버 컴포넌트에서
+export default function Page() {
+  const { data: user } = useSWR('auth/user', fetcher); // 에러!
+  return <div>{user?.name}</div>;
+}
+
+// ✅ 올바른 예 - 클라이언트 컴포넌트로 분리
+'use client';
+export default function UserInfo() {
+  const { data: user } = useSWR('auth/user', fetcher);
+  return <div>{user?.name}</div>;
+}
+```
+
+## 🧪 검증 체크리스트
+- [ ] localStorage, sessionStorage 직접 접근 없음
+- [ ] window, document 객체 useEffect 내부에서만 사용
+- [ ] TanStack Query에서 enabled 옵션으로 클라이언트 제한
+- [ ] 동적 import 시 loading 상태 처리
+- [ ] 조건부 렌더링 시 일관된 DOM 구조 유지
+- [ ] 서버/클라이언트 컴포넌트 명확히 구분
+
+##  ���������� Ư�� ��Ģ
+
+### 9. ���������� Import ����ȭ (Required)
+- ������� �ʴ� lucide-react ������ ���� ����
+- Play, Search, Calendar �� �̻�� ������ ����
+- ���� ���������� ����ϴ� �����ܸ� import
+
+### 10. ���������� ���̵巹�̼� ���� (Required)
+- useClientMounted() �� �ʼ� ���
+- ����Ʈ �� �ε� UI ����
+- ���� �����͸� �ʱ� �������� ���

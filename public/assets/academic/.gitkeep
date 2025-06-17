@@ -1,0 +1,8 @@
+# Academic Landing Page Assets
+
+이 디렉토리는 논문 초록/서론 자동 생성기 랜딩페이지에 사용될 이미지 자산들을 저장합니다.
+
+## 필요한 이미지 파일들:
+- abstract-preview.png: 초록 생성 결과 미리보기
+- demo-input.png: 입력 예시 화면
+- demo-output.png: 출력 결과 화면 

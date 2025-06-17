@@ -1,0 +1,92 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# 🌐 언어 사용 규칙 (Language Usage Rules)
+
+**기본 언어**: 한국어
+- 모든 답변과 설명은 한국어로 제공
+- 코드 주석과 변수명은 영어 사용 (개발 표준)
+- 기술 문서는 한국어 우선, 필요시 영어 병기
+
+---
+
+# 🛡️ 방어적 프로그래밍 (Defensive Programming)
+
+**중요**: 모든 답변과 설명은 한국어로 제공해주세요.
+
+## 개요
+
+방어적 프로그래밍은 예상치 못한 입력, 외부 리소스의 오류, 그리고 런타임 예외에 강건하게 대응할 수 있는 코드를 작성하는 방법론입니다. 이 규칙을 통해 안정적이고 예측 가능한 코드를 작성할 수 있습니다.
+
+## 📌 필수 규칙
+
+### 1. 정규식 처리
+
+모든 정규식 `match()`, `exec()` 함수 사용 시 반드시 null 체크를 수행해야 합니다.
+
+```javascript
+// ❌ 잘못된 방법
+const emailMatch = inputString.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/);
+const email = emailMatch[1]; // TypeError 위험: match 결과가 null일 수 있음
+
+// ✅ 올바른 방법
+const emailMatch = inputString.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/);
+const email = emailMatch && emailMatch[1] ? emailMatch[1] : null;
+```
+
+### 2. 외부 제공 객체 접근
+
+`module.context`와 같은 외부에서 제공되는 객체에 접근할 때는 반드시 null/undefined 체크를 수행해야 합니다.
+
+```javascript
+// ❌ 잘못된 방법
+const config = externalModule.config.settings.timeout; // externalModule.config가 null이면 오류 발생
+
+// ✅ 올바른 방법 (옵셔널 체이닝 사용)
+const config = externalModule?.config?.settings?.timeout;
+
+// ✅ 대체값 제공 (nullish 병합 연산자 사용)
+const config = externalModule?.config?.settings?.timeout ?? defaultTimeout;
+```
+
+### 3. 옵셔널 체이닝 및 Nullish 병합 연산자 활용
+
+가능한 모든 경우에 옵셔널 체이닝(`?.`) 또는 nullish 병합 연산자(`??`)를 사용합니다.
+
+```javascript
+// 옵셔널 체이닝 예시
+const userName = user?.profile?.name;
+
+// Nullish 병합 연산자 예시
+const displayName = userName ?? 'Guest';
+```
+
+### 4. 외부 API 반환값 검증
+
+외부 API 호출 결과는 항상 유효성을 검증해야 합니다.
+
+```javascript
+// ❌ 잘못된 방법
+const data = await api.fetchUserData(userId);
+return data.results.map(item => item.name); // data나 data.results가 undefined면 오류 발생
+
+// ✅ 올바른 방법
+const response = await api.fetchUserData(userId);
+if (!response || !response.results || !Array.isArray(response.results)) {
+  return []; // 안전한 기본값 반환
+}
+return response.results.map(item => item?.name || 'Unknown');
+```
+
+## 🧪 검토 체크리스트
+
+새로운 코드를 작성하거나 기존 코드를 리뷰할 때 다음 체크리스트를 활용합니다.
+
+- [ ] 모든 정규식 매칭 결과에 null 체크를 수행했는가?
+- [ ] 외부 객체 접근 시 null/undefined 체크를 수행했는가?
+- [ ] API 호출 결과의 유효성을 검증했는가?
+- [ ] 예상치 못한 입력에 대한 처리가 있는가?
+- [ ] 옵셔널 체이닝이나 nullish 병합 연산자를 적절히 활용했는가?
+- [ ] 오류 발생 시 사용자에게 적절한 피드백을 제공하는가?
