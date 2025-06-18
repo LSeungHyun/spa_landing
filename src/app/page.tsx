@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
 import { BeforeAfterDemo } from '@/components/demo/before-after-demo';
 import TwelveScenariosDemo from '@/components/demo/twelve-scenarios-demo';
 import { Footer } from '@/components/layout/footer';
-import HeroSection from '@/components/sections/hero-section';
+import { HeroSection } from '@/components/sections/hero-section';
 import FeaturesSection from '@/components/sections/features-section';
 import { HowItWorksSection } from '@/components/sections/how-it-works-section';
 import { PricingSection } from '@/components/sections/pricing-section';
