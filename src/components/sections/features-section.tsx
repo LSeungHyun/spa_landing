@@ -1,13 +1,15 @@
 "use client";
 
+import React from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { FeatureCard } from "./feature-card";
+import { FeatureCard } from "@/components/shared/feature-card";
 import { Boxes, Code, Scale, Search, Smartphone, Zap } from "lucide-react";
 import { LucideIcon } from "lucide-react";
+import { defaultFeatures } from '../data/features-data';
 
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
@@ -30,16 +32,14 @@ const fadeInLeft = {
 };
 
 interface FeaturesSectionProps {
-  features: Array<{
-    title: string;
-    description: string;
-    icon: LucideIcon;
-    size: "small" | "large";
-    image: string;
-  }>;
+  title?: string;
+  subtitle?: string;
 }
 
-export function FeaturesSection({ features }: FeaturesSectionProps) {
+export default function FeaturesSection({
+  title = "핵심 기능",
+  subtitle = "AI 기반 스마트 프롬프트 생성 도구의 주요 기능들을 확인해보세요"
+}: FeaturesSectionProps) {
   return (
     <Section>
       <Container>
@@ -47,9 +47,11 @@ export function FeaturesSection({ features }: FeaturesSectionProps) {
           <Badge variant="secondary" className="mb-4">
             특징
           </Badge>
-          <h2 className="text-3xl font-bold mb-4">주요 기능</h2>
+          <h2 className="text-3xl font-bold mb-4">
+            {title}
+          </h2>
           <p className="text-muted-foreground">
-            현대적인 웹 개발에 필요한 모든 기능이 포함되어 있습니다
+            {subtitle}
           </p>
         </motion.div>
         <motion.div
@@ -59,7 +61,7 @@ export function FeaturesSection({ features }: FeaturesSectionProps) {
           whileInView="animate"
           viewport={{ once: true }}
         >
-          {features.map((feature, index) => (
+          {defaultFeatures.map((feature, index) => (
             <motion.div
               key={feature.title}
               variants={fadeInLeft}
@@ -74,6 +76,7 @@ export function FeaturesSection({ features }: FeaturesSectionProps) {
                 title={feature.title}
                 description={feature.description}
                 icon={feature.icon}
+                size={feature.size}
                 image={feature.image}
                 imagePosition={index === 0 ? "top" : "right"}
                 className={cn("h-full", index === 0 && "first-card")}

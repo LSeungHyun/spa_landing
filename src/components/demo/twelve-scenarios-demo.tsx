@@ -404,7 +404,7 @@ export default function TwelveScenariosDemo() {
                                             <div>
                                                 <h4 className="font-medium mb-2">샘플 입력</h4>
                                                 <p className="text-sm text-muted-foreground bg-muted p-3 rounded-lg">
-                                                    "{scenario.samplePrompt}"
+                                                    &quot;{scenario.samplePrompt}&quot;
                                                 </p>
                                             </div>
 

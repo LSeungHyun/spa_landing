@@ -163,8 +163,8 @@ export function BeforeAfterDemo() {
                             size="lg"
                             onClick={() => handleScenarioChange(index)}
                             className={`transition-all duration-300 ${selectedScenario === index
-                                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
-                                    : 'hover:bg-muted'
+                                ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
+                                : 'hover:bg-muted'
                                 }`}
                         >
                             {scenario.title}
@@ -199,7 +199,7 @@ export function BeforeAfterDemo() {
                                 </h3>
                             </div>
                             <p className="text-muted-foreground text-lg leading-relaxed">
-                                "{currentScenario.before.description}"
+                                &quot;{currentScenario.before.description}&quot;
                             </p>
                         </div>
 
@@ -301,7 +301,7 @@ export function BeforeAfterDemo() {
                         </h3>
                         <p className="text-lg text-muted-foreground mb-6">
                             SPA는 단순한 아이디어를 구체적이고 실행 가능한 전문가 수준의 기획서로 변환합니다.
-                            더 이상 '어떻게 시작해야 할지 모르겠다'는 고민은 필요없습니다.
+                            더 이상 &apos;어떻게 시작해야 할지 모르겠다&apos;는 고민은 필요없습니다.
                         </p>
                         <div className="flex flex-wrap justify-center gap-6 text-sm">
                             <div className="flex items-center gap-2">

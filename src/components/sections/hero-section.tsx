@@ -5,7 +5,11 @@ import { Container } from '@/components/ui/container';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Sparkles, Zap, Clock, Target } from 'lucide-react';
 
-export function SmartPromptHero() {
+interface HeroSectionProps {
+    onPreRegisterClick?: () => void;
+}
+
+export function HeroSection({ onPreRegisterClick }: HeroSectionProps) {
     return (
         <section className="pt-20 pb-16 bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50">
             <Container>
@@ -46,7 +50,11 @@ export function SmartPromptHero() {
                         transition={{ duration: 0.8, delay: 0.2 }}
                         className="flex flex-col sm:flex-row gap-4 justify-center mb-12"
                     >
-                        <Button size="lg" className="text-lg px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+                        <Button
+                            size="lg"
+                            className="text-lg px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                            onClick={onPreRegisterClick}
+                        >
                             무료 체험 시작하기
                             <ArrowRight className="ml-2 w-5 h-5" />
                         </Button>
@@ -73,7 +81,7 @@ export function SmartPromptHero() {
                                     </div>
                                     <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-700">
                                         <div className="mb-2 text-xs text-red-500">입력</div>
-                                        "구독 결제 시스템 만들어줘"
+                                        &ldquo;구독 결제 시스템 만들어줘&rdquo;
                                         <div className="mt-3 pt-3 border-t border-red-200">
                                             <div className="text-xs text-red-500 mb-1">결과</div>
                                             막막함... 어디서부터 시작해야 할지 모르겠음 😰
@@ -94,7 +102,7 @@ export function SmartPromptHero() {
                                     </div>
                                     <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-sm text-green-700">
                                         <div className="mb-2 text-xs text-green-600">입력</div>
-                                        "구독 결제 시스템 만들어줘"
+                                        &ldquo;구독 결제 시스템 만들어줘&rdquo;
                                         <div className="mt-3 pt-3 border-t border-green-200">
                                             <div className="text-xs text-green-600 mb-1">결과</div>
                                             <div className="font-medium">

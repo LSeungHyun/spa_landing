@@ -1,15 +1,15 @@
 'use client';
 
-import React from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Lightbulb, Brain, Cog, CheckCircle } from 'lucide-react';
+import { CheckCircle, Lightbulb, Brain, Cog } from 'lucide-react';
 
 interface ProcessingStep {
     id: string;
     title: string;
     description: string;
     icon: React.ReactNode;
-    duration: number; // in seconds
+    duration: number; // seconds
 }
 
 interface ProcessingStepsProps {
@@ -50,87 +50,83 @@ const processingSteps: ProcessingStep[] = [
 ];
 
 export default function ProcessingSteps({ isProcessing, currentStep, onComplete }: ProcessingStepsProps) {
-    React.useEffect(() => {
-        if (isProcessing && currentStep >= processingSteps.length - 1) {
-            const timer = setTimeout(() => {
-                onComplete?.();
-            }, processingSteps[currentStep]?.duration * 1000 || 1000);
+    const [progress, setProgress] = useState(0);
 
-            return () => clearTimeout(timer);
+    useEffect(() => {
+        if (!isProcessing) {
+            setProgress(0);
+            return;
         }
+
+        if (currentStep >= processingSteps.length) {
+            onComplete?.();
+            return;
+        }
+
+        const interval = setInterval(() => {
+            setProgress((prev) => {
+                const newProgress = prev + (100 / (processingSteps[currentStep]?.duration || 1));
+                return Math.min(newProgress, 100);
+            });
+        }, 1000);
+
+        return () => clearInterval(interval);
     }, [isProcessing, currentStep, onComplete]);
 
-    if (!isProcessing) {
-        return null;
-    }
-
     return (
-        <div className="w-full max-w-md mx-auto">
-            <div className="space-y-4">
+        <div className="w-full max-w-md mx-auto space-y-4">
+            <div className="space-y-3">
                 {processingSteps.map((step, index) => (
                     <motion.div
                         key={step.id}
                         initial={{ opacity: 0, x: -20 }}
-                        animate={{
-                            opacity: index <= currentStep ? 1 : 0.3,
-                            x: 0,
-                            scale: index === currentStep ? 1.02 : 1
-                        }}
-                        transition={{ duration: 0.3, delay: index * 0.1 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.1 }}
                         className={`
-              flex items-center space-x-4 p-4 rounded-lg border-2 transition-all duration-300
-              ${index === currentStep
-                                ? 'border-blue-500 bg-blue-50'
+                            relative flex items-center gap-3 p-3 rounded-lg border
+                            ${index === currentStep
+                                ? 'bg-blue-50 border-blue-200'
                                 : index < currentStep
-                                    ? 'border-green-500 bg-green-50'
-                                    : 'border-gray-200 bg-gray-50'
+                                    ? 'bg-green-50 border-green-200'
+                                    : 'bg-gray-50 border-gray-200'
                             }
-            `}
+                        `}
                     >
+                        {/* 아이콘 */}
                         <div className={`
-              flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300
-              ${index === currentStep
-                                ? 'bg-blue-500 text-white'
+                            flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center
+                            ${index === currentStep
+                                ? 'bg-blue-100 text-blue-600'
                                 : index < currentStep
-                                    ? 'bg-green-500 text-white'
-                                    : 'bg-gray-300 text-gray-600'
+                                    ? 'bg-green-100 text-green-600'
+                                    : 'bg-gray-100 text-gray-400'
                             }
-            `}>
-                            {index < currentStep ? (
-                                <CheckCircle className="w-6 h-6" />
-                            ) : index === currentStep ? (
-                                <motion.div
-                                    animate={{ rotate: 360 }}
-                                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                                >
-                                    {step.icon}
-                                </motion.div>
-                            ) : (
-                                step.icon
-                            )}
+                        `}>
+                            {step.icon}
                         </div>
 
+                        {/* 콘텐츠 */}
                         <div className="flex-1 min-w-0">
                             <div className={`
-                font-semibold text-sm transition-colors duration-300
-                ${index === currentStep
+                                font-semibold text-sm transition-colors duration-300
+                                ${index === currentStep
                                     ? 'text-blue-900'
                                     : index < currentStep
                                         ? 'text-green-900'
                                         : 'text-gray-600'
                                 }
-              `}>
+                            `}>
                                 {step.title}
                             </div>
                             <div className={`
-                text-xs mt-1 transition-colors duration-300
-                ${index === currentStep
+                                text-xs mt-1 transition-colors duration-300
+                                ${index === currentStep
                                     ? 'text-blue-700'
                                     : index < currentStep
                                         ? 'text-green-700'
                                         : 'text-gray-500'
                                 }
-              `}>
+                            `}>
                                 {step.description}
                             </div>
                         </div>

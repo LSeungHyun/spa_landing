@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { motion } from "framer-motion";
-import { PricingCard } from "./pricing-card";
+import { PricingCard } from "@/components/shared/pricing-card";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },

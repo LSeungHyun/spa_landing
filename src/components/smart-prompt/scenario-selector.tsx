@@ -177,8 +177,8 @@ export function ScenarioSelector() {
                         >
                             <Card
                                 className={`cursor-pointer transition-all duration-200 ${isSelected
-                                        ? `border-${scenario.color}-500 bg-${scenario.color}-50 shadow-md`
-                                        : 'hover:border-gray-300 hover:shadow-sm'
+                                    ? `border-${scenario.color}-500 bg-${scenario.color}-50 shadow-md`
+                                    : 'hover:border-gray-300 hover:shadow-sm'
                                     }`}
                                 onClick={() => handleScenarioSelect(scenario.id)}
                             >
@@ -236,7 +236,7 @@ export function ScenarioSelector() {
                                     <h4 className="font-medium mb-2">예시 생성 결과:</h4>
                                     <div className="bg-white p-4 rounded-lg border">
                                         <p className="text-sm text-gray-700 italic">
-                                            "{selectedData.sample}"
+                                            &ldquo;{selectedData.sample}&rdquo;
                                         </p>
                                     </div>
                                 </div>
