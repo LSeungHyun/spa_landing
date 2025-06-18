@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, ArrowRight, Copy, CheckCircle } from "lucide-react";
-import { Persona } from "@/app/page";
+import { Persona } from "@/components/data/persona-types";
 import ProcessingSteps from '@/components/shared/processing-steps';
 
 interface AIDemoProps {
@@ -23,7 +23,7 @@ export function AIDemo({ persona, onTextGenerated }: AIDemoProps) {
     const [currentStep, setCurrentStep] = useState(0);
     const [copied, setCopied] = useState(false);
 
-    const examples = {
+    const examples: Record<string, { placeholder: string; samples: string[] }> = {
         'pm-developer': {
             placeholder: "예: 사용자 인증 시스템 개발 계획서 작성해줘",
             samples: [
@@ -39,10 +39,66 @@ export function AIDemo({ persona, onTextGenerated }: AIDemoProps) {
                 "유튜브 썸네일 아이디어 제안해줘",
                 "마케팅 이메일 문구 만들어줘"
             ]
+        },
+        'startup-founder': {
+            placeholder: "예: 투자 제안서 작성해줘",
+            samples: [
+                "사업계획서 구조 도움 필요",
+                "투자자 피치덱 작성법",
+                "경쟁사 분석 보고서 작성"
+            ]
+        },
+        'marketer': {
+            placeholder: "예: 마케팅 캠페인 기획서 작성해줘",
+            samples: [
+                "타겟 고객 분석 도움",
+                "광고 카피 작성해줘",
+                "브랜딩 전략 수립"
+            ]
+        },
+        'consultant': {
+            placeholder: "예: 비즈니스 분석 보고서 작성해줘",
+            samples: [
+                "문제 분석 프레임워크 도움",
+                "솔루션 제안서 작성",
+                "프로젝트 계획 수립"
+            ]
+        },
+        'freelancer': {
+            placeholder: "예: 프로젝트 제안서 작성해줘",
+            samples: [
+                "클라이언트 제안서 템플릿",
+                "프로젝트 견적서 작성",
+                "포트폴리오 설명 작성"
+            ]
+        },
+        'ux-designer': {
+            placeholder: "예: 사용자 리서치 보고서 작성해줘",
+            samples: [
+                "디자인 가이드라인 작성",
+                "사용자 인터뷰 분석",
+                "와이어프레임 설명서"
+            ]
+        },
+        'educator': {
+            placeholder: "예: 강의 자료 작성해줘",
+            samples: [
+                "교육 프로그램 설계",
+                "학습 가이드 작성",
+                "강의 계획서 구성"
+            ]
+        },
+        'researcher': {
+            placeholder: "예: 연구 논문 초안 작성해줘",
+            samples: [
+                "연구 방법론 설계",
+                "문헌 검토 정리",
+                "데이터 분석 보고서"
+            ]
         }
     };
 
-    const currentExample = examples[persona as keyof typeof examples];
+    const currentExample = examples[persona.id] || examples['pm-developer'];
 
     const handleOptimize = async () => {
         if (!input.trim()) return;
@@ -66,7 +122,7 @@ export function AIDemo({ persona, onTextGenerated }: AIDemoProps) {
             await new Promise(resolve => setTimeout(resolve, 1000));
 
             let optimized = "";
-            if (persona === 'pm-developer') {
+            if (persona.id === 'pm-developer') {
                 optimized = `[개발자용 최적화 프롬프트]
 
 목표: ${input}

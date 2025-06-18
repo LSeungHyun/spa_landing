@@ -1,17 +1,7 @@
-// Main demo components
-export { default as AIDemo } from './ai-demo';
-export { default as BeforeAfterDemo } from './before-after-demo';
-export { default as TwelveScenariosDemo } from './twelve-scenarios-demo';
-
-// Monaco editor components
-export { default as MonacoEditorDemo } from './monaco-editor-demo';
-export { default as MonacoResultDisplay } from './monaco-result-display';
-export { default as RealtimeImprovementDemo } from './realtime-improvement-demo';
+// Main demo components - mixed export types based on actual implementation
+export { AIDemo } from './ai-demo';  // named export
+export { BeforeAfterDemo } from './before-after-demo';  // named export
+export { default as TwelveScenariosDemo } from './twelve-scenarios-demo';  // default export
 
 // Demo components barrel exports
-export { AIDemo } from './ai-demo';
-export { PersonaSelector } from './persona-selector';
-
-// Legacy exports (to be migrated)
-export { default as MonacoResultDisplay } from './monaco-result-display';
-export { default as RealtimeImprovementDemo } from './realtime-improvement-demo'; 
+export { PersonaSelector } from './persona-selector'; 
