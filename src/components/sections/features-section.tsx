@@ -7,8 +7,6 @@ import { Section } from "@/components/ui/section";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { FeatureCard } from "@/components/shared/feature-card";
-import { Boxes, Code, Scale, Search, Smartphone, Zap } from "lucide-react";
-import { LucideIcon } from "lucide-react";
 import { defaultFeatures } from '../data/features-data';
 
 const fadeInUp = {
@@ -76,7 +74,6 @@ export default function FeaturesSection({
                 title={feature.title}
                 description={feature.description}
                 icon={feature.icon}
-                size={feature.size}
                 image={feature.image}
                 imagePosition={index === 0 ? "top" : "right"}
                 className={cn("h-full", index === 0 && "first-card")}
