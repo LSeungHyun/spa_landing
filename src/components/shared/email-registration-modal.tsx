@@ -34,10 +34,10 @@ export default function EmailRegistrationModal({ isOpen, onClose }: EmailRegistr
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-[#1A1A1A] border border-[#2D2D2D] rounded-2xl p-8 w-full max-w-md">
-                <h3 className="text-2xl font-bold mb-4 text-center">사전등록</h3>
-                <p className="text-[#94A3B8] mb-6 text-center">
-                    출시 소식을 가장 먼저 받아보세요
+            <div className="bg-brand-surface-primary border border-brand-border-primary rounded-2xl p-8 w-full max-w-md">
+                <h2 className="text-2xl font-bold mb-2 text-center">📧 이메일 등록</h2>
+                <p className="text-brand-text-secondary mb-6 text-center">
+                    런칭 소식을 가장 먼저 받아보세요!
                 </p>
 
                 {!isRegistered ? (
@@ -47,7 +47,7 @@ export default function EmailRegistrationModal({ isOpen, onClose }: EmailRegistr
                             placeholder="이메일 주소를 입력하세요"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="bg-[#0A0A0A] border-[#2D2D2D] text-[#E2E8F0]"
+                            className="bg-brand-dark-primary border-brand-border-primary text-brand-text-primary"
                         />
                         <Button
                             type="submit"
@@ -64,16 +64,33 @@ export default function EmailRegistrationModal({ isOpen, onClose }: EmailRegistr
                             </svg>
                         </div>
                         <h4 className="text-lg font-semibold mb-2">등록 완료!</h4>
-                        <p className="text-[#94A3B8] mb-4">
+                        <p className="text-brand-text-secondary mb-4">
                             출시 소식을 이메일로 보내드릴게요
                         </p>
                     </div>
                 )}
 
+                <div className="mt-6 text-center">
+                    <p className="text-brand-text-secondary mb-4">
+                        또는 다른 방법으로 소식을 받아보세요:
+                    </p>
+                    <div className="flex justify-center space-x-4">
+                        <button
+                            onClick={() => {
+                                window.open('https://www.instagram.com/ledag_official/', '_blank');
+                                onClose();
+                            }}
+                            className="w-full mt-4 text-brand-text-secondary hover:text-brand-text-primary"
+                        >
+                            Instagram
+                        </button>
+                    </div>
+                </div>
+
                 <Button
                     variant="ghost"
                     onClick={handleClose}
-                    className="w-full mt-4 text-[#94A3B8] hover:text-[#E2E8F0]"
+                    className="w-full mt-4 text-brand-text-secondary hover:text-brand-text-primary"
                 >
                     닫기
                 </Button>

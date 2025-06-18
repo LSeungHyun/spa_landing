@@ -16,7 +16,7 @@ export default function FinalCTASection({ onPreRegisterClick }: FinalCTASectionP
                     <h2 className="text-3xl lg:text-4xl font-bold mb-6 text-white">
                         지금 바로 시작해보세요
                     </h2>
-                    <p className="text-lg text-[#94A3B8] mb-8">
+                    <p className="text-lg text-brand-text-secondary mb-8">
                         더 이상 빈 문서 앞에서 고민하지 마세요. AI가 여러분의 아이디어를 전문적인 프롬프트로 변환해드립니다.
                     </p>
                     <Button

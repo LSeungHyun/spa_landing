@@ -33,6 +33,23 @@
     /* 새로운 다크 테마 변수 */
     --background-dark: linear-gradient(135deg, #0f172a 0%, #0a0e1a 100%);
     --text-gradient: linear-gradient(135deg, #3b82f6, #8b5cf6, #06b6d4);
+
+    /* 브랜드 색상 변수 */
+    --brand-dark-primary: #0f172a;
+    --brand-dark-secondary: #0a0e1a;
+    --brand-dark-tertiary: #020617;
+    --brand-surface-primary: #1e293b;
+    --brand-surface-secondary: #334155;
+    --brand-surface-tertiary: #475569;
+    --brand-border-primary: #2d2d2d;
+    --brand-border-secondary: #3a3a3a;
+    --brand-border-muted: #1a1a1a;
+    --brand-text-primary: #e2e8f0;
+    --brand-text-secondary: #94a3b8;
+    --brand-text-muted: #64748b;
+    --brand-accent-blue: #3b82f6;
+    --brand-accent-purple: #8b5cf6;
+    --brand-accent-cyan: #06b6d4;
   }
 
   .dark {

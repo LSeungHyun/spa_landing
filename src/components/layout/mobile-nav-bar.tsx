@@ -87,7 +87,7 @@ export function MobileNavBar() {
 
     return (
         <nav className="fixed bottom-0 left-0 right-0 z-50 lg:hidden">
-            <div className="bg-[#0A0A0A]/95 backdrop-blur-md border-t border-[#2D2D2D]">
+            <div className="bg-brand-dark-primary/95 backdrop-blur-md border-t border-brand-border-primary">
                 <div className="flex items-center justify-around px-2 py-2">
                     {navItems.map((item) => {
                         const Icon = item.icon;
@@ -99,10 +99,10 @@ export function MobileNavBar() {
                                 onClick={() => handleNavClick(item.href)}
                                 className={cn(
                                     'flex flex-col items-center justify-center min-w-[44px] min-h-[44px] px-2 py-1 rounded-lg transition-all duration-200',
-                                    'hover:bg-[#1A1A1A] active:scale-95',
+                                    'hover:bg-brand-surface-primary active:scale-95',
                                     isActive
-                                        ? 'text-white bg-[#1A1A1A]'
-                                        : 'text-[#94A3B8] hover:text-[#E2E8F0]'
+                                        ? 'text-white bg-brand-surface-primary'
+                                        : 'text-brand-text-secondary hover:text-brand-text-primary'
                                 )}
                                 aria-label={`${item.label}로 이동`}
                             >

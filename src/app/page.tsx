@@ -88,9 +88,9 @@ export default function HomePage() {
     };
 
     return (
-        <div className="min-h-screen bg-[#0A0A0A] text-[#E2E8F0]">
+        <div className="min-h-screen bg-brand-dark-primary text-brand-text-primary">
             {/* Header */}
-            <header className="border-b border-[#2D2D2D] bg-[#0A0A0A]/90 backdrop-blur fixed top-0 w-full z-50">
+            <header className="border-b border-brand-border-primary bg-brand-dark-primary/90 backdrop-blur fixed top-0 w-full z-50">
                 <Container>
                     <div className="flex items-center justify-between h-16">
                         <div className="flex items-center space-x-2">
@@ -100,19 +100,19 @@ export default function HomePage() {
                             <span className="font-bold text-lg">Smart Prompt</span>
                         </div>
                         <nav className="hidden md:flex items-center space-x-8">
-                            <a href="#features" className="text-[#94A3B8] hover:text-white transition-colors">
+                            <a href="#features" className="text-brand-text-secondary hover:text-white transition-colors">
                                 기능
                             </a>
-                            <a href="#how" className="text-[#94A3B8] hover:text-white transition-colors">
+                            <a href="#how" className="text-brand-text-secondary hover:text-white transition-colors">
                                 작동원리
                             </a>
-                            <a href="#pricing" className="text-[#94A3B8] hover:text-white transition-colors">
+                            <a href="#pricing" className="text-brand-text-secondary hover:text-white transition-colors">
                                 요금제
                             </a>
                             <Button
                                 onClick={() => setShowModal(true)}
                                 variant="outline"
-                                className="border-[#2D2D2D] text-[#E2E8F0] hover:bg-[#1A1A1A]"
+                                className="border-brand-border-primary text-brand-text-primary hover:bg-brand-surface-primary"
                             >
                                 사전등록
                             </Button>
@@ -125,7 +125,7 @@ export default function HomePage() {
             <HeroSection />
 
             {/* Before/After Demo Section */}
-            <section className="py-20 bg-[#111111]">
+            <section className="py-20 bg-brand-surface-primary">
                 <BeforeAfterDemo />
             </section>
 
@@ -133,7 +133,7 @@ export default function HomePage() {
             <FeaturesSection />
 
             {/* 12 Scenarios Demo Section */}
-            <section id="scenarios" className="py-20 bg-[#111111]">
+            <section id="scenarios" className="py-20 bg-brand-surface-primary">
                 <TwelveScenariosDemo />
             </section>
 
@@ -150,7 +150,7 @@ export default function HomePage() {
                         <h2 className="text-3xl lg:text-4xl font-bold mb-6 text-white">
                             지금 바로 시작해보세요
                         </h2>
-                        <p className="text-lg text-[#94A3B8] mb-8">
+                        <p className="text-lg text-brand-text-secondary mb-8">
                             더 이상 빈 문서 앞에서 고민하지 마세요. AI가 여러분의 아이디어를 전문적인 프롬프트로 변환해드립니다.
                         </p>
                         <Button
@@ -198,9 +198,9 @@ export default function HomePage() {
             {/* Email Registration Modal */}
             {showModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-[#1A1A1A] border border-[#2D2D2D] rounded-2xl p-8 w-full max-w-md">
+                    <div className="bg-brand-surface-primary border border-brand-border-primary rounded-2xl p-8 w-full max-w-md">
                         <h3 className="text-2xl font-bold mb-4 text-center">사전등록</h3>
-                        <p className="text-[#94A3B8] mb-6 text-center">
+                        <p className="text-brand-text-secondary mb-6 text-center">
                             출시 소식을 가장 먼저 받아보세요
                         </p>
 
@@ -211,7 +211,7 @@ export default function HomePage() {
                                     placeholder="이메일 주소를 입력하세요"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="bg-[#0A0A0A] border-[#2D2D2D] text-[#E2E8F0]"
+                                    className="bg-brand-dark-primary border-brand-border-primary text-brand-text-primary"
                                 />
                                 <Button
                                     type="submit"
@@ -228,7 +228,7 @@ export default function HomePage() {
                                     </svg>
                                 </div>
                                 <h4 className="text-lg font-semibold mb-2">등록 완료!</h4>
-                                <p className="text-[#94A3B8] mb-4">
+                                <p className="text-brand-text-secondary mb-4">
                                     출시 소식을 이메일로 보내드릴게요
                                 </p>
                             </div>
@@ -237,7 +237,7 @@ export default function HomePage() {
                         <Button
                             variant="ghost"
                             onClick={() => setShowModal(false)}
-                            className="w-full mt-4 text-[#94A3B8] hover:text-[#E2E8F0]"
+                            className="w-full mt-4 text-brand-text-secondary hover:text-brand-text-primary"
                         >
                             닫기
                         </Button>
