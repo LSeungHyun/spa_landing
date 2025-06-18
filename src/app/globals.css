@@ -29,6 +29,10 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+
+    /* 새로운 다크 테마 변수 */
+    --background-dark: linear-gradient(135deg, #0f172a 0%, #0a0e1a 100%);
+    --text-gradient: linear-gradient(135deg, #3b82f6, #8b5cf6, #06b6d4);
   }
 
   .dark {
@@ -63,8 +67,35 @@
   * {
     @apply border-border;
   }
+
   body {
-    @apply bg-background text-foreground;
+    background: linear-gradient(135deg, #0f172a 0%, #0a0e1a 100%);
+    color: #e2e8f0;
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  .main-background {
+    background: radial-gradient(ellipse at top, #1e293b 0%, #0f172a 50%, #020617 100%);
+  }
+
+  .glass-card {
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(148, 163, 184, 0.1);
+  }
+
+  .gradient-text {
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6, #06b6d4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .blur-circle {
+    filter: blur(60px);
+    opacity: 0.3;
   }
 }
 

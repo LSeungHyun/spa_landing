@@ -1,0 +1,305 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# 🌐 언어 사용 규칙 (Language Usage Rules)
+
+**기본 언어**: 한국어
+- 모든 답변과 설명은 한국어로 제공
+- 코드 주석과 변수명은 영어 사용 (개발 표준)
+- 기술 문서는 한국어 우선, 필요시 영어 병기
+
+---
+
+<!-- ruleType: always -->
+
+# 🎨 Style Management & Consistency Rules (스타일 관리 및 일관성 규칙)
+
+**중요**: 모든 답변과 설명은 한국어로 제공해주세요.
+
+## 🎯 목적
+스타일 모듈화 부족으로 인한 CSS 충돌, 유지보수성 저하, 브랜드 일관성 문제를 사전에 방지합니다.
+
+## 🚨 **CSS 충돌 방지 규칙** (Critical - 우선 적용)
+
+### **문제 상황**: 글로벌 CSS vs 컴포넌트 스타일 충돌
+```typescript
+// 문제 예시: globals.css에서 body 배경 설정 후
+// 컴포넌트에서 Tailwind로 덮어씌움
+// globals.css
+body { background: linear-gradient(...); }
+
+// page.tsx
+<div className="bg-[#0A0A0A]"> // 글로벌 스타일을 무시하고 덮어씌움
+```
+
+### **해결 규칙**:
+
+#### 1. **스타일 변경 시 영향 범위 확인 (Required)**
+```bash
+# 새로운 글로벌 스타일 추가 시 반드시 실행
+grep -r "bg-\[" src/  # 하드코딩된 배경색 검색
+grep -r "text-\[" src/  # 하드코딩된 텍스트 색상 검색
+```
+
+#### 2. **글로벌 스타일 변경 시 컴포넌트 동기화 (Required)**
+- `globals.css` 수정 후 반드시 관련 컴포넌트들 확인
+- 하드코딩된 색상값이 글로벌 스타일과 충돌하는지 검증
+- 변경 사항을 팀에 공유하고 일괄 수정
+
+#### 3. **CSS 우선순위 명확화 (Required)**
+```typescript
+// ✅ 올바른 우선순위 적용
+// 1. 글로벌 CSS (body, html)
+// 2. 컴포넌트 CSS 클래스 (.glass-card)  
+// 3. Tailwind 브랜드 색상 (bg-brand-primary)
+// 4. 동적 스타일만 인라인 허용
+
+// ❌ 잘못된 예 - 글로벌 스타일 무시
+<div className="bg-[#0A0A0A]"> // 글로벌 body 배경과 충돌
+
+// ✅ 올바른 예 - 글로벌 스타일 활용
+<div className="bg-brand-dark-primary"> // 브랜드 팔레트 사용
+// 또는
+<div> // 글로벌 body 스타일 그대로 사용
+```
+
+## ✅ 필수 규칙 (Required)
+
+### 1. **하드코딩된 색상값 금지**
+```typescript
+// ❌ 잘못된 예
+<div className="bg-[#0A0A0A] text-[#E2E8F0]">
+<section style={{ backgroundColor: '#111111' }}>
+
+// ✅ 올바른 예
+<div className="bg-brand-dark-primary text-brand-text-primary">
+<section className="bg-brand-surface-primary">
+```
+
+### 2. **Tailwind 커스텀 색상 팔레트 사용 (Required)**
+모든 프로젝트 색상은 `tailwind.config.ts`에서 브랜드 팔레트로 정의:
+
+```typescript
+// tailwind.config.ts
+colors: {
+  brand: {
+    // 다크 테마 배경
+    'dark-primary': '#0f172a',
+    'dark-secondary': '#0a0e1a', 
+    'dark-tertiary': '#020617',
+    // 서피스 색상
+    'surface-primary': '#1e293b',
+    'surface-secondary': '#334155',
+    // 텍스트 색상
+    'text-primary': '#e2e8f0',
+    'text-secondary': '#94a3b8',
+    'text-muted': '#64748b',
+    // 액센트 색상
+    'accent-blue': '#3b82f6',
+    'accent-purple': '#8b5cf6',
+    'accent-cyan': '#06b6d4',
+  }
+}
+```
+
+### 3. **스타일 우선순위 규칙 (Required)**
+다음 순서로 스타일 적용:
+1. **글로벌 CSS** (`body`, `html` 기본 스타일)
+2. **컴포넌트 CSS 클래스** (`.glass-card`, `.gradient-text`)
+3. **Tailwind 유틸리티** (브랜드 색상 팔레트 사용)
+4. **인라인 스타일** (절대 금지, 예외: 동적 계산값)
+
+### 4. **테마 시스템 일관성 (Required)**
+```typescript
+// ❌ 잘못된 예 - 여러 곳에 흩어진 색상
+const Header = () => <header className="bg-[#0A0A0A]/90" />
+const Footer = () => <footer className="bg-[#111111]" />
+const Card = () => <div className="bg-[#1a1a1a]" />
+
+// ✅ 올바른 예 - 일관된 브랜드 색상
+const Header = () => <header className="bg-brand-dark-primary/90" />
+const Footer = () => <footer className="bg-brand-surface-primary" />
+const Card = () => <div className="bg-brand-surface-secondary" />
+```
+
+### 5. **CSS 변수와 Tailwind 통합 (Required)**
+```css
+/* globals.css */
+@layer base {
+  :root {
+    --brand-dark-primary: #0f172a;
+    --brand-accent-blue: #3b82f6;
+  }
+}
+
+/* tailwind.config.ts에서 참조 */
+colors: {
+  'brand-dark-primary': 'var(--brand-dark-primary)',
+  'brand-accent-blue': 'var(--brand-accent-blue)',
+}
+```
+
+## 🔧 권장 규칙 (Recommended)
+
+### 6. **컴포넌트별 스타일 파일 분리**
+```
+components/
+├── ui/
+│   ├── button.tsx
+│   └── button.styles.ts  // 스타일 로직 분리
+├── sections/
+│   ├── hero-section.tsx
+│   └── hero-section.styles.ts
+```
+
+### 7. **스타일 유틸리티 함수 사용**
+```typescript
+// lib/style-utils.ts
+export const getGlassCardClasses = () => 
+  "bg-brand-surface-primary/80 backdrop-blur-xl border border-brand-surface-secondary/20"
+
+export const getGradientTextClasses = () =>
+  "bg-gradient-to-r from-brand-accent-blue via-brand-accent-purple to-brand-accent-cyan bg-clip-text text-transparent"
+```
+
+### 8. **반응형 스타일 일관성**
+```typescript
+// ✅ 일관된 반응형 패턴
+const ResponsiveComponent = () => (
+  <div className="
+    bg-brand-surface-primary 
+    p-4 md:p-6 lg:p-8
+    text-sm md:text-base lg:text-lg
+    rounded-lg md:rounded-xl lg:rounded-2xl
+  ">
+)
+```
+
+## 🚨 금지 사항 (Forbidden)
+
+### 9. **중복 스타일 정의 금지**
+```typescript
+// ❌ 금지 - 같은 스타일을 여러 곳에서 정의
+const Card1 = () => <div className="bg-slate-800 rounded-xl p-6 border border-slate-700" />
+const Card2 = () => <div className="bg-slate-800 rounded-xl p-6 border border-slate-700" />
+
+// ✅ 권장 - 공통 클래스 또는 컴포넌트 사용
+const Card = ({ children }) => <div className="glass-card">{children}</div>
+```
+
+### 10. **인라인 스타일 금지** (예외: 동적 계산값)
+```typescript
+// ❌ 금지
+<div style={{ backgroundColor: '#0A0A0A', padding: '24px' }}>
+
+// ✅ 허용 (동적 계산값)
+<div style={{ height: `${dynamicHeight}px` }} className="bg-brand-dark-primary p-6">
+```
+
+### 11. **글로벌 스타일 무시 금지 (New)**
+```typescript
+// ❌ 금지 - 글로벌 CSS 무시하고 덮어씌우기
+// globals.css에서 body 배경 설정했는데 컴포넌트에서 덮어씌움
+<div className="min-h-screen bg-[#0A0A0A]">
+
+// ✅ 권장 - 글로벌 스타일 활용 또는 브랜드 색상 사용
+<div className="min-h-screen"> // 글로벌 body 스타일 활용
+// 또는
+<div className="min-h-screen bg-brand-dark-primary"> // 브랜드 색상 사용
+```
+
+## 🔍 검증 체크리스트
+
+### 새로운 스타일 추가 시:
+- [ ] 하드코딩된 색상값 없음
+- [ ] 브랜드 색상 팔레트 사용
+- [ ] 기존 유사 스타일과 중복 확인
+- [ ] 글로벌 CSS와 충돌 확인 (**New**)
+- [ ] 반응형 동작 테스트
+- [ ] 다크/라이트 테마 호환성 확인
+
+### 컴포넌트 개발 시:
+- [ ] 글로벌 CSS와 충돌 없음
+- [ ] Tailwind 유틸리티 클래스 우선 사용
+- [ ] 재사용 가능한 스타일 패턴 식별
+- [ ] 스타일 우선순위 규칙 준수
+
+### 글로벌 CSS 변경 시: (**New**)
+- [ ] 영향받는 컴포넌트 식별 및 확인
+- [ ] 하드코딩된 색상값과 충돌 검사
+- [ ] 팀 공유 및 일괄 수정 계획
+- [ ] 변경 후 전체 페이지 시각적 검증
+
+## 🛠️ 도구 및 자동화
+
+### ESLint 규칙 설정
+```javascript
+// .eslintrc.js
+rules: {
+  // 하드코딩된 색상값 경고
+  'no-restricted-syntax': [
+    'error',
+    {
+      selector: 'Literal[value=/^#[0-9a-fA-F]{3,8}$/]',
+      message: '하드코딩된 색상값 대신 브랜드 색상 팔레트를 사용하세요.'
+    }
+  ]
+}
+```
+
+### 스타일 검증 스크립트
+```bash
+# package.json
+"scripts": {
+  "check:styles": "grep -r 'bg-\\[#' src/ && echo '하드코딩된 색상 발견!' || echo '스타일 검증 통과'",
+  "check:colors": "node scripts/validate-brand-colors.js",
+  "check:css-conflicts": "node scripts/check-css-conflicts.js"
+}
+```
+
+### 실시간 검증 도구 (**New**)
+```bash
+# 글로벌 CSS 변경 시 자동으로 충돌 검사
+npm run check:global-css-conflicts
+
+# 컴포넌트 스타일 일관성 검사
+npm run check:component-styles
+```
+
+## 📚 참고 자료
+
+### 브랜드 색상 가이드
+- 모든 색상은 `docs/brand-colors.md`에 문서화
+- Figma 디자인 시스템과 동기화
+- 접근성 대비비 AA 등급 이상 준수
+
+### 마이그레이션 가이드
+기존 하드코딩된 스타일을 브랜드 팔레트로 변환하는 단계별 가이드는 `docs/style-migration.md` 참조
+
+### CSS 충돌 해결 가이드 (**New**)
+- `docs/css-conflict-resolution.md`: 글로벌 CSS vs 컴포넌트 스타일 충돌 해결법
+- `docs/style-debugging.md`: 스타일 우선순위 디버깅 방법
+
+---
+
+## 🎯 핵심 원칙
+
+> **"스타일은 한 곳에서 정의하고, 모든 곳에서 일관되게 사용한다"**
+> 
+> **"글로벌 CSS 변경 시 반드시 컴포넌트 영향도를 확인한다"** (**New**)
+
+이 규칙을 통해 CSS 충돌, 유지보수성 저하, 브랜드 일관성 문제를 근본적으로 해결할 수 있습니다.
+
+## 🔄 5 Whys 적용 사례 (**New**)
+
+### 문제: 다크 그라디언트가 적용되지 않음
+1. **왜?** CSS 스타일이 덮어씌워짐
+2. **왜?** 컴포넌트에서 하드코딩된 배경색 사용
+3. **왜?** 글로벌 CSS와 컴포넌트 스타일 간 우선순위 충돌
+4. **왜?** 스타일 변경 시 영향 범위를 확인하지 않음
+5. **왜?** 스타일 모듈화 및 일관성 관리 규칙 부재
+
+### 해결책: 이 규칙을 따라 체계적으로 스타일 관리
+
