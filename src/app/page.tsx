@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
 import { BeforeAfterDemo } from '@/components/demo/before-after-demo';
 import TwelveScenariosDemo from '@/components/demo/twelve-scenarios-demo';
 import { Footer } from '@/components/layout/footer';
-import { HeroSection } from '@/components/sections/hero-section';
+import { InteractiveHeroSection } from '@/components/sections/interactive-hero-section';
 import FeaturesSection from '@/components/sections/features-section';
 import { HowItWorksSection } from '@/components/sections/how-it-works-section';
 import { PricingSection } from '@/components/sections/pricing-section';
@@ -121,8 +121,8 @@ export default function HomePage() {
                 </Container>
             </header>
 
-            {/* Hero Section */}
-            <HeroSection />
+            {/* 새로운 인터랙티브 히어로 섹션 */}
+            <InteractiveHeroSection onPreRegisterClick={() => setShowModal(true)} />
 
             {/* Before/After Demo Section */}
             <section className="py-20 bg-brand-surface-primary">
@@ -198,11 +198,15 @@ export default function HomePage() {
             {/* Email Registration Modal */}
             {showModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-brand-surface-primary border border-brand-border-primary rounded-2xl p-8 w-full max-w-md">
-                        <h3 className="text-2xl font-bold mb-4 text-center">사전등록</h3>
-                        <p className="text-brand-text-secondary mb-6 text-center">
-                            출시 소식을 가장 먼저 받아보세요
-                        </p>
+                    <Card className="w-full max-w-md p-6 bg-white">
+                        <div className="text-center mb-6">
+                            <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                                사전등록
+                            </h3>
+                            <p className="text-gray-600">
+                                출시 알림을 받고 얼리버드 혜택을 누리세요
+                            </p>
+                        </div>
 
                         {!isRegistered ? (
                             <form onSubmit={handleEmailSubmit} className="space-y-4">
@@ -211,37 +215,36 @@ export default function HomePage() {
                                     placeholder="이메일 주소를 입력하세요"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="bg-brand-dark-primary border-brand-border-primary text-brand-text-primary"
+                                    className="w-full"
                                 />
-                                <Button
-                                    type="submit"
-                                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                                >
+                                <Button type="submit" className="w-full">
                                     사전등록하기
                                 </Button>
                             </form>
                         ) : (
                             <div className="text-center">
-                                <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                     </svg>
                                 </div>
-                                <h4 className="text-lg font-semibold mb-2">등록 완료!</h4>
-                                <p className="text-brand-text-secondary mb-4">
-                                    출시 소식을 이메일로 보내드릴게요
+                                <h4 className="text-xl font-semibold text-gray-900 mb-2">
+                                    등록 완료!
+                                </h4>
+                                <p className="text-gray-600 mb-4">
+                                    출시 소식을 가장 먼저 알려드리겠습니다.
                                 </p>
                             </div>
                         )}
 
                         <Button
-                            variant="ghost"
+                            variant="outline"
                             onClick={() => setShowModal(false)}
-                            className="w-full mt-4 text-brand-text-secondary hover:text-brand-text-primary"
+                            className="w-full mt-4"
                         >
                             닫기
                         </Button>
-                    </div>
+                    </Card>
                 </div>
             )}
         </div>
