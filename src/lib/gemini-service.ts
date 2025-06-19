@@ -61,4 +61,44 @@ export class GeminiService {
             throw new Error('Failed to generate content using Gemini API');
         }
     }
+
+    public async improvePrompt(originalPrompt: string): Promise<string> {
+        try {
+            const model = this.genAI.getGenerativeModel({ model: 'gemini-pro' });
+
+            const prompt = `
+                You are an expert prompt engineer specializing in optimizing AI prompts for better results.
+                
+                Transform the following prompt into a more effective, clear, and specific version that will generate better AI responses.
+                
+                Original prompt: "${originalPrompt}"
+                
+                Guidelines for improvement:
+                - Make the request more specific and detailed
+                - Add context and background information when needed
+                - Specify the desired format, style, or structure
+                - Include relevant constraints or requirements
+                - Add examples if helpful
+                - Clarify the target audience or purpose
+                - Use clear, actionable language
+                - Break down complex requests into steps if needed
+                
+                Improved prompt structure should include:
+                1. Clear objective/goal
+                2. Specific requirements or constraints
+                3. Desired output format
+                4. Context or background (if relevant)
+                5. Examples (if helpful)
+                
+                Please provide ONLY the improved prompt without any explanation or additional text:
+            `;
+
+            const result = await model.generateContent(prompt);
+            const response = await result.response;
+            return response.text().trim();
+        } catch (error) {
+            console.error('Gemini API Error:', error);
+            throw new Error('Failed to improve prompt using Gemini API');
+        }
+    }
 } 

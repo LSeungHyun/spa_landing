@@ -1,0 +1,715 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# UI Design System & Styling Standards
+
+## 🎯 Design Philosophy
+**Vision**: Create a cohesive, accessible, and conversion-optimized design system
+**Principle**: Consistency breeds trust, simplicity drives conversion
+**Standard**: Mobile-first, accessibility-first, performance-first approach
+
+## 🎨 Design System Foundation
+
+### **MUST FOLLOW - Core Design Tokens**
+
+#### 1. **Color System Architecture**
+Reference: [tailwind.config.ts](mdc:tailwind.config.ts) and [globals.css](mdc:src/app/globals.css)
+
+```css
+/* ✅ CORRECT: Semantic color naming */
+:root {
+  /* Primary Brand Colors */
+  --primary: 222.2 84% 4.9%;          /* Deep blue-black */
+  --primary-foreground: 210 40% 98%;  /* Light text on primary */
+  
+  /* Secondary Colors */
+  --secondary: 210 40% 94%;           /* Light gray */
+  --secondary-foreground: 222.2 84% 4.9%;
+  
+  /* Accent Colors */
+  --accent: 210 40% 94%;
+  --accent-foreground: 222.2 84% 4.9%;
+  
+  /* Status Colors */
+  --destructive: 0 84.2% 60.2%;      /* Error red */
+  --success: 142.1 76.2% 36.3%;      /* Success green */
+  --warning: 47.9 95.8% 53.1%;       /* Warning yellow */
+  --info: 221.2 83.2% 53.3%;         /* Info blue */
+}
+
+/* ✅ CORRECT: Dark mode variants */
+.dark {
+  --primary: 210 40% 98%;
+  --primary-foreground: 222.2 84% 4.9%;
+  /* ... other dark mode colors */
+}
+```
+
+**Color Usage Rules:**
+- ✅ ALWAYS use CSS custom properties for colors
+- ✅ ALWAYS provide dark mode variants
+- ✅ ALWAYS maintain 4.5:1 contrast ratio minimum
+- ❌ NEVER hardcode hex colors in components
+- ❌ NEVER use more than 3 brand colors per design
+
+#### 2. **Typography System**
+```css
+/* ✅ CORRECT: Typography scale */
+.font-display {
+  font-family: var(--font-geist-sans);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.font-body {
+  font-family: var(--font-geist-sans);
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+/* ✅ CORRECT: Responsive typography */
+.text-display-lg {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  line-height: 1.1;
+}
+
+.text-display-md {
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1.2;
+}
+```
+
+**Typography Rules:**
+- ✅ ALWAYS use system font stack with fallbacks
+- ✅ ALWAYS implement responsive typography with `clamp()`
+- ✅ ALWAYS maintain consistent line-height ratios
+- ❌ NEVER use more than 2 font families
+- ❌ NEVER use font sizes smaller than 14px on mobile
+
+#### 3. **Spacing System**
+```typescript
+// ✅ CORRECT: Consistent spacing scale
+const spacing = {
+  xs: '0.25rem',    // 4px
+  sm: '0.5rem',     // 8px
+  md: '1rem',       // 16px
+  lg: '1.5rem',     // 24px
+  xl: '2rem',       // 32px
+  '2xl': '3rem',    // 48px
+  '3xl': '4rem',    // 64px
+  '4xl': '6rem',    // 96px
+  '5xl': '8rem',    // 128px
+}
+
+// ✅ CORRECT: Component spacing patterns
+const componentSpacing = {
+  section: 'py-16 md:py-24',        // Section vertical padding
+  container: 'px-4 md:px-6 lg:px-8', // Container horizontal padding
+  card: 'p-6 md:p-8',              // Card internal padding
+  button: 'px-4 py-2 md:px-6 md:py-3', // Button padding
+}
+```
+
+## 🧩 Component Design Patterns
+
+### **MUST FOLLOW - Component Architecture**
+
+#### 1. **Button Component System**
+Reference: [button.tsx](mdc:src/components/ui/button.tsx)
+
+```typescript
+// ✅ CORRECT: Variant-based button system
+const buttonVariants = cva(
+  // Base styles
+  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+  {
+    variants: {
+      variant: {
+        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+        outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        ghost: "hover:bg-accent hover:text-accent-foreground",
+        link: "text-primary underline-offset-4 hover:underline",
+      },
+      size: {
+        default: "h-10 px-4 py-2",
+        sm: "h-9 rounded-md px-3",
+        lg: "h-11 rounded-md px-8",
+        icon: "h-10 w-10",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  }
+)
+
+// ✅ CORRECT: Button usage
+<Button variant="primary" size="lg" className="w-full md:w-auto">
+  Get Started
+</Button>
+```
+
+**Button Design Rules:**
+- ✅ ALWAYS provide hover and focus states
+- ✅ ALWAYS include disabled state styling
+- ✅ ALWAYS use semantic variant names
+- ❌ NEVER create buttons without proper contrast
+- ❌ NEVER use buttons smaller than 44px touch target
+
+#### 2. **Card Component Pattern**
+```typescript
+// ✅ CORRECT: Flexible card system
+interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
+  variant?: 'default' | 'outlined' | 'elevated' | 'ghost'
+  padding?: 'none' | 'sm' | 'md' | 'lg'
+  rounded?: 'none' | 'sm' | 'md' | 'lg' | 'full'
+}
+
+const Card = React.forwardRef<HTMLDivElement, CardProps>(
+  ({ className, variant = 'default', padding = 'md', rounded = 'lg', ...props }, ref) => (
+    <div
+      ref={ref}
+      className={cn(
+        // Base styles
+        "bg-card text-card-foreground transition-all duration-200",
+        // Variant styles
+        {
+          'shadow-sm border': variant === 'default',
+          'border-2 border-border': variant === 'outlined',
+          'shadow-lg': variant === 'elevated',
+          'bg-transparent': variant === 'ghost',
+        },
+        // Padding styles
+        {
+          'p-0': padding === 'none',
+          'p-4': padding === 'sm',
+          'p-6': padding === 'md',
+          'p-8': padding === 'lg',
+        },
+        // Rounded styles
+        {
+          'rounded-none': rounded === 'none',
+          'rounded-sm': rounded === 'sm',
+          'rounded-md': rounded === 'md',
+          'rounded-lg': rounded === 'lg',
+          'rounded-full': rounded === 'full',
+        },
+        className
+      )}
+      {...props}
+    />
+  )
+)
+```
+
+#### 3. **Layout Components**
+```typescript
+// ✅ CORRECT: Container component
+const Container: React.FC<ContainerProps> = ({ 
+  size = 'default', 
+  className, 
+  children 
+}) => (
+  <div className={cn(
+    'mx-auto px-4 sm:px-6 lg:px-8',
+    {
+      'max-w-4xl': size === 'sm',
+      'max-w-6xl': size === 'default',
+      'max-w-7xl': size === 'lg',
+      'max-w-none': size === 'full',
+    },
+    className
+  )}>
+    {children}
+  </div>
+)
+
+// ✅ CORRECT: Section component
+const Section: React.FC<SectionProps> = ({ 
+  variant = 'default',
+  padding = 'default',
+  className,
+  children 
+}) => (
+  <section className={cn(
+    {
+      'py-12 md:py-16 lg:py-20': padding === 'default',
+      'py-8 md:py-12': padding === 'sm',
+      'py-16 md:py-24 lg:py-32': padding === 'lg',
+    },
+    {
+      'bg-background': variant === 'default',
+      'bg-muted': variant === 'muted',
+      'bg-primary text-primary-foreground': variant === 'primary',
+    },
+    className
+  )}>
+    {children}
+  </section>
+)
+```
+
+## 📱 Responsive Design Standards
+
+### **MUST FOLLOW - Mobile-First Approach**
+
+#### 1. **Breakpoint System**
+```typescript
+// ✅ CORRECT: Tailwind breakpoint usage
+const responsiveClasses = {
+  // Mobile-first approach
+  mobile: 'text-sm p-4',
+  tablet: 'md:text-base md:p-6',
+  desktop: 'lg:text-lg lg:p-8',
+  wide: 'xl:text-xl xl:p-12',
+}
+
+// ✅ CORRECT: Component responsive patterns
+<div className="
+  flex flex-col space-y-4
+  md:flex-row md:space-y-0 md:space-x-6
+  lg:space-x-8
+">
+  <div className="w-full md:w-1/2 lg:w-2/3">
+    {/* Content */}
+  </div>
+  <div className="w-full md:w-1/2 lg:w-1/3">
+    {/* Sidebar */}
+  </div>
+</div>
+```
+
+**Responsive Rules:**
+- ✅ ALWAYS design mobile-first
+- ✅ ALWAYS test on actual devices
+- ✅ ALWAYS use relative units for typography
+- ❌ NEVER assume desktop-first design
+- ❌ NEVER ignore tablet breakpoints
+
+#### 2. **Grid System Patterns**
+```typescript
+// ✅ CORRECT: CSS Grid patterns
+<div className="
+  grid grid-cols-1 gap-6
+  md:grid-cols-2 md:gap-8
+  lg:grid-cols-3 lg:gap-10
+  xl:grid-cols-4
+">
+  {items.map(item => (
+    <Card key={item.id}>{item.content}</Card>
+  ))}
+</div>
+
+// ✅ CORRECT: Flexbox patterns
+<div className="
+  flex flex-col space-y-4
+  sm:flex-row sm:space-y-0 sm:space-x-4
+  sm:items-center sm:justify-between
+">
+  <h2 className="text-xl font-semibold">Title</h2>
+  <Button>Action</Button>
+</div>
+```
+
+## 🎭 Animation & Interaction Standards
+
+### **MUST FOLLOW - Motion Design Rules**
+
+#### 1. **Framer Motion Patterns**
+```typescript
+// ✅ CORRECT: Consistent animation variants
+const fadeInUp = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -20 },
+  transition: { duration: 0.3, ease: 'easeOut' }
+}
+
+const staggerContainer = {
+  animate: {
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.2
+    }
+  }
+}
+
+// ✅ CORRECT: Animation usage
+<motion.div
+  variants={fadeInUp}
+  initial="initial"
+  animate="animate"
+  exit="exit"
+  className="hero-section"
+>
+  <motion.div variants={staggerContainer} animate="animate">
+    {items.map((item, index) => (
+      <motion.div key={index} variants={fadeInUp}>
+        {item}
+      </motion.div>
+    ))}
+  </motion.div>
+</motion.div>
+```
+
+**Animation Rules:**
+- ✅ ALWAYS respect `prefers-reduced-motion`
+- ✅ ALWAYS use consistent easing functions
+- ✅ ALWAYS keep animations under 300ms for UI interactions
+- ❌ NEVER animate without purpose
+- ❌ NEVER use animations longer than 500ms for page transitions
+
+#### 2. **CSS Transition Patterns**
+```css
+/* ✅ CORRECT: Consistent transition timing */
+.transition-base {
+  transition: all 0.2s ease-out;
+}
+
+.transition-colors {
+  transition: color 0.15s ease-out, background-color 0.15s ease-out;
+}
+
+.transition-transform {
+  transition: transform 0.2s ease-out;
+}
+
+/* ✅ CORRECT: Hover state patterns */
+.interactive-element {
+  @apply transition-all duration-200 ease-out;
+  
+  &:hover {
+    @apply transform scale-105;
+  }
+  
+  &:active {
+    @apply transform scale-95;
+  }
+}
+```
+
+## ♿ Accessibility Standards
+
+### **MUST FOLLOW - A11y Requirements**
+
+#### 1. **Color & Contrast**
+```typescript
+// ✅ CORRECT: Accessible color combinations
+const accessibleColors = {
+  // WCAG AA compliant (4.5:1 minimum)
+  textOnBackground: 'text-gray-900 dark:text-gray-100',
+  textOnPrimary: 'text-white',
+  textOnSecondary: 'text-gray-900',
+  
+  // WCAG AAA compliant (7:1 minimum) for important text
+  headingOnBackground: 'text-gray-950 dark:text-gray-50',
+}
+
+// ✅ CORRECT: Focus indicators
+const focusStyles = 'focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2'
+```
+
+#### 2. **Semantic HTML & ARIA**
+```typescript
+// ✅ CORRECT: Semantic component structure
+const NavigationMenu = () => (
+  <nav aria-label="Main navigation" role="navigation">
+    <ul className="flex space-x-4">
+      {menuItems.map((item) => (
+        <li key={item.id}>
+          <a 
+            href={item.href}
+            aria-current={item.isActive ? 'page' : undefined}
+            className={cn(
+              'px-3 py-2 rounded-md text-sm font-medium',
+              item.isActive 
+                ? 'bg-primary text-primary-foreground' 
+                : 'text-muted-foreground hover:text-foreground'
+            )}
+          >
+            {item.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+)
+
+// ✅ CORRECT: Form accessibility
+<form onSubmit={handleSubmit}>
+  <div className="space-y-4">
+    <div>
+      <label htmlFor="email" className="block text-sm font-medium">
+        Email Address
+      </label>
+      <input
+        id="email"
+        type="email"
+        required
+        aria-describedby="email-error"
+        className={cn(
+          'mt-1 block w-full rounded-md border-gray-300',
+          error && 'border-red-500 focus:border-red-500 focus:ring-red-500'
+        )}
+      />
+      {error && (
+        <p id="email-error" className="mt-1 text-sm text-red-600" role="alert">
+          {error}
+        </p>
+      )}
+    </div>
+  </div>
+</form>
+```
+
+**Accessibility Rules:**
+- ✅ ALWAYS provide alt text for images
+- ✅ ALWAYS use semantic HTML elements
+- ✅ ALWAYS ensure keyboard navigation works
+- ✅ ALWAYS provide focus indicators
+- ❌ NEVER rely solely on color to convey information
+- ❌ NEVER remove focus outlines without replacement
+
+## 🎨 Component Styling Patterns
+
+### **MUST FOLLOW - CSS Organization**
+
+#### 1. **Tailwind CSS Best Practices**
+```typescript
+// ✅ CORRECT: Utility class organization
+const componentClasses = cn(
+  // Layout
+  'flex items-center justify-between',
+  // Spacing
+  'px-4 py-2 mx-auto',
+  // Typography
+  'text-sm font-medium',
+  // Colors
+  'bg-white text-gray-900',
+  // Borders & Shadows
+  'border border-gray-200 rounded-lg shadow-sm',
+  // Interactions
+  'hover:bg-gray-50 focus:outline-none focus:ring-2',
+  // Responsive
+  'md:px-6 md:py-3 md:text-base',
+  // Conditional classes
+  {
+    'bg-primary text-primary-foreground': isPrimary,
+    'opacity-50 cursor-not-allowed': isDisabled,
+  },
+  className
+)
+
+// ✅ CORRECT: Custom CSS when needed
+// globals.css
+@layer components {
+  .hero-gradient {
+    background: linear-gradient(
+      135deg,
+      hsl(var(--primary)) 0%,
+      hsl(var(--primary) / 0.8) 100%
+    );
+  }
+  
+  .glass-effect {
+    backdrop-filter: blur(10px);
+    background: hsl(var(--background) / 0.8);
+    border: 1px solid hsl(var(--border) / 0.2);
+  }
+}
+```
+
+#### 2. **CSS-in-JS Patterns (when necessary)**
+```typescript
+// ✅ CORRECT: Styled components for complex animations
+const AnimatedCard = styled(motion.div)<{ isActive: boolean }>`
+  ${({ isActive, theme }) => css`
+    background: ${isActive 
+      ? `linear-gradient(135deg, ${theme.colors.primary} 0%, ${theme.colors.primaryDark} 100%)`
+      : theme.colors.background};
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: ${theme.shadows.lg};
+    }
+    
+    @media (prefers-reduced-motion: reduce) {
+      transform: none;
+      transition: none;
+    }
+  `}
+`
+
+// ❌ WRONG: Overusing CSS-in-JS for simple styles
+const SimpleButton = styled.button`
+  padding: 8px 16px;
+  background: blue;
+  color: white;
+  border: none;
+  border-radius: 4px;
+`
+
+// ✅ CORRECT: Use Tailwind for simple styles
+<button className="px-4 py-2 bg-blue-500 text-white border-none rounded">
+  Button
+</button>
+```
+
+## 🔧 Design System Utilities
+
+### **MUST FOLLOW - Helper Functions**
+
+#### 1. **Class Name Utilities**
+```typescript
+// ✅ CORRECT: cn utility usage
+import { cn } from '@/lib/utils'
+
+const Component = ({ className, variant, size, ...props }) => (
+  <div
+    className={cn(
+      // Base styles
+      'rounded-md border',
+      // Variant styles
+      {
+        'bg-primary text-primary-foreground': variant === 'primary',
+        'bg-secondary text-secondary-foreground': variant === 'secondary',
+      },
+      // Size styles
+      {
+        'p-2 text-sm': size === 'sm',
+        'p-4 text-base': size === 'md',
+        'p-6 text-lg': size === 'lg',
+      },
+      // External className
+      className
+    )}
+    {...props}
+  />
+)
+```
+
+#### 2. **Design Token Functions**
+```typescript
+// ✅ CORRECT: Design token utilities
+export const getSpacing = (size: SpacingSize): string => {
+  const spacingMap = {
+    xs: 'space-y-1',
+    sm: 'space-y-2',
+    md: 'space-y-4',
+    lg: 'space-y-6',
+    xl: 'space-y-8',
+  }
+  return spacingMap[size] || spacingMap.md
+}
+
+export const getTextSize = (size: TextSize): string => {
+  const textSizeMap = {
+    xs: 'text-xs',
+    sm: 'text-sm',
+    base: 'text-base',
+    lg: 'text-lg',
+    xl: 'text-xl',
+    '2xl': 'text-2xl',
+    '3xl': 'text-3xl',
+  }
+  return textSizeMap[size] || textSizeMap.base
+}
+```
+
+## 🚫 Design Anti-Patterns
+
+### **NEVER DO - Common Design Mistakes**
+
+#### 1. **Inconsistent Spacing**
+```typescript
+// ❌ WRONG: Random spacing values
+<div className="mt-3 mb-5 px-7 py-9">
+  <h2 className="mb-2.5">Title</h2>
+  <p className="mt-1.5">Content</p>
+</div>
+
+// ✅ CORRECT: Consistent spacing scale
+<div className="mt-4 mb-6 px-6 py-8">
+  <h2 className="mb-3">Title</h2>
+  <p className="mt-2">Content</p>
+</div>
+```
+
+#### 2. **Poor Color Usage**
+```typescript
+// ❌ WRONG: Hardcoded colors
+<button className="bg-blue-500 text-white hover:bg-blue-600">
+  Click me
+</button>
+
+// ✅ CORRECT: Semantic color usage
+<button className="bg-primary text-primary-foreground hover:bg-primary/90">
+  Click me
+</button>
+```
+
+#### 3. **Accessibility Violations**
+```typescript
+// ❌ WRONG: Poor accessibility
+<div className="text-gray-400 bg-gray-300" onClick={handleClick}>
+  Click me
+</div>
+
+// ✅ CORRECT: Accessible interactive element
+<button 
+  className="text-gray-900 bg-gray-100 hover:bg-gray-200 focus:ring-2 focus:ring-primary"
+  onClick={handleClick}
+  aria-label="Perform action"
+>
+  Click me
+</button>
+```
+
+## 📊 Design System Metrics
+
+### **MUST TRACK - Design Quality Metrics**
+
+#### 1. **Performance Metrics**
+- ✅ CSS bundle size < 50KB gzipped
+- ✅ Unused CSS < 10%
+- ✅ Critical CSS inlined
+- ✅ Font loading optimized
+
+#### 2. **Accessibility Metrics**
+- ✅ WCAG AA compliance (100%)
+- ✅ Keyboard navigation (100%)
+- ✅ Screen reader compatibility
+- ✅ Color contrast ratios met
+
+#### 3. **Consistency Metrics**
+- ✅ Design token usage (>90%)
+- ✅ Component reuse rate (>80%)
+- ✅ Style consistency score
+- ✅ Brand guideline adherence
+
+---
+
+## 🎯 Design System Checklist
+
+### **Before Shipping**
+- [ ] ✅ All components use design tokens
+- [ ] ✅ Responsive design tested on all breakpoints
+- [ ] ✅ Accessibility requirements met
+- [ ] ✅ Animation performance optimized
+- [ ] ✅ Color contrast ratios verified
+- [ ] ✅ Typography scale consistent
+- [ ] ✅ Spacing system followed
+- [ ] ✅ Focus states implemented
+- [ ] ✅ Dark mode support added
+- [ ] ✅ Component variants documented
+
+---
+
+*Remember: A great design system enables teams to build consistent, accessible, and beautiful interfaces quickly. Invest in the system, and it will pay dividends in development speed and user experience.*
+

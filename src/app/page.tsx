@@ -5,86 +5,107 @@ import { toast } from 'sonner';
 import { Container } from '@/components/ui/container';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { ArrowRight, Copy, Lock } from 'lucide-react';
+import { Send, Wand2, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { BeforeAfterDemo } from '@/components/demo/before-after-demo';
-import TwelveScenariosDemo from '@/components/demo/twelve-scenarios-demo';
-import { Footer } from '@/components/layout/footer';
-import { InteractiveHeroSection } from '@/components/sections/interactive-hero-section';
-import FeaturesSection from '@/components/sections/features-section';
-import { HowItWorksSection } from '@/components/sections/how-it-works-section';
-import { PricingSection } from '@/components/sections/pricing-section';
-import { pricingPlans } from '@/components/data/pricing-data';
-import { Persona, personas } from '@/components/data/landing-data';
-import ProcessingSteps from '@/components/shared/processing-steps';
+
+interface ChatMessage {
+    id: string;
+    type: 'user' | 'ai';
+    content: string;
+    timestamp: Date;
+}
 
 export default function HomePage() {
-    const [selectedPersona, setSelectedPersona] = useState<Persona>('pm-developer');
-    const [userInput, setUserInput] = useState('');
-    const [generatedPrompt, setGeneratedPrompt] = useState('');
+    const [inputText, setInputText] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [email, setEmail] = useState('');
-    const [isRegistered, setIsRegistered] = useState(false);
-    const [showModal, setShowModal] = useState(false);
-    const [currentStep, setCurrentStep] = useState(0);
+    const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
+        {
+            id: '1',
+            type: 'ai',
+            content: '안녕하세요! 저는 SPA(Smart Prompt Assistant)입니다. 여러분의 프롬프트를 더 효과적으로 만들어드릴게요. 아래 샘플을 클릭하거나 직접 입력해보세요.',
+            timestamp: new Date()
+        }
+    ]);
 
-    const handleTransform = async () => {
-        if (!userInput.trim()) {
-            toast.error('아이디어를 입력해주세요');
+    // 샘플 프롬프트
+    const samplePrompts = [
+        "고객에게 제품 소개 이메일을 작성해야 해요",
+        "신제품 런칭 프레젠테이션 개요를 만들어주세요",
+        "마케팅 캠페인 아이디어를 브레인스토밍해주세요",
+        "회의록을 정리하고 액션 아이템을 추출해주세요"
+    ];
+
+    const handleSampleClick = (sample: string) => {
+        setInputText(sample);
+    };
+
+    const handleImprovePrompt = async () => {
+        if (!inputText.trim()) {
+            toast.error('프롬프트를 입력해주세요');
             return;
         }
 
         setIsLoading(true);
-        setCurrentStep(0);
-        setGeneratedPrompt('');
+
+        // 사용자 메시지 추가
+        const userMessage: ChatMessage = {
+            id: Date.now().toString(),
+            type: 'user',
+            content: inputText,
+            timestamp: new Date()
+        };
+
+        setChatMessages(prev => [...prev, userMessage]);
 
         try {
-            const response = await fetch('/api/generate', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    idea: userInput,
-                    persona: selectedPersona
-                }),
-            });
+            // 임시 향상된 결과 생성 (실제 API 대신)
+            const improvedPrompt = `${inputText}를 더 명확하고 설득력 있게 다듬어서, 구체적인 가이드라인과 예시를 포함하여 전문적으로 작성해주세요. 대상 독자의 관점을 고려하고, 핵심 메시지가 명확히 전달되도록 구성해주세요.`;
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'API 호출에 실패했습니다');
-            }
+            // AI 응답 추가
+            const aiMessage: ChatMessage = {
+                id: (Date.now() + 1).toString(),
+                type: 'ai',
+                content: improvedPrompt,
+                timestamp: new Date()
+            };
 
-            const data = await response.json();
-            setGeneratedPrompt(data.content);
-            toast.success(`${personas[selectedPersona]?.title}용 프롬프트가 생성되었습니다!`);
+            setChatMessages(prev => [...prev, aiMessage]);
+            setInputText(''); // 입력 필드 클리어
+            toast.success('프롬프트가 향상되었습니다!');
+
         } catch (error) {
-            toast.error('프롬프트 생성에 실패했습니다. 다시 시도해주세요.');
+            toast.error('프롬프트 향상에 실패했습니다. 다시 시도해주세요.');
             console.error(error);
         } finally {
             setIsLoading(false);
-            setCurrentStep(0);
         }
     };
 
-    const handleCopy = async () => {
-        try {
-            await navigator.clipboard.writeText(generatedPrompt);
-            toast.success('클립보드에 복사되었습니다!');
-        } catch (error) {
-            toast.error('복사에 실패했습니다');
-        }
-    };
+    const handleSendMessage = () => {
+        if (!inputText.trim()) return;
 
-    const handleEmailSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!email.trim()) {
-            toast.error('이메일을 입력해주세요');
-            return;
-        }
-        setIsRegistered(true);
-        toast.success('사전등록이 완료되었습니다!');
+        // 사용자 메시지 추가
+        const userMessage: ChatMessage = {
+            id: Date.now().toString(),
+            type: 'user',
+            content: inputText,
+            timestamp: new Date()
+        };
+
+        setChatMessages(prev => [...prev, userMessage]);
+
+        // 간단한 AI 응답 시뮬레이션
+        setTimeout(() => {
+            const aiMessage: ChatMessage = {
+                id: (Date.now() + 1).toString(),
+                type: 'ai',
+                content: '네, 이해했습니다. 더 구체적인 요구사항이 있으시면 말씀해주세요!',
+                timestamp: new Date()
+            };
+            setChatMessages(prev => [...prev, aiMessage]);
+        }, 1000);
+
+        setInputText('');
     };
 
     return (
@@ -95,158 +116,125 @@ export default function HomePage() {
                     <div className="flex items-center justify-between h-16">
                         <div className="flex items-center space-x-2">
                             <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                                <span className="text-white font-bold text-sm">AI</span>
+                                <span className="text-white font-bold text-sm">SPA</span>
                             </div>
-                            <span className="font-bold text-lg">Smart Prompt</span>
+                            <span className="font-bold text-lg">Smart Prompt Assistant</span>
                         </div>
-                        <nav className="hidden md:flex items-center space-x-8">
-                            <a href="#features" className="text-brand-text-secondary hover:text-white transition-colors">
-                                기능
-                            </a>
-                            <a href="#how" className="text-brand-text-secondary hover:text-white transition-colors">
-                                작동원리
-                            </a>
-                            <a href="#pricing" className="text-brand-text-secondary hover:text-white transition-colors">
-                                요금제
-                            </a>
-                            <Button
-                                onClick={() => setShowModal(true)}
-                                variant="outline"
-                                className="border-brand-border-primary text-brand-text-primary hover:bg-brand-surface-primary"
-                            >
-                                사전등록
-                            </Button>
-                        </nav>
                     </div>
                 </Container>
             </header>
 
-            {/* 새로운 인터랙티브 히어로 섹션 */}
-            <InteractiveHeroSection onPreRegisterClick={() => setShowModal(true)} />
-
-            {/* Before/After Demo Section */}
-            <section className="py-20 bg-brand-surface-primary">
-                <BeforeAfterDemo />
-            </section>
-
-            {/* Features Section */}
-            <FeaturesSection />
-
-            {/* 12 Scenarios Demo Section */}
-            <section id="scenarios" className="py-20 bg-brand-surface-primary">
-                <TwelveScenariosDemo />
-            </section>
-
-            {/* How It Works Section */}
-            <HowItWorksSection />
-
-            {/* Pricing Section */}
-            <PricingSection plans={pricingPlans} />
-
-            {/* Final CTA Section */}
-            <section className="py-20 bg-gradient-to-r from-blue-600/10 to-purple-600/10">
+            {/* Main Content */}
+            <main className="pt-20 pb-8 px-4 sm:px-6 lg:px-8">
                 <Container>
-                    <div className="text-center max-w-3xl mx-auto">
-                        <h2 className="text-3xl lg:text-4xl font-bold mb-6 text-white">
-                            지금 바로 시작해보세요
-                        </h2>
-                        <p className="text-lg text-brand-text-secondary mb-8">
-                            더 이상 빈 문서 앞에서 고민하지 마세요. AI가 여러분의 아이디어를 전문적인 프롬프트로 변환해드립니다.
-                        </p>
-                        <Button
-                            size="lg"
-                            onClick={() => setShowModal(true)}
-                            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-lg px-8 py-3"
-                        >
-                            무료 체험 시작하기
-                            <ArrowRight className="ml-2 w-5 h-5" />
-                        </Button>
+                    <div className="max-w-4xl mx-auto">
+                        {/* 채팅창 */}
+                        <Card className="bg-brand-surface-primary/80 backdrop-blur-xl border-brand-surface-secondary/20 shadow-2xl mb-6 p-4 sm:p-6 min-h-[300px] sm:min-h-[400px]">
+                            <div className="flex flex-col h-full">
+                                <div className="flex-1 overflow-y-auto space-y-4 mb-4 max-h-[400px]">
+                                    {chatMessages.map((message) => (
+                                        <div
+                                            key={message.id}
+                                            className={cn(
+                                                "flex",
+                                                message.type === 'user' ? 'justify-end' : 'justify-start'
+                                            )}
+                                        >
+                                            <div
+                                                className={cn(
+                                                    "max-w-[85%] sm:max-w-[80%] p-3 sm:p-4 rounded-lg",
+                                                    message.type === 'user'
+                                                        ? 'bg-brand-accent-blue text-white'
+                                                        : 'bg-brand-surface-secondary text-brand-text-primary'
+                                                )}
+                                            >
+                                                <p className="text-sm leading-relaxed">{message.content}</p>
+                                                <span className="text-xs opacity-70 mt-2 block">
+                                                    {message.timestamp.toLocaleTimeString()}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </Card>
+
+                        {/* 입력 섹션 */}
+                        <Card className="bg-brand-surface-primary/80 backdrop-blur-xl border-brand-surface-secondary/20 shadow-2xl p-4 sm:p-6">
+                            {/* 입력 필드 */}
+                            <div className="relative mb-6">
+                                <textarea
+                                    value={inputText}
+                                    onChange={(e) => setInputText(e.target.value)}
+                                    placeholder="프롬프트를 입력하세요. 예: '고객에게 제품 소개 이메일을 작성해주세요'"
+                                    className={cn(
+                                        "w-full min-h-[100px] sm:min-h-[120px] p-3 sm:p-4 pr-12 sm:pr-16 bg-brand-dark-primary/50 border border-brand-surface-secondary/30 rounded-xl",
+                                        "text-brand-text-primary placeholder:text-brand-text-secondary/60",
+                                        "focus:outline-none focus:ring-2 focus:ring-brand-accent-blue/50 focus:border-brand-accent-blue/50",
+                                        "resize-none transition-all duration-200 text-sm sm:text-base"
+                                    )}
+                                    disabled={isLoading}
+                                />
+
+                                {/* 전송 버튼 - 입력 필드 내부 우측 */}
+                                <button
+                                    onClick={handleSendMessage}
+                                    disabled={isLoading || !inputText.trim()}
+                                    className={cn(
+                                        "absolute right-2 sm:right-3 top-2 sm:top-3 p-2 rounded-lg transition-all duration-200",
+                                        "bg-brand-accent-blue/20 hover:bg-brand-accent-blue/30",
+                                        "text-brand-accent-blue hover:text-brand-accent-blue",
+                                        "disabled:opacity-50 disabled:cursor-not-allowed",
+                                        "flex items-center justify-center"
+                                    )}
+                                    title="메시지 전송"
+                                >
+                                    <Send className="w-4 h-4 sm:w-5 sm:h-5" />
+                                </button>
+                            </div>
+
+                            {/* 액션 버튼들 */}
+                            <div className="flex flex-wrap gap-3 justify-center mb-6">
+                                <Button
+                                    onClick={handleImprovePrompt}
+                                    disabled={isLoading || !inputText.trim()}
+                                    className="bg-yellow-400 hover:bg-yellow-500 text-black font-medium px-4 sm:px-6 py-2 text-sm sm:text-base"
+                                >
+                                    {isLoading ? (
+                                        <>
+                                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                            향상 중...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Wand2 className="w-4 h-4 mr-2" />
+                                            프롬프트 향상
+                                        </>
+                                    )}
+                                </Button>
+                            </div>
+
+                            {/* 샘플 프롬프트 섹션 */}
+                            <div>
+                                <h3 className="text-sm font-medium text-brand-text-secondary mb-3">
+                                    샘플 프롬프트를 클릭해보세요
+                                </h3>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    {samplePrompts.map((prompt, index) => (
+                                        <button
+                                            key={index}
+                                            onClick={() => handleSampleClick(prompt)}
+                                            className="text-left p-3 bg-brand-dark-primary/30 hover:bg-brand-dark-primary/50 rounded-lg border border-brand-surface-secondary/20 transition-all duration-200 text-sm text-brand-text-secondary hover:text-brand-text-primary"
+                                        >
+                                            {prompt}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </Card>
                     </div>
                 </Container>
-            </section>
-
-            {/* Footer */}
-            <Footer
-                links={[
-                    {
-                        title: "제품",
-                        items: [
-                            { label: "기능", href: "#features" },
-                            { label: "요금제", href: "#pricing" },
-                            { label: "사용 방법", href: "#how" }
-                        ]
-                    },
-                    {
-                        title: "지원",
-                        items: [
-                            { label: "문의하기", href: "/contact" },
-                            { label: "가이드", href: "/guide" },
-                            { label: "FAQ", href: "/faq" }
-                        ]
-                    },
-                    {
-                        title: "회사",
-                        items: [
-                            { label: "개인정보처리방침", href: "/privacy" },
-                            { label: "서비스 약관", href: "/terms" },
-                            { label: "보안", href: "/security" }
-                        ]
-                    }
-                ]}
-            />
-
-            {/* Email Registration Modal */}
-            {showModal && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <Card className="w-full max-w-md p-6 bg-white">
-                        <div className="text-center mb-6">
-                            <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                                사전등록
-                            </h3>
-                            <p className="text-gray-600">
-                                출시 알림을 받고 얼리버드 혜택을 누리세요
-                            </p>
-                        </div>
-
-                        {!isRegistered ? (
-                            <form onSubmit={handleEmailSubmit} className="space-y-4">
-                                <Input
-                                    type="email"
-                                    placeholder="이메일 주소를 입력하세요"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    className="w-full"
-                                />
-                                <Button type="submit" className="w-full">
-                                    사전등록하기
-                                </Button>
-                            </form>
-                        ) : (
-                            <div className="text-center">
-                                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                    </svg>
-                                </div>
-                                <h4 className="text-xl font-semibold text-gray-900 mb-2">
-                                    등록 완료!
-                                </h4>
-                                <p className="text-gray-600 mb-4">
-                                    출시 소식을 가장 먼저 알려드리겠습니다.
-                                </p>
-                            </div>
-                        )}
-
-                        <Button
-                            variant="outline"
-                            onClick={() => setShowModal(false)}
-                            className="w-full mt-4"
-                        >
-                            닫기
-                        </Button>
-                    </Card>
-                </div>
-            )}
+            </main>
         </div>
     );
 } 

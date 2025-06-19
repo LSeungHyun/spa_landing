@@ -1,0 +1,552 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Component Development Patterns & Standards
+
+## 🎯 Component Design Philosophy
+**Goal**: Create reusable, accessible, and performant components that follow the SPA Landing design system
+**Principle**: Composition over inheritance, clarity over cleverness
+
+## 🏗️ Component Architecture Patterns
+
+### **MUST FOLLOW - Component Structure**
+
+#### 1. **Standard Component Template**
+```typescript
+// ✅ CORRECT: Standard component structure
+import React from 'react'
+import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import type { ComponentVariant } from '@/types'
+
+interface HeroSectionProps {
+  variant?: ComponentVariant
+  title: string
+  subtitle?: string
+  className?: string
+  children?: React.ReactNode
+}
+
+const HeroSection: React.FC<HeroSectionProps> = ({
+  variant = 'default',
+  title,
+  subtitle,
+  className,
+  children,
+  ...props
+}) => {
+  return (
+    <section 
+      className={cn(
+        'relative py-12 px-4',
+        variant === 'centered' && 'text-center',
+        className
+      )}
+      {...props}
+    >
+      <h1 className="text-4xl font-bold">{title}</h1>
+      {subtitle && <p className="text-lg mt-4">{subtitle}</p>}
+      {children}
+    </section>
+  )
+}
+
+export default HeroSection
+export { HeroSection, type HeroSectionProps }
+```
+
+#### 2. **Component Organization Rules**
+- ✅ ALWAYS place imports in order: React → Third-party → Internal → Types
+- ✅ ALWAYS define interfaces before component definition
+- ✅ ALWAYS use React.FC with explicit props typing
+- ✅ ALWAYS destructure props with defaults
+- ✅ ALWAYS export both default and named exports
+- ❌ NEVER define interfaces inside component files unless component-specific
+- ❌ NEVER use function declarations for components
+
+### **MUST FOLLOW - Props Design Patterns**
+
+#### 1. **Discriminated Union Props**
+```typescript
+// ✅ CORRECT: Discriminated unions for variants
+type ButtonVariant = 
+  | { variant: 'primary'; size?: 'sm' | 'md' | 'lg' }
+  | { variant: 'secondary'; size?: 'sm' | 'md' }
+  | { variant: 'ghost'; size?: 'sm' }
+
+// ❌ WRONG: Boolean props for multiple states
+interface BadButtonProps {
+  isPrimary?: boolean
+  isSecondary?: boolean
+  isGhost?: boolean
+  isSmall?: boolean
+  isMedium?: boolean
+  isLarge?: boolean
+}
+```
+
+#### 2. **Polymorphic Component Pattern**
+```typescript
+// ✅ CORRECT: Polymorphic component for flexibility
+interface ButtonProps<T extends React.ElementType = 'button'> {
+  as?: T
+  variant?: 'primary' | 'secondary'
+  children: React.ReactNode
+}
+
+const Button = <T extends React.ElementType = 'button'>({
+  as,
+  variant = 'primary',
+  children,
+  ...props
+}: ButtonProps<T> & Omit<React.ComponentPropsWithoutRef<T>, keyof ButtonProps<T>>) => {
+  const Component = as || 'button'
+  
+  return (
+    <Component
+      className={cn(
+        'px-4 py-2 rounded',
+        variant === 'primary' && 'bg-blue-600 text-white',
+        variant === 'secondary' && 'bg-gray-200 text-gray-900'
+      )}
+      {...props}
+    >
+      {children}
+    </Component>
+  )
+}
+```
+
+## 🎨 UI Component Standards
+
+### **MUST FOLLOW - shadcn/ui Integration**
+
+#### 1. **Base Component Extension**
+```typescript
+// ✅ CORRECT: Extending shadcn/ui components
+import { Button as BaseButton } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
+
+interface CTAButtonProps extends React.ComponentProps<typeof BaseButton> {
+  loading?: boolean
+  icon?: React.ReactNode
+}
+
+const CTAButton: React.FC<CTAButtonProps> = ({
+  loading = false,
+  icon,
+  children,
+  className,
+  disabled,
+  ...props
+}) => {
+  return (
+    <BaseButton
+      className={cn(
+        'relative min-w-[120px]',
+        loading && 'cursor-not-allowed opacity-70',
+        className
+      )}
+      disabled={disabled || loading}
+      {...props}
+    >
+      {loading ? (
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+          Loading...
+        </div>
+      ) : (
+        <div className="flex items-center gap-2">
+          {icon}
+          {children}
+        </div>
+      )}
+    </BaseButton>
+  )
+}
+```
+
+#### 2. **Form Components Pattern**
+```typescript
+// ✅ CORRECT: Form component with validation
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
+
+const emailSchema = z.object({
+  email: z.string().email('Please enter a valid email address'),
+  name: z.string().min(2, 'Name must be at least 2 characters')
+})
+
+interface EmailFormProps {
+  onSubmit: (data: z.infer<typeof emailSchema>) => void
+  loading?: boolean
+}
+
+const EmailForm: React.FC<EmailFormProps> = ({ onSubmit, loading = false }) => {
+  const form = useForm<z.infer<typeof emailSchema>>({
+    resolver: zodResolver(emailSchema),
+    defaultValues: {
+      email: '',
+      name: ''
+    }
+  })
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Name</FormLabel>
+              <FormControl>
+                <Input placeholder="Enter your name" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input type="email" placeholder="Enter your email" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <CTAButton type="submit" loading={loading} className="w-full">
+          Subscribe
+        </CTAButton>
+      </form>
+    </Form>
+  )
+}
+```
+
+## 🎭 Animation & Interaction Patterns
+
+### **MUST FOLLOW - Framer Motion Integration**
+
+#### 1. **Page Transitions**
+```typescript
+// ✅ CORRECT: Page-level animations
+import { motion } from 'framer-motion'
+
+const pageVariants = {
+  initial: { opacity: 0, y: 20 },
+  in: { opacity: 1, y: 0 },
+  out: { opacity: 0, y: -20 }
+}
+
+const pageTransition = {
+  type: 'tween',
+  ease: 'anticipate',
+  duration: 0.5
+}
+
+const AnimatedPage: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  return (
+    <motion.div
+      initial="initial"
+      animate="in"
+      exit="out"
+      variants={pageVariants}
+      transition={pageTransition}
+    >
+      {children}
+    </motion.div>
+  )
+}
+```
+
+#### 2. **Interactive Component Animations**
+```typescript
+// ✅ CORRECT: Component-level interactions
+import { motion } from 'framer-motion'
+
+const FeatureCard: React.FC<FeatureCardProps> = ({ title, description, icon }) => {
+  return (
+    <motion.div
+      className="p-6 rounded-lg border bg-card"
+      whileHover={{ 
+        scale: 1.02,
+        boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
+      }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+    >
+      <motion.div
+        className="mb-4"
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+      >
+        {icon}
+      </motion.div>
+      <h3 className="text-xl font-semibold mb-2">{title}</h3>
+      <p className="text-muted-foreground">{description}</p>
+    </motion.div>
+  )
+}
+```
+
+## 📱 Responsive Component Patterns
+
+### **MUST FOLLOW - Mobile-First Design**
+
+#### 1. **Responsive Grid Layouts**
+```typescript
+// ✅ CORRECT: Mobile-first responsive grid
+const FeaturesGrid: React.FC<{ features: Feature[] }> = ({ features }) => {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {features.map((feature, index) => (
+        <FeatureCard key={feature.id} {...feature} />
+      ))}
+    </div>
+  )
+}
+
+// ✅ CORRECT: Responsive text sizing
+const ResponsiveHeading: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  return (
+    <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">
+      {children}
+    </h1>
+  )
+}
+```
+
+#### 2. **Conditional Rendering for Device Types**
+```typescript
+// ✅ CORRECT: Device-specific components
+import { useMediaQuery } from '@/hooks/use-media-query'
+
+const Navigation: React.FC = () => {
+  const isMobile = useMediaQuery('(max-width: 768px)')
+  
+  return (
+    <nav className="flex items-center justify-between p-4">
+      <Logo />
+      {isMobile ? <MobileMenu /> : <DesktopMenu />}
+    </nav>
+  )
+}
+```
+
+## 🔄 State Management Patterns
+
+### **MUST FOLLOW - Component State Rules**
+
+#### 1. **Local State with useState**
+```typescript
+// ✅ CORRECT: Simple local state
+const [isOpen, setIsOpen] = useState(false)
+const [formData, setFormData] = useState<FormData>({ email: '', name: '' })
+
+// ✅ CORRECT: Complex state with useReducer
+interface ModalState {
+  isOpen: boolean
+  step: number
+  data: any
+}
+
+type ModalAction = 
+  | { type: 'OPEN'; step?: number }
+  | { type: 'CLOSE' }
+  | { type: 'NEXT_STEP'; data?: any }
+  | { type: 'PREV_STEP' }
+
+const modalReducer = (state: ModalState, action: ModalAction): ModalState => {
+  switch (action.type) {
+    case 'OPEN':
+      return { ...state, isOpen: true, step: action.step ?? 1 }
+    case 'CLOSE':
+      return { ...state, isOpen: false, step: 1, data: null }
+    case 'NEXT_STEP':
+      return { ...state, step: state.step + 1, data: action.data }
+    case 'PREV_STEP':
+      return { ...state, step: Math.max(1, state.step - 1) }
+    default:
+      return state
+  }
+}
+```
+
+#### 2. **Server State with SWR**
+```typescript
+// ✅ CORRECT: Server state management
+import useSWR from 'swr'
+import { fetcher } from '@/lib/api'
+
+const UserProfile: React.FC<{ userId: string }> = ({ userId }) => {
+  const { data: user, error, isLoading } = useSWR(
+    userId ? `/api/users/${userId}` : null,
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      dedupingInterval: 60000
+    }
+  )
+
+  if (isLoading) return <ProfileSkeleton />
+  if (error) return <ErrorMessage error={error} />
+  if (!user) return <EmptyState />
+
+  return <ProfileDisplay user={user} />
+}
+```
+
+## 🚫 Anti-Patterns to Avoid
+
+### **NEVER DO - Common Mistakes**
+
+#### 1. **Prop Drilling**
+```typescript
+// ❌ WRONG: Prop drilling through multiple levels
+const App = () => {
+  const [user, setUser] = useState(null)
+  return <Layout user={user} setUser={setUser} />
+}
+
+const Layout = ({ user, setUser }) => {
+  return <Header user={user} setUser={setUser} />
+}
+
+// ✅ CORRECT: Use context for deeply nested props
+const UserContext = createContext<UserContextType | null>(null)
+
+const App = () => {
+  const [user, setUser] = useState(null)
+  return (
+    <UserContext.Provider value={{ user, setUser }}>
+      <Layout />
+    </UserContext.Provider>
+  )
+}
+```
+
+#### 2. **Inline Object/Function Creation**
+```typescript
+// ❌ WRONG: Creating objects/functions on every render
+const MyComponent = () => {
+  return (
+    <ChildComponent 
+      style={{ marginTop: 10 }}
+      onClick={() => console.log('clicked')}
+    />
+  )
+}
+
+// ✅ CORRECT: Memoize or define outside component
+const COMPONENT_STYLE = { marginTop: 10 }
+
+const MyComponent = () => {
+  const handleClick = useCallback(() => {
+    console.log('clicked')
+  }, [])
+
+  return (
+    <ChildComponent 
+      style={COMPONENT_STYLE}
+      onClick={handleClick}
+    />
+  )
+}
+```
+
+#### 3. **Mutation of Props**
+```typescript
+// ❌ WRONG: Mutating props directly
+const BadComponent: React.FC<{ items: Item[] }> = ({ items }) => {
+  items.push(newItem) // NEVER mutate props
+  return <ItemList items={items} />
+}
+
+// ✅ CORRECT: Create new arrays/objects
+const GoodComponent: React.FC<{ items: Item[] }> = ({ items }) => {
+  const updatedItems = [...items, newItem]
+  return <ItemList items={updatedItems} />
+}
+```
+
+## 🎯 Performance Optimization Patterns
+
+### **MUST FOLLOW - Optimization Rules**
+
+#### 1. **Memoization Strategies**
+```typescript
+// ✅ CORRECT: Memoize expensive calculations
+const ExpensiveComponent: React.FC<{ data: LargeDataSet }> = ({ data }) => {
+  const processedData = useMemo(() => {
+    return expensiveDataProcessing(data)
+  }, [data])
+
+  return <DataVisualization data={processedData} />
+}
+
+// ✅ CORRECT: Memoize components with React.memo
+const PureComponent = React.memo<ComponentProps>(({ title, description }) => {
+  return (
+    <div>
+      <h2>{title}</h2>
+      <p>{description}</p>
+    </div>
+  )
+})
+```
+
+#### 2. **Lazy Loading Patterns**
+```typescript
+// ✅ CORRECT: Lazy load heavy components
+const HeavyChart = lazy(() => import('@/components/charts/heavy-chart'))
+
+const Dashboard: React.FC = () => {
+  const [showChart, setShowChart] = useState(false)
+
+  return (
+    <div>
+      <button onClick={() => setShowChart(true)}>Show Chart</button>
+      {showChart && (
+        <Suspense fallback={<ChartSkeleton />}>
+          <HeavyChart />
+        </Suspense>
+      )}
+    </div>
+  )
+}
+```
+
+---
+
+## 🎯 Component Quality Checklist
+
+### **Before Committing Any Component**
+- [ ] ✅ TypeScript strict mode compliance
+- [ ] ✅ Accessibility attributes (ARIA labels, semantic HTML)
+- [ ] ✅ Responsive design (mobile-first)
+- [ ] ✅ Loading and error states handled
+- [ ] ✅ Props properly typed with interfaces
+- [ ] ✅ Performance optimized (memoization where needed)
+- [ ] ✅ Follows naming conventions
+- [ ] ✅ Includes both default and named exports
+- [ ] ✅ No console.log statements
+- [ ] ✅ Follows design system colors and spacing
+
+---
+
+*Remember: Great components are predictable, reusable, and accessible. When in doubt, favor explicit over implicit, simple over complex.*
+

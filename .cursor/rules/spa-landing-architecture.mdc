@@ -1,0 +1,235 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# SPA Landing Architecture & Development Rules
+
+## 🎯 Project Context & Mission
+**Project**: Smart Prompt Assistant Landing Page
+**Mission**: Create an interactive, conversion-focused landing page that demonstrates AI-powered prompt optimization
+**Target**: Solve "blank page syndrome" through engaging user experience
+
+## 🏗️ Architecture Principles
+
+### **MUST FOLLOW - Core Architecture Rules**
+
+#### 1. **Next.js App Router Pattern**
+- ✅ ALWAYS use App Router (`src/app/`) for routing
+- ✅ ALWAYS place page components in `page.tsx` files
+- ✅ ALWAYS use `layout.tsx` for shared layouts
+- ❌ NEVER use Pages Router (`pages/` directory)
+- ❌ NEVER mix routing patterns
+
+#### 2. **Component Organization Hierarchy**
+```
+src/components/
+├── sections/     # Page-specific sections (hero, features, etc.)
+├── shared/       # Reusable business components
+├── ui/           # Pure UI components (shadcn/ui based)
+├── layout/       # Layout-specific components
+├── data/         # Static data and configurations
+└── demo/         # Interactive demo components
+```
+
+#### 3. **File Naming Conventions**
+- ✅ ALWAYS use kebab-case for files: `hero-section.tsx`
+- ✅ ALWAYS use PascalCase for components: `HeroSection`
+- ✅ ALWAYS use camelCase for functions and variables
+- ✅ ALWAYS export components as named exports AND default exports
+- ❌ NEVER use snake_case for React components
+- ❌ NEVER use default-only exports for components
+
+## 🎨 Design System Rules
+
+### **MUST FOLLOW - UI/UX Standards**
+
+#### 1. **Tailwind CSS Usage**
+- ✅ ALWAYS use Tailwind utility classes
+- ✅ ALWAYS use design tokens from [tailwind.config.ts](mdc:tailwind.config.ts)
+- ✅ ALWAYS use responsive prefixes: `sm:`, `md:`, `lg:`, `xl:`
+- ✅ ALWAYS use semantic color names: `primary`, `secondary`, `accent`
+- ❌ NEVER write custom CSS unless absolutely necessary
+- ❌ NEVER use arbitrary color values outside the design system
+
+#### 2. **Component Composition Pattern**
+- ✅ ALWAYS compose using shadcn/ui components from [src/components/ui/](mdc:src/components/ui)
+- ✅ ALWAYS extend base components rather than creating from scratch
+- ✅ ALWAYS use Radix UI primitives for complex interactions
+- ❌ NEVER create custom form controls without Radix UI base
+
+#### 3. **Animation & Interaction Standards**
+- ✅ ALWAYS use Framer Motion for complex animations
+- ✅ ALWAYS use Tailwind transitions for simple hover effects
+- ✅ ALWAYS implement loading states for async operations
+- ❌ NEVER use CSS animations for complex state transitions
+- ❌ NEVER skip loading/pending states
+
+## 🔧 TypeScript & Code Quality
+
+### **MUST FOLLOW - Type Safety Rules**
+
+#### 1. **Type Definitions**
+- ✅ ALWAYS define types in [src/types/](mdc:src/types) directory
+- ✅ ALWAYS use interfaces for object shapes
+- ✅ ALWAYS use union types for component variants
+- ✅ ALWAYS export types alongside components
+- ❌ NEVER use `any` type unless interfacing with untyped libraries
+- ❌ NEVER skip type annotations for component props
+
+#### 2. **Import/Export Patterns**
+- ✅ ALWAYS use absolute imports from `src/`
+- ✅ ALWAYS use barrel exports in `index.ts` files
+- ✅ ALWAYS group imports: React → Third-party → Internal
+- ❌ NEVER use relative imports beyond one level (`../`)
+- ❌ NEVER import entire libraries when tree-shaking is possible
+
+## 📊 Data Management Rules
+
+### **MUST FOLLOW - State & Data Patterns**
+
+#### 1. **State Management Strategy**
+- ✅ ALWAYS use React state for component-local state
+- ✅ ALWAYS use SWR for server state (see [src/hooks/](mdc:src/hooks))
+- ✅ ALWAYS use React Hook Form for form state
+- ✅ ALWAYS validate with Zod schemas
+- ❌ NEVER use Redux or Zustand for this project
+- ❌ NEVER manage server state manually
+
+#### 2. **Data Flow Patterns**
+- ✅ ALWAYS define data types in [src/types/smart-prompt.ts](mdc:src/types/smart-prompt.ts)
+- ✅ ALWAYS use static data from [src/components/data/](mdc:src/components/data)
+- ✅ ALWAYS implement error boundaries for API calls
+- ❌ NEVER fetch data directly in components without hooks
+- ❌ NEVER ignore error states
+
+## 🚀 Performance & Optimization
+
+### **MUST FOLLOW - Performance Rules**
+
+#### 1. **Code Splitting & Loading**
+- ✅ ALWAYS use dynamic imports for heavy components
+- ✅ ALWAYS implement Suspense boundaries
+- ✅ ALWAYS optimize images with Next.js Image component
+- ❌ NEVER import heavy libraries synchronously
+- ❌ NEVER skip image optimization
+
+#### 2. **Bundle Optimization**
+- ✅ ALWAYS use tree-shakable imports: `import { Button } from 'lucide-react'`
+- ✅ ALWAYS check bundle size impact of new dependencies
+- ❌ NEVER import entire icon libraries
+- ❌ NEVER add dependencies without justification
+
+## 🔒 Security & Best Practices
+
+### **MUST FOLLOW - Security Rules**
+
+#### 1. **API & Data Security**
+- ✅ ALWAYS validate API inputs with Zod
+- ✅ ALWAYS use environment variables for secrets
+- ✅ ALWAYS sanitize user inputs
+- ❌ NEVER expose API keys in client code
+- ❌ NEVER trust user input without validation
+
+#### 2. **Accessibility Standards**
+- ✅ ALWAYS use semantic HTML elements
+- ✅ ALWAYS provide ARIA labels for interactive elements
+- ✅ ALWAYS ensure keyboard navigation works
+- ✅ ALWAYS test with screen readers
+- ❌ NEVER rely solely on color for information
+- ❌ NEVER skip focus management
+
+## 📱 Responsive Design Rules
+
+### **MUST FOLLOW - Mobile-First Approach**
+
+#### 1. **Breakpoint Strategy**
+- ✅ ALWAYS design mobile-first (320px+)
+- ✅ ALWAYS test on tablet (768px+) and desktop (1024px+)
+- ✅ ALWAYS use Tailwind responsive prefixes
+- ❌ NEVER assume desktop-first behavior
+- ❌ NEVER hardcode pixel values
+
+#### 2. **Touch & Interaction**
+- ✅ ALWAYS ensure touch targets are 44px minimum
+- ✅ ALWAYS implement swipe gestures where appropriate
+- ✅ ALWAYS optimize for thumb navigation
+- ❌ NEVER rely on hover states for critical functionality
+- ❌ NEVER ignore touch device limitations
+
+## 🧪 Testing & Quality Assurance
+
+### **MUST FOLLOW - Testing Standards**
+
+#### 1. **Component Testing**
+- ✅ ALWAYS test component rendering and interactions
+- ✅ ALWAYS test responsive behavior
+- ✅ ALWAYS test accessibility features
+- ❌ NEVER skip testing for user-facing components
+- ❌ NEVER commit without running tests
+
+#### 2. **Code Quality Gates**
+- ✅ ALWAYS run ESLint before commits
+- ✅ ALWAYS fix TypeScript errors immediately
+- ✅ ALWAYS maintain 90%+ test coverage for utilities
+- ❌ NEVER ignore linting warnings
+- ❌ NEVER commit broken builds
+
+## 🎭 Component Development Patterns
+
+### **MUST FOLLOW - Component Design Rules**
+
+#### 1. **Component Structure Template**
+```typescript
+// 1. Imports (React, Third-party, Internal)
+// 2. Types & Interfaces
+// 3. Component Definition
+// 4. Default Export
+// 5. Named Export (for testing)
+```
+
+#### 2. **Props Design Patterns**
+- ✅ ALWAYS use discriminated unions for variant props
+- ✅ ALWAYS provide sensible defaults
+- ✅ ALWAYS document complex props with JSDoc
+- ❌ NEVER use boolean props for more than 2 states
+- ❌ NEVER create props that conflict with each other
+
+## 🔄 Development Workflow
+
+### **MUST FOLLOW - Git & Deployment Rules**
+
+#### 1. **Commit Standards**
+- ✅ ALWAYS use conventional commits
+- ✅ ALWAYS test locally before pushing
+- ✅ ALWAYS update documentation for API changes
+- ❌ NEVER commit directly to main branch
+- ❌ NEVER push without testing
+
+#### 2. **Code Review Requirements**
+- ✅ ALWAYS review for accessibility compliance
+- ✅ ALWAYS check mobile responsiveness
+- ✅ ALWAYS verify TypeScript strict mode compliance
+- ❌ NEVER approve without testing the changes
+- ❌ NEVER skip performance impact assessment
+
+---
+
+## 🎯 Success Metrics & Goals
+
+### **Primary Objectives**
+1. **Conversion Rate**: Maximize email registrations
+2. **User Engagement**: Increase demo interaction time
+3. **Performance**: Maintain 90+ Lighthouse scores
+4. **Accessibility**: Achieve WCAG 2.1 AA compliance
+
+### **Quality Gates**
+- Zero TypeScript errors
+- Zero accessibility violations
+- 100% responsive design coverage
+- Sub-3s initial page load time
+
+---
+
+*Remember: These rules exist to ensure consistent, high-quality, and maintainable code. When in doubt, prioritize user experience and code clarity over clever solutions.*
+

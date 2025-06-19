@@ -1,0 +1,918 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Performance Optimization Standards
+
+## 🎯 Performance Philosophy
+**Goal**: Deliver exceptional user experience through optimized performance
+**Standard**: Core Web Vitals excellence, sub-second load times, 60fps interactions
+**Principle**: Performance is a feature, not an afterthought
+
+## 📊 Performance Targets & Metrics
+
+### **MUST ACHIEVE - Core Web Vitals**
+
+#### 1. **Largest Contentful Paint (LCP)**
+- ✅ TARGET: < 1.2 seconds (Excellent)
+- ⚠️ ACCEPTABLE: < 2.5 seconds (Good)
+- ❌ CRITICAL: > 4.0 seconds (Poor)
+
+#### 2. **First Input Delay (FID)**
+- ✅ TARGET: < 50ms (Excellent)
+- ⚠️ ACCEPTABLE: < 100ms (Good)
+- ❌ CRITICAL: > 300ms (Poor)
+
+#### 3. **Cumulative Layout Shift (CLS)**
+- ✅ TARGET: < 0.05 (Excellent)
+- ⚠️ ACCEPTABLE: < 0.1 (Good)
+- ❌ CRITICAL: > 0.25 (Poor)
+
+#### 4. **Interaction to Next Paint (INP)**
+- ✅ TARGET: < 100ms (Excellent)
+- ⚠️ ACCEPTABLE: < 200ms (Good)
+- ❌ CRITICAL: > 500ms (Poor)
+
+### **MUST MONITOR - Additional Metrics**
+
+```typescript
+// ✅ CORRECT: Performance monitoring setup
+// lib/web-vitals.ts
+import { getCLS, getFID, getFCP, getLCP, getTTFB, getINP } from 'web-vitals'
+
+export function reportWebVitals(metric: any) {
+  // Report to analytics service
+  gtag('event', metric.name, {
+    event_category: 'Web Vitals',
+    event_label: metric.id,
+    value: Math.round(metric.name === 'CLS' ? metric.value * 1000 : metric.value),
+    non_interaction: true,
+  })
+  
+  // Log critical performance issues
+  if (metric.name === 'LCP' && metric.value > 2500) {
+    console.warn('LCP is too slow:', metric.value)
+  }
+  
+  if (metric.name === 'CLS' && metric.value > 0.1) {
+    console.warn('CLS is too high:', metric.value)
+  }
+}
+
+// Measure all Core Web Vitals
+getCLS(reportWebVitals)
+getFID(reportWebVitals)
+getFCP(reportWebVitals)
+getLCP(reportWebVitals)
+getTTFB(reportWebVitals)
+getINP(reportWebVitals)
+```
+
+## 🚀 Next.js Optimization Strategies
+
+### **MUST FOLLOW - App Router Optimizations**
+
+#### 1. **Image Optimization**
+Reference: [next.config.js](mdc:next.config.js)
+
+```typescript
+// ✅ CORRECT: Next.js Image component usage
+import Image from 'next/image'
+
+const OptimizedImage = ({ src, alt, ...props }) => (
+  <Image
+    src={src}
+    alt={alt}
+    priority={props.priority || false}
+    placeholder="blur"
+    blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
+    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+    quality={85}
+    loading={props.priority ? 'eager' : 'lazy'}
+    {...props}
+  />
+)
+
+// ✅ CORRECT: Hero image with priority
+<OptimizedImage
+  src="/hero-image.jpg"
+  alt="Smart Prompt Assistant Hero"
+  width={1200}
+  height={600}
+  priority={true}
+  className="w-full h-auto"
+/>
+
+// ✅ CORRECT: Lazy loaded images
+<OptimizedImage
+  src="/feature-image.jpg"
+  alt="Feature demonstration"
+  width={400}
+  height={300}
+  className="w-full h-auto"
+/>
+```
+
+**Image Optimization Rules:**
+- ✅ ALWAYS use Next.js Image component
+- ✅ ALWAYS provide width and height
+- ✅ ALWAYS add priority to above-the-fold images
+- ✅ ALWAYS use appropriate image formats (WebP, AVIF)
+- ❌ NEVER use raw img tags for content images
+- ❌ NEVER load large images without optimization
+
+#### 2. **Font Optimization**
+```typescript
+// ✅ CORRECT: Font optimization in layout.tsx
+import { Inter, Geist_Sans } from 'next/font/google'
+
+const inter = Inter({ 
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
+  preload: true,
+})
+
+const geistSans = Geist_Sans({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-geist-sans',
+  preload: true,
+})
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <html lang="en" className={`${inter.variable} ${geistSans.variable}`}>
+      <body className="font-sans antialiased">
+        {children}
+      </body>
+    </html>
+  )
+}
+```
+
+#### 3. **Code Splitting & Dynamic Imports**
+```typescript
+// ✅ CORRECT: Dynamic imports for heavy components
+import dynamic from 'next/dynamic'
+import { Suspense } from 'react'
+
+// Heavy components that aren't immediately needed
+const MonacoEditor = dynamic(() => import('@/components/demo/monaco-editor-demo'), {
+  loading: () => <div className="animate-pulse bg-gray-200 h-64 rounded-lg" />,
+  ssr: false, // Disable SSR for client-only components
+})
+
+const HeavyChart = dynamic(() => import('@/components/charts/heavy-chart'), {
+  loading: () => <ChartSkeleton />,
+})
+
+// ✅ CORRECT: Lazy loading with Suspense
+const LazyComponent = lazy(() => import('@/components/heavy-component'))
+
+const ParentComponent = () => (
+  <Suspense fallback={<ComponentSkeleton />}>
+    <LazyComponent />
+  </Suspense>
+)
+
+// ✅ CORRECT: Route-based code splitting
+const DemoPage = dynamic(() => import('@/app/demo/page'), {
+  loading: () => <PageSkeleton />,
+})
+```
+
+#### 4. **Bundle Analysis & Optimization**
+```javascript
+// ✅ CORRECT: Bundle analyzer configuration
+// next.config.js
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+})
+
+module.exports = withBundleAnalyzer({
+  // Webpack optimizations
+  webpack: (config, { dev, isServer }) => {
+    // Production optimizations
+    if (!dev && !isServer) {
+      config.optimization.splitChunks = {
+        chunks: 'all',
+        cacheGroups: {
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            chunks: 'all',
+          },
+          common: {
+            name: 'common',
+            minChunks: 2,
+            chunks: 'all',
+            enforce: true,
+          },
+        },
+      }
+    }
+    
+    return config
+  },
+  
+  // Experimental features for performance
+  experimental: {
+    optimizeCss: true,
+    optimizePackageImports: ['lucide-react', 'framer-motion'],
+  },
+})
+```
+
+## ⚡ React Performance Optimization
+
+### **MUST FOLLOW - Component Optimization**
+
+#### 1. **Memoization Strategies**
+```typescript
+// ✅ CORRECT: React.memo for expensive components
+const ExpensiveComponent = React.memo(({ data, onAction }) => {
+  const processedData = useMemo(() => {
+    return data.map(item => ({
+      ...item,
+      computed: heavyComputation(item),
+    }))
+  }, [data])
+  
+  const handleAction = useCallback((id: string) => {
+    onAction(id)
+  }, [onAction])
+  
+  return (
+    <div>
+      {processedData.map(item => (
+        <ItemComponent 
+          key={item.id} 
+          item={item} 
+          onAction={handleAction}
+        />
+      ))}
+    </div>
+  )
+}, (prevProps, nextProps) => {
+  // Custom comparison for complex props
+  return (
+    prevProps.data.length === nextProps.data.length &&
+    prevProps.data.every((item, index) => 
+      item.id === nextProps.data[index]?.id &&
+      item.version === nextProps.data[index]?.version
+    )
+  )
+})
+
+// ✅ CORRECT: useMemo for expensive calculations
+const HeavyCalculationComponent = ({ items, filters }) => {
+  const filteredAndSortedItems = useMemo(() => {
+    return items
+      .filter(item => matchesFilters(item, filters))
+      .sort((a, b) => a.priority - b.priority)
+      .slice(0, 100) // Limit results
+  }, [items, filters])
+  
+  return (
+    <div>
+      {filteredAndSortedItems.map(item => (
+        <ItemCard key={item.id} item={item} />
+      ))}
+    </div>
+  )
+}
+
+// ✅ CORRECT: useCallback for event handlers
+const InteractiveComponent = ({ onSubmit, onCancel }) => {
+  const [formData, setFormData] = useState({})
+  
+  const handleSubmit = useCallback((e: FormEvent) => {
+    e.preventDefault()
+    onSubmit(formData)
+  }, [formData, onSubmit])
+  
+  const handleInputChange = useCallback((field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }))
+  }, [])
+  
+  return (
+    <form onSubmit={handleSubmit}>
+      {/* Form fields */}
+    </form>
+  )
+}
+```
+
+#### 2. **Virtual Scrolling for Large Lists**
+```typescript
+// ✅ CORRECT: Virtual scrolling implementation
+import { FixedSizeList as List } from 'react-window'
+
+const VirtualizedList = ({ items }) => {
+  const Row = ({ index, style }) => (
+    <div style={style}>
+      <ItemComponent item={items[index]} />
+    </div>
+  )
+  
+  return (
+    <List
+      height={600}
+      itemCount={items.length}
+      itemSize={80}
+      width="100%"
+    >
+      {Row}
+    </List>
+  )
+}
+
+// ✅ CORRECT: Intersection Observer for lazy loading
+const LazyLoadItem = ({ item }) => {
+  const [isVisible, setIsVisible] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+  
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true)
+          observer.disconnect()
+        }
+      },
+      { threshold: 0.1 }
+    )
+    
+    if (ref.current) {
+      observer.observe(ref.current)
+    }
+    
+    return () => observer.disconnect()
+  }, [])
+  
+  return (
+    <div ref={ref} className="min-h-[200px]">
+      {isVisible ? (
+        <HeavyItemComponent item={item} />
+      ) : (
+        <ItemSkeleton />
+      )}
+    </div>
+  )
+}
+```
+
+## 🎨 CSS & Animation Performance
+
+### **MUST FOLLOW - Efficient Styling**
+
+#### 1. **CSS Performance Optimization**
+```css
+/* ✅ CORRECT: Efficient CSS patterns */
+.optimized-component {
+  /* Use transform and opacity for animations */
+  transform: translateZ(0); /* Create new layer */
+  will-change: transform, opacity;
+  
+  /* Efficient transitions */
+  transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+}
+
+.optimized-component:hover {
+  transform: translateY(-2px) scale(1.02);
+}
+
+/* ✅ CORRECT: Use contain for isolated components */
+.isolated-component {
+  contain: layout style paint;
+}
+
+/* ✅ CORRECT: Efficient grid layouts */
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+  contain: layout;
+}
+
+/* ❌ WRONG: Expensive properties in animations */
+.bad-animation {
+  transition: width 0.3s, height 0.3s, top 0.3s, left 0.3s;
+}
+
+.bad-animation:hover {
+  width: 120%;
+  height: 120%;
+  top: -10px;
+  left: -10px;
+}
+```
+
+#### 2. **Framer Motion Performance**
+```typescript
+// ✅ CORRECT: Optimized Framer Motion usage
+const OptimizedMotionComponent = ({ children }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -20 }}
+    transition={{ 
+      duration: 0.2, 
+      ease: 'easeOut',
+      // Use hardware acceleration
+      type: 'tween',
+    }}
+    // Optimize for performance
+    style={{ 
+      transform: 'translateZ(0)',
+      willChange: 'transform, opacity',
+    }}
+    // Reduce layout calculations
+    layout={false}
+  >
+    {children}
+  </motion.div>
+)
+
+// ✅ CORRECT: Stagger animations with performance in mind
+const StaggeredList = ({ items }) => (
+  <motion.div
+    variants={{
+      hidden: { opacity: 0 },
+      show: {
+        opacity: 1,
+        transition: {
+          staggerChildren: 0.1,
+          delayChildren: 0.2,
+        },
+      },
+    }}
+    initial="hidden"
+    animate="show"
+  >
+    {items.map((item, index) => (
+      <motion.div
+        key={item.id}
+        variants={{
+          hidden: { opacity: 0, y: 20 },
+          show: { opacity: 1, y: 0 },
+        }}
+        // Limit concurrent animations
+        custom={index}
+        transition={{ duration: 0.3 }}
+      >
+        <ItemComponent item={item} />
+      </motion.div>
+    ))}
+  </motion.div>
+)
+```
+
+## 📡 Network & Data Optimization
+
+### **MUST FOLLOW - Efficient Data Fetching**
+
+#### 1. **SWR Optimization Patterns**
+```typescript
+// ✅ CORRECT: Optimized SWR configuration
+import useSWR from 'swr'
+
+const fetcher = async (url: string) => {
+  const response = await fetch(url)
+  if (!response.ok) {
+    throw new Error('Network response was not ok')
+  }
+  return response.json()
+}
+
+// Global SWR configuration
+const swrConfig = {
+  fetcher,
+  revalidateOnFocus: false,
+  revalidateOnReconnect: true,
+  dedupingInterval: 60000, // 1 minute
+  errorRetryCount: 3,
+  errorRetryInterval: 5000,
+  loadingTimeout: 10000,
+}
+
+// ✅ CORRECT: Efficient data fetching with caching
+const useOptimizedData = (endpoint: string, options = {}) => {
+  const { data, error, mutate } = useSWR(
+    endpoint,
+    fetcher,
+    {
+      ...swrConfig,
+      ...options,
+      // Preload data
+      fallbackData: options.fallbackData,
+      // Refresh interval for real-time data
+      refreshInterval: options.realtime ? 30000 : 0,
+    }
+  )
+  
+  return {
+    data,
+    isLoading: !error && !data,
+    isError: error,
+    mutate,
+  }
+}
+
+// ✅ CORRECT: Prefetching critical data
+const PrefetchedComponent = () => {
+  // Prefetch data that will likely be needed
+  useSWR('/api/user-preferences', fetcher)
+  useSWR('/api/critical-data', fetcher)
+  
+  return <MainComponent />
+}
+```
+
+#### 2. **API Route Optimization**
+```typescript
+// ✅ CORRECT: Optimized API routes
+// app/api/data/route.ts
+import { NextRequest, NextResponse } from 'next/server'
+import { unstable_cache } from 'next/cache'
+
+// Cache expensive operations
+const getCachedData = unstable_cache(
+  async (id: string) => {
+    const data = await expensiveDataOperation(id)
+    return data
+  },
+  ['cached-data'],
+  {
+    revalidate: 300, // 5 minutes
+    tags: ['data'],
+  }
+)
+
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url)
+  const id = searchParams.get('id')
+  
+  if (!id) {
+    return NextResponse.json({ error: 'ID required' }, { status: 400 })
+  }
+  
+  try {
+    const data = await getCachedData(id)
+    
+    return NextResponse.json(data, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+        'CDN-Cache-Control': 'public, s-maxage=300',
+        'Vercel-CDN-Cache-Control': 'public, s-maxage=300',
+      },
+    })
+  } catch (error) {
+    return NextResponse.json(
+      { error: 'Failed to fetch data' },
+      { status: 500 }
+    )
+  }
+}
+
+// ✅ CORRECT: Streaming responses for large data
+export async function GET() {
+  const encoder = new TextEncoder()
+  
+  const stream = new ReadableStream({
+    async start(controller) {
+      try {
+        const data = await getLargeDataSet()
+        
+        for (const chunk of data) {
+          const encoded = encoder.encode(JSON.stringify(chunk) + '\n')
+          controller.enqueue(encoded)
+          
+          // Allow other operations to run
+          await new Promise(resolve => setTimeout(resolve, 0))
+        }
+        
+        controller.close()
+      } catch (error) {
+        controller.error(error)
+      }
+    },
+  })
+  
+  return new Response(stream, {
+    headers: {
+      'Content-Type': 'application/json',
+      'Transfer-Encoding': 'chunked',
+    },
+  })
+}
+```
+
+## 🧪 Performance Monitoring & Testing
+
+### **MUST IMPLEMENT - Performance Monitoring**
+
+#### 1. **Performance Measurement Tools**
+```typescript
+// ✅ CORRECT: Custom performance monitoring
+class PerformanceMonitor {
+  private static instance: PerformanceMonitor
+  private metrics: Map<string, number[]> = new Map()
+  
+  static getInstance(): PerformanceMonitor {
+    if (!PerformanceMonitor.instance) {
+      PerformanceMonitor.instance = new PerformanceMonitor()
+    }
+    return PerformanceMonitor.instance
+  }
+  
+  startMeasure(name: string): void {
+    performance.mark(`${name}-start`)
+  }
+  
+  endMeasure(name: string): number {
+    performance.mark(`${name}-end`)
+    performance.measure(name, `${name}-start`, `${name}-end`)
+    
+    const measure = performance.getEntriesByName(name)[0]
+    const duration = measure.duration
+    
+    // Store metric
+    if (!this.metrics.has(name)) {
+      this.metrics.set(name, [])
+    }
+    this.metrics.get(name)!.push(duration)
+    
+    // Report if threshold exceeded
+    if (duration > this.getThreshold(name)) {
+      this.reportSlowOperation(name, duration)
+    }
+    
+    return duration
+  }
+  
+  private getThreshold(name: string): number {
+    const thresholds = {
+      'component-render': 16, // 60fps
+      'api-call': 1000,
+      'data-processing': 100,
+    }
+    return thresholds[name] || 100
+  }
+  
+  private reportSlowOperation(name: string, duration: number): void {
+    console.warn(`Slow operation detected: ${name} took ${duration}ms`)
+    
+    // Report to analytics
+    if (typeof gtag !== 'undefined') {
+      gtag('event', 'performance_issue', {
+        event_category: 'Performance',
+        event_label: name,
+        value: Math.round(duration),
+      })
+    }
+  }
+}
+
+// ✅ CORRECT: React component performance tracking
+const withPerformanceTracking = <P extends object>(
+  Component: React.ComponentType<P>,
+  componentName: string
+) => {
+  return React.memo((props: P) => {
+    const monitor = PerformanceMonitor.getInstance()
+    
+    useEffect(() => {
+      monitor.startMeasure(`${componentName}-render`)
+      return () => {
+        monitor.endMeasure(`${componentName}-render`)
+      }
+    })
+    
+    return <Component {...props} />
+  })
+}
+
+// Usage
+const OptimizedHeroSection = withPerformanceTracking(HeroSection, 'HeroSection')
+```
+
+#### 2. **Automated Performance Testing**
+```javascript
+// ✅ CORRECT: Lighthouse CI configuration
+// .lighthouserc.js
+module.exports = {
+  ci: {
+    collect: {
+      numberOfRuns: 3,
+      url: [
+        'http://localhost:3000/',
+        'http://localhost:3000/demo',
+        'http://localhost:3000/pricing',
+      ],
+    },
+    assert: {
+      assertions: {
+        'categories:performance': ['error', { minScore: 0.9 }],
+        'categories:accessibility': ['error', { minScore: 0.95 }],
+        'categories:best-practices': ['error', { minScore: 0.9 }],
+        'categories:seo': ['error', { minScore: 0.9 }],
+        'largest-contentful-paint': ['error', { maxNumericValue: 1200 }],
+        'first-input-delay': ['error', { maxNumericValue: 50 }],
+        'cumulative-layout-shift': ['error', { maxNumericValue: 0.05 }],
+      },
+    },
+    upload: {
+      target: 'temporary-public-storage',
+    },
+  },
+}
+
+// ✅ CORRECT: Performance budget
+// performance-budget.json
+{
+  "budget": [
+    {
+      "path": "/*",
+      "timings": [
+        {
+          "metric": "first-contentful-paint",
+          "budget": 1000
+        },
+        {
+          "metric": "largest-contentful-paint",
+          "budget": 1200
+        },
+        {
+          "metric": "speed-index",
+          "budget": 1300
+        }
+      ],
+      "resourceSizes": [
+        {
+          "resourceType": "script",
+          "budget": 200
+        },
+        {
+          "resourceType": "stylesheet",
+          "budget": 50
+        },
+        {
+          "resourceType": "image",
+          "budget": 500
+        }
+      ]
+    }
+  ]
+}
+```
+
+## 🚫 Performance Anti-Patterns
+
+### **NEVER DO - Performance Killers**
+
+#### 1. **Expensive Operations in Render**
+```typescript
+// ❌ WRONG: Heavy computation in render
+const BadComponent = ({ items }) => {
+  // This runs on every render!
+  const expensiveResult = items.map(item => {
+    return heavyComputation(item) // Expensive!
+  })
+  
+  return <div>{expensiveResult.map(...)}</div>
+}
+
+// ✅ CORRECT: Memoized computation
+const GoodComponent = ({ items }) => {
+  const expensiveResult = useMemo(() => {
+    return items.map(item => heavyComputation(item))
+  }, [items])
+  
+  return <div>{expensiveResult.map(...)}</div>
+}
+```
+
+#### 2. **Unnecessary Re-renders**
+```typescript
+// ❌ WRONG: Creating objects in render
+const BadParent = () => {
+  const [count, setCount] = useState(0)
+  
+  return (
+    <ChildComponent 
+      style={{ color: 'red' }} // New object every render!
+      onClick={() => setCount(count + 1)} // New function every render!
+    />
+  )
+}
+
+// ✅ CORRECT: Stable references
+const GoodParent = () => {
+  const [count, setCount] = useState(0)
+  
+  const style = useMemo(() => ({ color: 'red' }), [])
+  const handleClick = useCallback(() => {
+    setCount(prev => prev + 1)
+  }, [])
+  
+  return (
+    <ChildComponent 
+      style={style}
+      onClick={handleClick}
+    />
+  )
+}
+```
+
+#### 3. **Blocking the Main Thread**
+```typescript
+// ❌ WRONG: Synchronous heavy operations
+const BadDataProcessor = ({ data }) => {
+  const processData = () => {
+    // This blocks the UI!
+    const result = data.map(item => {
+      for (let i = 0; i < 1000000; i++) {
+        // Heavy computation
+      }
+      return processItem(item)
+    })
+    setProcessedData(result)
+  }
+  
+  return <button onClick={processData}>Process</button>
+}
+
+// ✅ CORRECT: Web Workers or time-slicing
+const GoodDataProcessor = ({ data }) => {
+  const processData = async () => {
+    const worker = new Worker('/data-processor-worker.js')
+    
+    worker.postMessage(data)
+    worker.onmessage = (e) => {
+      setProcessedData(e.data)
+    }
+  }
+  
+  // Alternative: Time-slicing
+  const processDataWithTimeSlicing = async () => {
+    const batchSize = 100
+    const batches = []
+    
+    for (let i = 0; i < data.length; i += batchSize) {
+      batches.push(data.slice(i, i + batchSize))
+    }
+    
+    for (const batch of batches) {
+      const processed = batch.map(processItem)
+      setProcessedData(prev => [...prev, ...processed])
+      
+      // Yield to browser
+      await new Promise(resolve => setTimeout(resolve, 0))
+    }
+  }
+  
+  return <button onClick={processData}>Process</button>
+}
+```
+
+## 📋 Performance Checklist
+
+### **Before Production Deployment**
+
+#### **Core Web Vitals**
+- [ ] ✅ LCP < 1.2s on 3G connection
+- [ ] ✅ FID < 50ms for all interactions
+- [ ] ✅ CLS < 0.05 for all pages
+- [ ] ✅ INP < 100ms for all interactions
+
+#### **Resource Optimization**
+- [ ] ✅ Images optimized (WebP/AVIF format)
+- [ ] ✅ Fonts preloaded and optimized
+- [ ] ✅ Critical CSS inlined
+- [ ] ✅ JavaScript bundle size < 200KB
+- [ ] ✅ CSS bundle size < 50KB
+- [ ] ✅ Unused code eliminated
+
+#### **Caching Strategy**
+- [ ] ✅ Static assets cached with long TTL
+- [ ] ✅ API responses cached appropriately
+- [ ] ✅ CDN configured for global delivery
+- [ ] ✅ Service worker implemented for offline
+
+#### **Monitoring Setup**
+- [ ] ✅ Real User Monitoring (RUM) configured
+- [ ] ✅ Performance budgets enforced
+- [ ] ✅ Lighthouse CI integrated
+- [ ] ✅ Error tracking for performance issues
+
+---
+
+*Remember: Performance is not just about speed—it's about creating a smooth, responsive user experience that keeps users engaged and converts them into customers.*
+

@@ -1,0 +1,622 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# TypeScript Standards & Best Practices
+
+## 🎯 TypeScript Philosophy
+**Goal**: Achieve maximum type safety while maintaining developer productivity
+**Principle**: Strict typing prevents runtime errors and improves code maintainability
+**Standard**: Zero tolerance for `any` types and TypeScript errors
+
+## 🔧 Configuration Standards
+
+### **MUST FOLLOW - TypeScript Config Rules**
+
+#### 1. **Strict Mode Configuration**
+Reference: [tsconfig.json](mdc:tsconfig.json)
+- ✅ ALWAYS enable `strict: true`
+- ✅ ALWAYS enable `noUncheckedIndexedAccess: true`
+- ✅ ALWAYS enable `exactOptionalPropertyTypes: true`
+- ✅ ALWAYS enable `noImplicitReturns: true`
+- ❌ NEVER disable strict mode in production code
+- ❌ NEVER use `skipLibCheck: true` unless absolutely necessary
+
+#### 2. **Import Resolution**
+- ✅ ALWAYS use absolute imports with `@/` prefix
+- ✅ ALWAYS configure path mapping in [tsconfig.json](mdc:tsconfig.json)
+- ✅ ALWAYS use `moduleResolution: "bundler"`
+- ❌ NEVER use relative imports beyond one level
+- ❌ NEVER mix import styles within the same file
+
+## 🏗️ Type Definition Standards
+
+### **MUST FOLLOW - Type Architecture**
+
+#### 1. **Interface vs Type Aliases**
+```typescript
+// ✅ CORRECT: Use interfaces for object shapes
+interface UserProfile {
+  id: string
+  name: string
+  email: string
+  avatar?: string
+  preferences: UserPreferences
+}
+
+interface UserPreferences {
+  theme: 'light' | 'dark'
+  notifications: boolean
+  language: string
+}
+
+// ✅ CORRECT: Use type aliases for unions and computed types
+type ComponentVariant = 'primary' | 'secondary' | 'ghost'
+type ComponentSize = 'sm' | 'md' | 'lg'
+type ButtonProps = ComponentVariant & ComponentSize
+
+// ❌ WRONG: Using type aliases for simple object shapes
+type BadUserProfile = {
+  id: string
+  name: string
+}
+```
+
+#### 2. **Generic Type Patterns**
+```typescript
+// ✅ CORRECT: Generic interfaces with constraints
+interface ApiResponse<T = unknown> {
+  data: T
+  status: number
+  message: string
+  timestamp: string
+}
+
+interface Repository<T extends { id: string }> {
+  findById(id: string): Promise<T | null>
+  create(item: Omit<T, 'id'>): Promise<T>
+  update(id: string, updates: Partial<T>): Promise<T>
+  delete(id: string): Promise<void>
+}
+
+// ✅ CORRECT: Conditional types for advanced patterns
+type FormFieldProps<T> = T extends string
+  ? { type: 'text'; value: string }
+  : T extends number
+  ? { type: 'number'; value: number }
+  : T extends boolean
+  ? { type: 'checkbox'; checked: boolean }
+  : never
+```
+
+#### 3. **Discriminated Unions**
+```typescript
+// ✅ CORRECT: Discriminated unions for component variants
+type NotificationVariant =
+  | { type: 'success'; message: string; duration?: number }
+  | { type: 'error'; message: string; retry?: () => void }
+  | { type: 'warning'; message: string; dismissible?: boolean }
+  | { type: 'info'; message: string; link?: string }
+
+// ✅ CORRECT: Type guards for discriminated unions
+const isErrorNotification = (
+  notification: NotificationVariant
+): notification is Extract<NotificationVariant, { type: 'error' }> => {
+  return notification.type === 'error'
+}
+
+// ❌ WRONG: Using optional properties instead of discriminated unions
+interface BadNotification {
+  type: 'success' | 'error' | 'warning' | 'info'
+  message: string
+  duration?: number      // Should only be for success
+  retry?: () => void     // Should only be for error
+  dismissible?: boolean  // Should only be for warning
+  link?: string         // Should only be for info
+}
+```
+
+## 🎭 React TypeScript Patterns
+
+### **MUST FOLLOW - Component Typing Rules**
+
+#### 1. **Component Props Interface**
+```typescript
+// ✅ CORRECT: Comprehensive component props typing
+interface HeroSectionProps {
+  // Required props
+  title: string
+  subtitle: string
+  
+  // Optional props with defaults
+  variant?: 'default' | 'centered' | 'minimal'
+  size?: 'sm' | 'md' | 'lg'
+  
+  // Event handlers with proper typing
+  onCTAClick?: (event: React.MouseEvent<HTMLButtonElement>) => void
+  onEmailSubmit?: (email: string) => Promise<void>
+  
+  // Render props and children
+  children?: React.ReactNode
+  renderCTA?: (props: { isLoading: boolean }) => React.ReactNode
+  
+  // HTML attributes
+  className?: string
+  'data-testid'?: string
+}
+
+// ✅ CORRECT: Component with proper typing
+const HeroSection: React.FC<HeroSectionProps> = ({
+  title,
+  subtitle,
+  variant = 'default',
+  size = 'md',
+  onCTAClick,
+  onEmailSubmit,
+  children,
+  renderCTA,
+  className,
+  ...props
+}) => {
+  // Component implementation
+}
+```
+
+#### 2. **Hook Typing Patterns**
+```typescript
+// ✅ CORRECT: Custom hook with proper return types
+interface UseApiOptions {
+  enabled?: boolean
+  refetchInterval?: number
+}
+
+interface UseApiReturn<T> {
+  data: T | null
+  loading: boolean
+  error: Error | null
+  refetch: () => Promise<void>
+}
+
+const useApi = <T>(
+  url: string,
+  options: UseApiOptions = {}
+): UseApiReturn<T> => {
+  const [data, setData] = useState<T | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<Error | null>(null)
+
+  const refetch = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const response = await fetch(url)
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+      }
+      const result = await response.json() as T
+      setData(result)
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Unknown error'))
+    } finally {
+      setLoading(false)
+    }
+  }, [url])
+
+  return { data, loading, error, refetch }
+}
+```
+
+#### 3. **Event Handler Typing**
+```typescript
+// ✅ CORRECT: Properly typed event handlers
+interface FormComponentProps {
+  onSubmit: (data: FormData) => void
+  onFieldChange: (field: keyof FormData, value: string) => void
+  onFileUpload: (files: FileList) => void
+}
+
+const FormComponent: React.FC<FormComponentProps> = ({
+  onSubmit,
+  onFieldChange,
+  onFileUpload
+}) => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const formData = new FormData(event.currentTarget)
+    onSubmit(Object.fromEntries(formData) as FormData)
+  }
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target
+    onFieldChange(name as keyof FormData, value)
+  }
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      onFileUpload(event.target.files)
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      {/* Form fields */}
+    </form>
+  )
+}
+```
+
+## 📊 API & Data Typing
+
+### **MUST FOLLOW - API Response Patterns**
+
+#### 1. **API Response Types**
+```typescript
+// ✅ CORRECT: Comprehensive API response typing
+interface BaseApiResponse {
+  success: boolean
+  timestamp: string
+  requestId: string
+}
+
+interface SuccessResponse<T> extends BaseApiResponse {
+  success: true
+  data: T
+}
+
+interface ErrorResponse extends BaseApiResponse {
+  success: false
+  error: {
+    code: string
+    message: string
+    details?: Record<string, unknown>
+  }
+}
+
+type ApiResponse<T> = SuccessResponse<T> | ErrorResponse
+
+// ✅ CORRECT: Specific API endpoint types
+interface User {
+  id: string
+  name: string
+  email: string
+  createdAt: string
+  updatedAt: string
+}
+
+interface CreateUserRequest {
+  name: string
+  email: string
+  password: string
+}
+
+interface UpdateUserRequest {
+  name?: string
+  email?: string
+}
+
+// API function with proper typing
+const createUser = async (
+  userData: CreateUserRequest
+): Promise<ApiResponse<User>> => {
+  const response = await fetch('/api/users', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(userData)
+  })
+  
+  return response.json() as Promise<ApiResponse<User>>
+}
+```
+
+#### 2. **Form Data Validation**
+```typescript
+// ✅ CORRECT: Zod schema with TypeScript integration
+import { z } from 'zod'
+
+const userRegistrationSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+  email: z.string().email('Please enter a valid email address'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+  confirmPassword: z.string(),
+  acceptTerms: z.boolean().refine(val => val === true, {
+    message: 'You must accept the terms and conditions'
+  })
+}).refine(data => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ['confirmPassword']
+})
+
+// Infer TypeScript types from Zod schema
+type UserRegistrationData = z.infer<typeof userRegistrationSchema>
+
+// Use in form component
+const RegistrationForm: React.FC = () => {
+  const form = useForm<UserRegistrationData>({
+    resolver: zodResolver(userRegistrationSchema),
+    defaultValues: {
+      name: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+      acceptTerms: false
+    }
+  })
+
+  const onSubmit = (data: UserRegistrationData) => {
+    // TypeScript knows the exact shape of data
+  }
+
+  return <form onSubmit={form.handleSubmit(onSubmit)} />
+}
+```
+
+## 🔧 Utility Type Patterns
+
+### **MUST FOLLOW - Advanced TypeScript Utilities**
+
+#### 1. **Custom Utility Types**
+```typescript
+// ✅ CORRECT: Custom utility types for common patterns
+type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
+type RequiredKeys<T> = {
+  [K in keyof T]-?: {} extends Pick<T, K> ? never : K
+}[keyof T]
+
+// ✅ CORRECT: Component prop utilities
+type PropsWithClassName<T = {}> = T & { className?: string }
+type PropsWithChildren<T = {}> = T & { children?: React.ReactNode }
+type PropsWithTestId<T = {}> = T & { 'data-testid'?: string }
+
+// ✅ CORRECT: API utilities
+type ApiEndpoint<TRequest, TResponse> = (
+  request: TRequest
+) => Promise<ApiResponse<TResponse>>
+
+type PaginatedResponse<T> = {
+  items: T[]
+  totalCount: number
+  pageSize: number
+  currentPage: number
+  hasNextPage: boolean
+  hasPreviousPage: boolean
+}
+```
+
+#### 2. **Type Guards and Assertions**
+```typescript
+// ✅ CORRECT: Type guards for runtime type checking
+const isString = (value: unknown): value is string => {
+  return typeof value === 'string'
+}
+
+const isApiError = (response: unknown): response is ErrorResponse => {
+  return (
+    typeof response === 'object' &&
+    response !== null &&
+    'success' in response &&
+    response.success === false &&
+    'error' in response
+  )
+}
+
+// ✅ CORRECT: Assertion functions
+const assertIsNumber = (value: unknown): asserts value is number => {
+  if (typeof value !== 'number') {
+    throw new Error(`Expected number, got ${typeof value}`)
+  }
+}
+
+// Usage
+const processValue = (input: unknown) => {
+  assertIsNumber(input)
+  // TypeScript now knows input is number
+  return input * 2
+}
+```
+
+## 🚫 TypeScript Anti-Patterns
+
+### **NEVER DO - Common TypeScript Mistakes**
+
+#### 1. **Avoid `any` Type**
+```typescript
+// ❌ WRONG: Using any type
+const processData = (data: any) => {
+  return data.someProperty.nested.value
+}
+
+// ✅ CORRECT: Use proper typing
+interface DataStructure {
+  someProperty: {
+    nested: {
+      value: string
+    }
+  }
+}
+
+const processData = (data: DataStructure) => {
+  return data.someProperty.nested.value
+}
+
+// ✅ CORRECT: Use unknown for truly unknown data
+const processUnknownData = (data: unknown) => {
+  if (isDataStructure(data)) {
+    return data.someProperty.nested.value
+  }
+  throw new Error('Invalid data structure')
+}
+```
+
+#### 2. **Avoid Type Assertions Without Validation**
+```typescript
+// ❌ WRONG: Unsafe type assertion
+const userData = response.data as User
+
+// ✅ CORRECT: Validate before asserting
+const isValidUser = (data: unknown): data is User => {
+  return (
+    typeof data === 'object' &&
+    data !== null &&
+    'id' in data &&
+    'name' in data &&
+    'email' in data &&
+    typeof data.id === 'string' &&
+    typeof data.name === 'string' &&
+    typeof data.email === 'string'
+  )
+}
+
+const userData = isValidUser(response.data) 
+  ? response.data 
+  : (() => { throw new Error('Invalid user data') })()
+```
+
+#### 3. **Avoid Overly Complex Types**
+```typescript
+// ❌ WRONG: Overly complex type that's hard to understand
+type ComplexType<T, U, V> = T extends U 
+  ? U extends V 
+    ? { [K in keyof T]: T[K] extends Function ? never : T[K] }
+    : never
+  : never
+
+// ✅ CORRECT: Break down complex types
+type NonFunctionKeys<T> = {
+  [K in keyof T]: T[K] extends Function ? never : K
+}[keyof T]
+
+type NonFunctionProperties<T> = Pick<T, NonFunctionKeys<T>>
+
+type ConditionalType<T, U, V> = T extends U ? NonFunctionProperties<T> : never
+```
+
+## 🎯 Performance & Bundle Optimization
+
+### **MUST FOLLOW - TypeScript Performance Rules**
+
+#### 1. **Type-Only Imports**
+```typescript
+// ✅ CORRECT: Use type-only imports for types
+import type { User, ApiResponse } from '@/types/api'
+import type { ComponentProps } from 'react'
+import { useState, useEffect } from 'react'
+
+// ❌ WRONG: Importing types as values
+import { User, ApiResponse } from '@/types/api'
+```
+
+#### 2. **Conditional Type Optimization**
+```typescript
+// ✅ CORRECT: Efficient conditional types
+type IsArray<T> = T extends readonly unknown[] ? true : false
+
+// ❌ WRONG: Inefficient nested conditionals
+type BadIsArray<T> = T extends unknown[]
+  ? true
+  : T extends readonly unknown[]
+  ? true
+  : false
+```
+
+## 🧪 Testing TypeScript
+
+### **MUST FOLLOW - Type Testing Rules**
+
+#### 1. **Type-Safe Test Utilities**
+```typescript
+// ✅ CORRECT: Type-safe test helpers
+interface TestUser {
+  id: string
+  name: string
+  email: string
+}
+
+const createMockUser = (overrides: Partial<TestUser> = {}): TestUser => ({
+  id: 'test-id',
+  name: 'Test User',
+  email: 'test@example.com',
+  ...overrides
+})
+
+// ✅ CORRECT: Component testing with proper types
+const renderComponent = <T extends Record<string, unknown>>(
+  Component: React.ComponentType<T>,
+  props: T
+) => {
+  return render(<Component {...props} />)
+}
+```
+
+#### 2. **Type Testing Utilities**
+```typescript
+// ✅ CORRECT: Compile-time type tests
+type Expect<T extends true> = T
+type Equal<X, Y> = (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2
+  ? true
+  : false
+
+// Test types at compile time
+type TestCases = [
+  Expect<Equal<ComponentVariant, 'primary' | 'secondary' | 'ghost'>>,
+  Expect<Equal<keyof User, 'id' | 'name' | 'email'>>
+]
+```
+
+---
+
+## 🎯 TypeScript Configuration Checklist
+
+### **Before Deploying**
+- [ ] ✅ Zero TypeScript errors in build
+- [ ] ✅ No `any` types in production code
+- [ ] ✅ All API responses properly typed
+- [ ] ✅ Component props fully typed
+- [ ] ✅ Event handlers properly typed
+- [ ] ✅ Custom hooks return proper types
+- [ ] ✅ Form validation with Zod schemas
+- [ ] ✅ Type-only imports used where appropriate
+- [ ] ✅ Discriminated unions for variant props
+- [ ] ✅ Proper error handling with typed errors
+
+---
+
+## 🚀 Advanced TypeScript Patterns
+
+### **OPTIONAL - Advanced Techniques**
+
+#### 1. **Template Literal Types**
+```typescript
+// ✅ ADVANCED: Template literal types for CSS classes
+type Size = 'sm' | 'md' | 'lg'
+type Variant = 'primary' | 'secondary'
+type ClassName = `btn-${Variant}-${Size}`
+
+// ✅ ADVANCED: API endpoint typing
+type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE'
+type ApiEndpoint = `/api/${string}`
+type ApiCall<T extends HttpMethod> = T extends 'GET' 
+  ? { method: T; url: ApiEndpoint }
+  : { method: T; url: ApiEndpoint; body: unknown }
+```
+
+#### 2. **Mapped Types with Key Remapping**
+```typescript
+// ✅ ADVANCED: Transform object keys
+type Getters<T> = {
+  [K in keyof T as `get${Capitalize<string & K>}`]: () => T[K]
+}
+
+interface User {
+  name: string
+  age: number
+}
+
+// Results in: { getName: () => string; getAge: () => number }
+type UserGetters = Getters<User>
+```
+
+---
+
+*Remember: TypeScript is your friend. Embrace strict typing for better code quality, fewer bugs, and improved developer experience. When in doubt, be more specific with types rather than more general.*
+
