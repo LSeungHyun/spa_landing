@@ -173,16 +173,16 @@ export function InteractiveHeroSection({ onPreRegisterClick }: InteractiveHeroSe
                                     disabled={isLoading || isTyping}
                                 />
 
-                                {/* 향상 버튼 - 입력 필드 내부 우측 */}
+                                {/* 프롬프트 향상 버튼 - 입력 필드 우측 하단 */}
                                 <button
                                     onClick={handleImprovePrompt}
                                     disabled={isLoading || isTyping || !inputText.trim()}
                                     className={cn(
-                                        "absolute right-3 top-3 p-2 rounded-lg transition-all duration-200",
-                                        "bg-brand-accent-blue/20 hover:bg-brand-accent-blue/30",
-                                        "text-brand-accent-blue hover:text-brand-accent-blue",
+                                        "absolute right-3 bottom-3 p-2 rounded-lg transition-all duration-200",
+                                        "bg-yellow-400/80 hover:bg-yellow-400",
+                                        "text-black hover:text-black",
                                         "disabled:opacity-50 disabled:cursor-not-allowed",
-                                        "flex items-center justify-center"
+                                        "flex items-center justify-center shadow-lg"
                                     )}
                                     title="프롬프트 향상"
                                 >

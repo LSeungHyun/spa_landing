@@ -3,7 +3,7 @@
 import { Container } from "@/components/ui/container";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import React from "react";
+import React, { useState, useEffect } from "react";
 
 interface FooterProps extends React.HTMLAttributes<HTMLElement> {
   links?: {
@@ -45,6 +45,12 @@ export function Footer({
   className,
   ...props
 }: FooterProps) {
+  const [currentYear, setCurrentYear] = useState<number | null>(null);
+
+  useEffect(() => {
+    setCurrentYear(new Date().getFullYear());
+  }, []);
+
   return (
     <footer
       className={cn("border-t bg-background py-8 md:py-12", className)}
@@ -81,7 +87,7 @@ export function Footer({
         </div>
         <div className="mt-8 border-t pt-8">
           <p className="text-center text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Your Company. All rights reserved.
+            © {currentYear || '2024'} Your Company. All rights reserved.
           </p>
         </div>
       </Container>

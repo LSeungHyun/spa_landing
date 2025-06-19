@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { Container } from '@/components/ui/container';
 import { Button } from '@/components/ui/button';
@@ -18,6 +18,7 @@ interface ChatMessage {
 export default function HomePage() {
     const [inputText, setInputText] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [isMounted, setIsMounted] = useState(false);
     const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
         {
             id: '1',
@@ -26,6 +27,11 @@ export default function HomePage() {
             timestamp: new Date()
         }
     ]);
+
+    // Hydration 안전성을 위한 useEffect
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     // 샘플 프롬프트
     const samplePrompts = [
@@ -47,30 +53,12 @@ export default function HomePage() {
 
         setIsLoading(true);
 
-        // 사용자 메시지 추가
-        const userMessage: ChatMessage = {
-            id: Date.now().toString(),
-            type: 'user',
-            content: inputText,
-            timestamp: new Date()
-        };
-
-        setChatMessages(prev => [...prev, userMessage]);
-
         try {
-            // 임시 향상된 결과 생성 (실제 API 대신)
+            // 향상된 프롬프트 생성 (실제 API 대신 임시 로직)
             const improvedPrompt = `${inputText}를 더 명확하고 설득력 있게 다듬어서, 구체적인 가이드라인과 예시를 포함하여 전문적으로 작성해주세요. 대상 독자의 관점을 고려하고, 핵심 메시지가 명확히 전달되도록 구성해주세요.`;
 
-            // AI 응답 추가
-            const aiMessage: ChatMessage = {
-                id: (Date.now() + 1).toString(),
-                type: 'ai',
-                content: improvedPrompt,
-                timestamp: new Date()
-            };
-
-            setChatMessages(prev => [...prev, aiMessage]);
-            setInputText(''); // 입력 필드 클리어
+            // 입력 필드의 텍스트를 향상된 프롬프트로 교체
+            setInputText(improvedPrompt);
             toast.success('프롬프트가 향상되었습니다!');
 
         } catch (error) {
@@ -150,7 +138,7 @@ export default function HomePage() {
                                             >
                                                 <p className="text-sm leading-relaxed">{message.content}</p>
                                                 <span className="text-xs opacity-70 mt-2 block">
-                                                    {message.timestamp.toLocaleTimeString()}
+                                                    {isMounted ? message.timestamp.toLocaleTimeString() : ''}
                                                 </span>
                                             </div>
                                         </div>
@@ -176,7 +164,7 @@ export default function HomePage() {
                                     disabled={isLoading}
                                 />
 
-                                {/* 전송 버튼 - 입력 필드 내부 우측 */}
+                                {/* 전송 버튼 - 입력 필드 내부 우측 상단 */}
                                 <button
                                     onClick={handleSendMessage}
                                     disabled={isLoading || !inputText.trim()}
@@ -191,27 +179,26 @@ export default function HomePage() {
                                 >
                                     <Send className="w-4 h-4 sm:w-5 sm:h-5" />
                                 </button>
-                            </div>
 
-                            {/* 액션 버튼들 */}
-                            <div className="flex flex-wrap gap-3 justify-center mb-6">
-                                <Button
+                                {/* 프롬프트 향상 버튼 - 입력 필드 내부 우측 하단 (전송 버튼 아래) */}
+                                <button
                                     onClick={handleImprovePrompt}
                                     disabled={isLoading || !inputText.trim()}
-                                    className="bg-yellow-400 hover:bg-yellow-500 text-black font-medium px-4 sm:px-6 py-2 text-sm sm:text-base"
+                                    className={cn(
+                                        "absolute right-2 sm:right-3 bottom-2 sm:bottom-3 p-2 rounded-lg transition-all duration-200",
+                                        "bg-yellow-400/80 hover:bg-yellow-400",
+                                        "text-black hover:text-black",
+                                        "disabled:opacity-50 disabled:cursor-not-allowed",
+                                        "flex items-center justify-center shadow-lg"
+                                    )}
+                                    title="프롬프트 향상"
                                 >
                                     {isLoading ? (
-                                        <>
-                                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                            향상 중...
-                                        </>
+                                        <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
                                     ) : (
-                                        <>
-                                            <Wand2 className="w-4 h-4 mr-2" />
-                                            프롬프트 향상
-                                        </>
+                                        <Wand2 className="w-4 h-4 sm:w-5 sm:h-5" />
                                     )}
-                                </Button>
+                                </button>
                             </div>
 
                             {/* 샘플 프롬프트 섹션 */}
