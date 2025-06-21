@@ -1,44 +1,30 @@
 -- SPA Landing Page를 위한 Supabase 테이블 구조
 
--- 개선된 사전 등록 테이블
+-- 요청된 사양에 맞는 사전 등록 테이블
 CREATE TABLE IF NOT EXISTS pre_registrations (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    name VARCHAR(100),
-    persona VARCHAR(50) NOT NULL CHECK (
-        persona IN ('pm', 'creator', 'startup', 'developer', 'marketer', 'other')
+    email TEXT NOT NULL UNIQUE,
+    name_or_nickname TEXT,
+    expected_feature TEXT NOT NULL CHECK (
+        expected_feature IN ('AI 논문 요약', 'ChatGPT 플러그인 추천', '템플릿 자동 생성')
     ),
-    company VARCHAR(100),
-    company_size VARCHAR(20) CHECK (
-        company_size IN ('1-10', '11-50', '51-200', '201-1000', '1000+', 'freelancer')
-    ),
-    use_case TEXT,
-    referral_source VARCHAR(50) CHECK (
-        referral_source IN ('google', 'social_media', 'friend', 'blog', 'ad', 'other')
-    ),
-    marketing_consent BOOLEAN DEFAULT false,
-    newsletter_consent BOOLEAN DEFAULT false,
-    beta_interest BOOLEAN DEFAULT true,
-    expected_usage VARCHAR(20) CHECK (
-        expected_usage IN ('daily', 'weekly', 'monthly', 'occasionally')
-    ),
-    current_tools TEXT[], -- 현재 사용 중인 도구들
-    pain_points TEXT[], -- 주요 고민 사항들
-    platform_preference VARCHAR(20) CHECK (
-        platform_preference IN ('web', 'mobile', 'both', 'api')
-    ),
-    status VARCHAR(20) DEFAULT 'registered' CHECK (
-        status IN ('registered', 'contacted', 'beta_invited', 'onboarded')
-    ),
-    notes TEXT, -- 관리자 노트
-    ip_address INET,
-    user_agent TEXT,
-    utm_source VARCHAR(100),
-    utm_medium VARCHAR(100),
-    utm_campaign VARCHAR(100),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    registered_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+-- 인덱스 생성
+CREATE INDEX IF NOT EXISTS idx_pre_registrations_email ON pre_registrations(email);
+CREATE INDEX IF NOT EXISTS idx_pre_registrations_registered_at ON pre_registrations(registered_at);
+
+-- RLS (Row Level Security) 정책 설정
+ALTER TABLE pre_registrations ENABLE ROW LEVEL SECURITY;
+
+-- 익명 사용자도 삽입 가능하도록 정책 설정
+CREATE POLICY "Anyone can insert pre_registrations" ON pre_registrations 
+FOR INSERT WITH CHECK (true);
+
+-- 인증된 사용자만 조회 가능
+CREATE POLICY "Authenticated users can view pre_registrations" ON pre_registrations 
+FOR SELECT USING (auth.role() = 'authenticated');
 
 -- 사용자 피드백 테이블
 CREATE TABLE IF NOT EXISTS user_feedback (
@@ -94,12 +80,6 @@ CREATE TABLE IF NOT EXISTS user_events (
 );
 
 -- 인덱스 생성
-CREATE INDEX IF NOT EXISTS idx_pre_registrations_email ON pre_registrations(email);
-CREATE INDEX IF NOT EXISTS idx_pre_registrations_persona ON pre_registrations(persona);
-CREATE INDEX IF NOT EXISTS idx_pre_registrations_status ON pre_registrations(status);
-CREATE INDEX IF NOT EXISTS idx_pre_registrations_created_at ON pre_registrations(created_at);
-CREATE INDEX IF NOT EXISTS idx_pre_registrations_utm_source ON pre_registrations(utm_source);
-
 CREATE INDEX IF NOT EXISTS idx_user_feedback_user_id ON user_feedback(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_feedback_email ON user_feedback(email);
 CREATE INDEX IF NOT EXISTS idx_user_feedback_created_at ON user_feedback(created_at);
@@ -114,20 +94,9 @@ CREATE INDEX IF NOT EXISTS idx_user_events_type ON user_events(event_type);
 CREATE INDEX IF NOT EXISTS idx_user_events_created_at ON user_events(created_at);
 
 -- RLS (Row Level Security) 정책 설정
-ALTER TABLE pre_registrations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_feedback ENABLE ROW LEVEL SECURITY;
 ALTER TABLE demo_usage ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_events ENABLE ROW LEVEL SECURITY;
-
--- 사전 등록 테이블 정책
-CREATE POLICY "Anyone can insert pre_registrations" ON pre_registrations 
-FOR INSERT WITH CHECK (true);
-
-CREATE POLICY "Authenticated users can view pre_registrations" ON pre_registrations 
-FOR SELECT USING (auth.role() = 'authenticated');
-
-CREATE POLICY "Authenticated users can update pre_registrations" ON pre_registrations 
-FOR UPDATE USING (auth.role() = 'authenticated');
 
 -- 피드백 테이블 정책
 CREATE POLICY "Anyone can insert feedback" ON user_feedback 
@@ -163,24 +132,14 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
--- 업데이트 트리거 적용
-DROP TRIGGER IF EXISTS update_pre_registrations_updated_at ON pre_registrations;
-CREATE TRIGGER update_pre_registrations_updated_at 
-    BEFORE UPDATE ON pre_registrations 
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
 -- 분석을 위한 뷰 생성
 CREATE OR REPLACE VIEW registration_analytics AS
 SELECT 
-    DATE_TRUNC('day', created_at) as date,
-    persona,
-    company_size,
-    referral_source,
-    COUNT(*) as registrations,
-    COUNT(CASE WHEN marketing_consent THEN 1 END) as marketing_consents,
-    COUNT(CASE WHEN newsletter_consent THEN 1 END) as newsletter_consents
+    DATE_TRUNC('day', registered_at) as date,
+    expected_feature,
+    COUNT(*) as registrations
 FROM pre_registrations 
-GROUP BY DATE_TRUNC('day', created_at), persona, company_size, referral_source
+GROUP BY DATE_TRUNC('day', registered_at), expected_feature
 ORDER BY date DESC;
 
 -- 실시간 구독을 위한 publication 생성 (선택사항)

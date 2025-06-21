@@ -76,6 +76,88 @@ class SupabaseMCPServer {
             },
           },
           {
+            name: 'supabase_schema',
+            description: 'Execute raw SQL commands for schema management',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                sql: {
+                  type: 'string',
+                  description: 'Raw SQL command to execute',
+                },
+                operation: {
+                  type: 'string',
+                  enum: ['create_table', 'alter_table', 'drop_table', 'create_index', 'raw_sql'],
+                  description: 'Type of schema operation',
+                },
+              },
+              required: ['sql'],
+            },
+          },
+          {
+            name: 'supabase_table_create',
+            description: 'Create a new table with columns and constraints',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                table_name: {
+                  type: 'string',
+                  description: 'Name of the table to create',
+                },
+                columns: {
+                  type: 'array',
+                  description: 'Array of column definitions',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      name: { type: 'string', description: 'Column name' },
+                      type: { type: 'string', description: 'Column data type (e.g., TEXT, UUID, INTEGER)' },
+                      constraints: { type: 'string', description: 'Column constraints (e.g., NOT NULL, UNIQUE, PRIMARY KEY)' },
+                      default: { type: 'string', description: 'Default value' },
+                    },
+                    required: ['name', 'type'],
+                  },
+                },
+                rls_enabled: {
+                  type: 'boolean',
+                  description: 'Enable Row Level Security',
+                  default: true,
+                },
+                policies: {
+                  type: 'array',
+                  description: 'Array of RLS policies to create',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      name: { type: 'string', description: 'Policy name' },
+                      operation: { type: 'string', description: 'Operation (SELECT, INSERT, UPDATE, DELETE)' },
+                      condition: { type: 'string', description: 'Policy condition' },
+                    },
+                  },
+                },
+              },
+              required: ['table_name', 'columns'],
+            },
+          },
+          {
+            name: 'supabase_table_info',
+            description: 'Get information about existing tables and their structure',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                table_name: {
+                  type: 'string',
+                  description: 'Name of the table to inspect (optional - if not provided, lists all tables)',
+                },
+                include_columns: {
+                  type: 'boolean',
+                  description: 'Include column information',
+                  default: true,
+                },
+              },
+            },
+          },
+          {
             name: 'supabase_auth',
             description: 'Perform authentication operations',
             inputSchema: {
@@ -133,6 +215,12 @@ class SupabaseMCPServer {
         switch (name) {
           case 'supabase_query':
             return await this.handleDatabaseQuery(args);
+          case 'supabase_schema':
+            return await this.handleSchemaOperation(args);
+          case 'supabase_table_create':
+            return await this.handleTableCreate(args);
+          case 'supabase_table_info':
+            return await this.handleTableInfo(args);
           case 'supabase_auth':
             return await this.handleAuth(args);
           case 'supabase_storage':
@@ -301,6 +389,161 @@ class SupabaseMCPServer {
       };
     } catch (error) {
       throw new Error(`Storage operation failed: ${error.message}`);
+    }
+  }
+
+  async handleSchemaOperation(args) {
+    const { sql, operation } = args;
+
+    try {
+      // Raw SQL 실행을 위해 RPC 함수 사용
+      const { data, error } = await supabase.rpc('exec_sql', { sql_query: sql });
+
+      if (error) {
+        throw new Error(`Schema operation error: ${error.message}`);
+      }
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Schema operation completed successfully. Operation: ${operation || 'raw_sql'}\nResult: ${JSON.stringify(data, null, 2)}`,
+          },
+        ],
+      };
+    } catch (error) {
+      throw new Error(`Schema operation failed: ${error.message}`);
+    }
+  }
+
+  async handleTableCreate(args) {
+    const { table_name, columns, rls_enabled = true, policies = [] } = args;
+
+    try {
+      // 테이블 생성 SQL 구성
+      const columnDefinitions = columns.map(col => {
+        let definition = `${col.name} ${col.type}`;
+        if (col.constraints) {
+          definition += ` ${col.constraints}`;
+        }
+        if (col.default) {
+          definition += ` DEFAULT ${col.default}`;
+        }
+        return definition;
+      }).join(', ');
+
+      const createTableSQL = `CREATE TABLE IF NOT EXISTS ${table_name} (${columnDefinitions});`;
+
+      // 테이블 생성
+      const { data: createResult, error: createError } = await supabase.rpc('exec_sql', { 
+        sql_query: createTableSQL 
+      });
+
+      if (createError) {
+        throw new Error(`Table creation error: ${createError.message}`);
+      }
+
+      let results = [`Table '${table_name}' created successfully.`];
+
+      // RLS 활성화
+      if (rls_enabled) {
+        const rlsSQL = `ALTER TABLE ${table_name} ENABLE ROW LEVEL SECURITY;`;
+        const { error: rlsError } = await supabase.rpc('exec_sql', { sql_query: rlsSQL });
+        
+        if (rlsError) {
+          results.push(`Warning: Could not enable RLS: ${rlsError.message}`);
+        } else {
+          results.push('Row Level Security enabled.');
+        }
+      }
+
+      // 정책 생성
+      for (const policy of policies) {
+        const policySQL = `CREATE POLICY "${policy.name}" ON ${table_name} FOR ${policy.operation} ${policy.condition};`;
+        const { error: policyError } = await supabase.rpc('exec_sql', { sql_query: policySQL });
+        
+        if (policyError) {
+          results.push(`Warning: Could not create policy '${policy.name}': ${policyError.message}`);
+        } else {
+          results.push(`Policy '${policy.name}' created.`);
+        }
+      }
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: results.join('\n'),
+          },
+        ],
+      };
+    } catch (error) {
+      throw new Error(`Table creation failed: ${error.message}`);
+    }
+  }
+
+  async handleTableInfo(args) {
+    const { table_name, include_columns = true } = args;
+
+    try {
+      if (table_name) {
+        // 특정 테이블 정보 조회
+        const { data, error } = await supabase
+          .from('information_schema.tables')
+          .select('*')
+          .eq('table_name', table_name)
+          .eq('table_schema', 'public');
+
+        if (error) {
+          throw new Error(`Table info error: ${error.message}`);
+        }
+
+        let result = { table: data };
+
+        if (include_columns && data && data.length > 0) {
+          const { data: columns, error: colError } = await supabase
+            .from('information_schema.columns')
+            .select('*')
+            .eq('table_name', table_name)
+            .eq('table_schema', 'public');
+
+          if (colError) {
+            result.columns_error = colError.message;
+          } else {
+            result.columns = columns;
+          }
+        }
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(result, null, 2),
+            },
+          ],
+        };
+      } else {
+        // 모든 테이블 목록 조회
+        const { data, error } = await supabase
+          .from('information_schema.tables')
+          .select('table_name, table_type')
+          .eq('table_schema', 'public');
+
+        if (error) {
+          throw new Error(`Tables list error: ${error.message}`);
+        }
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(data, null, 2),
+            },
+          ],
+        };
+      }
+    } catch (error) {
+      throw new Error(`Table info operation failed: ${error.message}`);
     }
   }
 
