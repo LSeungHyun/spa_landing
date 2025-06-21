@@ -16,10 +16,28 @@ export interface User {
     };
 }
 
+// 개선된 사전 등록 인터페이스
 export interface PreRegistration {
     id?: string;
     email: string;
-    persona: 'pm' | 'creator' | 'startup';
+    name?: string;
+    persona: 'pm' | 'creator' | 'startup' | 'developer' | 'marketer' | 'other';
+    company?: string;
+    company_size?: '1-10' | '11-50' | '51-200' | '201-1000' | '1000+' | 'freelancer';
+    use_case?: string;
+    referral_source?: 'google' | 'social_media' | 'friend' | 'blog' | 'ad' | 'other';
+    marketing_consent: boolean;
+    newsletter_consent: boolean;
+    beta_interest: boolean;
+    expected_usage?: 'daily' | 'weekly' | 'monthly' | 'occasionally';
+    current_tools?: string[];
+    pain_points?: string[];
+    platform_preference?: 'web' | 'mobile' | 'both' | 'api';
+    ip_address?: string;
+    user_agent?: string;
+    utm_source?: string;
+    utm_medium?: string;
+    utm_campaign?: string;
     created_at?: string;
     updated_at?: string;
 }
@@ -96,20 +114,48 @@ export const auth = {
 
 // 데이터베이스 관련 함수들
 export const database = {
-    // 사전 등록 추가
+    // 사전 등록 추가 - 개선된 버전
     addPreRegistration: async (preRegistration: Omit<PreRegistration, 'id' | 'created_at' | 'updated_at'>) => {
-        const { data, error } = await supabase
-            .from('pre_registrations')
-            .insert([preRegistration])
-            .select()
-            .single();
+        try {
+            // 데이터 검증 및 정리
+            const cleanData = {
+                email: preRegistration.email.toLowerCase().trim(),
+                name: preRegistration.name?.trim() || null,
+                persona: preRegistration.persona,
+                company: preRegistration.company?.trim() || null,
+                company_size: preRegistration.company_size || null,
+                use_case: preRegistration.use_case?.trim() || null,
+                referral_source: preRegistration.referral_source || null,
+                marketing_consent: preRegistration.marketing_consent || false,
+                newsletter_consent: preRegistration.newsletter_consent || false,
+                beta_interest: preRegistration.beta_interest || true,
+                expected_usage: preRegistration.expected_usage || null,
+                current_tools: preRegistration.current_tools || [],
+                pain_points: preRegistration.pain_points || [],
+                platform_preference: preRegistration.platform_preference || null,
+                ip_address: preRegistration.ip_address || null,
+                user_agent: preRegistration.user_agent || null,
+                utm_source: preRegistration.utm_source || null,
+                utm_medium: preRegistration.utm_medium || null,
+                utm_campaign: preRegistration.utm_campaign || null,
+            };
 
-        if (error) {
-            console.error('Error adding pre-registration:', error);
-            return { data: null, error };
+            const { data, error } = await supabase
+                .from('pre_registrations')
+                .insert([cleanData])
+                .select()
+                .single();
+
+            if (error) {
+                console.error('Error adding pre-registration:', error);
+                return { data: null, error };
+            }
+
+            return { data, error: null };
+        } catch (err) {
+            console.error('Unexpected error in addPreRegistration:', err);
+            return { data: null, error: err };
         }
-
-        return { data, error: null };
     },
 
     // 사전 등록 조회
@@ -117,7 +163,7 @@ export const database = {
         let query = supabase.from('pre_registrations').select('*');
 
         if (email) {
-            query = query.eq('email', email);
+            query = query.eq('email', email.toLowerCase().trim());
         }
 
         const { data, error } = await query.order('created_at', { ascending: false });
@@ -169,7 +215,7 @@ export const database = {
         const { data, error } = await supabase
             .from('pre_registrations')
             .select('email')
-            .eq('email', email)
+            .eq('email', email.toLowerCase().trim())
             .single();
 
         if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
@@ -178,6 +224,48 @@ export const database = {
         }
 
         return { exists: !!data, error: null };
+    },
+
+    // 통계 조회
+    getRegistrationStats: async () => {
+        try {
+            const { data, error } = await supabase
+                .from('pre_registrations')
+                .select('persona, company_size, referral_source, created_at')
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.error('Error getting registration stats:', error);
+                return { data: null, error };
+            }
+
+            // 기본 통계 계산
+            const stats = {
+                total: data.length,
+                byPersona: data.reduce((acc, reg) => {
+                    acc[reg.persona] = (acc[reg.persona] || 0) + 1;
+                    return acc;
+                }, {} as Record<string, number>),
+                byCompanySize: data.reduce((acc, reg) => {
+                    if (reg.company_size) {
+                        acc[reg.company_size] = (acc[reg.company_size] || 0) + 1;
+                    }
+                    return acc;
+                }, {} as Record<string, number>),
+                byReferralSource: data.reduce((acc, reg) => {
+                    if (reg.referral_source) {
+                        acc[reg.referral_source] = (acc[reg.referral_source] || 0) + 1;
+                    }
+                    return acc;
+                }, {} as Record<string, number>),
+                recentRegistrations: data.slice(0, 10),
+            };
+
+            return { data: stats, error: null };
+        } catch (err) {
+            console.error('Unexpected error in getRegistrationStats:', err);
+            return { data: null, error: err };
+        }
     }
 };
 

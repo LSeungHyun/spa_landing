@@ -10,6 +10,7 @@ import React from "react";
 interface NavItem {
   label: string;
   href: string;
+  onClick?: () => void;
 }
 
 interface HeaderProps extends React.HTMLAttributes<HTMLElement> {
@@ -24,12 +25,31 @@ export function Header({
     { label: "사용 방법", href: "#how-it-works" },
     { label: "고객 후기", href: "#testimonials" },
     { label: "FAQ", href: "#faq" },
-    { label: "문의하기", href: "#contact" },
+    { 
+      label: "예약하기", 
+      href: "#pre-registration",
+      onClick: () => {
+        const element = document.querySelector('[data-section="pre-registration"]') as HTMLElement;
+        if (element) {
+          element.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start',
+          });
+        }
+      }
+    },
   ],
   className,
   ...props
 }: HeaderProps) {
   const [isOpen, setIsOpen] = React.useState(false);
+
+  const handleNavClick = (item: NavItem) => {
+    if (item.onClick) {
+      item.onClick();
+    }
+    setIsOpen(false);
+  };
 
   return (
     <header
@@ -50,13 +70,23 @@ export function Header({
           {/* Desktop Navigation */}
           <nav className="hidden md:flex md:items-center md:space-x-6">
             {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-              >
-                {item.label}
-              </Link>
+              item.onClick ? (
+                <button
+                  key={item.href}
+                  onClick={() => handleNavClick(item)}
+                  className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  {item.label}
+                </button>
+              ) : (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  {item.label}
+                </Link>
+              )
             ))}
             <Button asChild>
               <Link href="/login">Sign In</Link>
@@ -78,14 +108,24 @@ export function Header({
           <div className="border-t py-4 md:hidden">
             <nav className="flex flex-col space-y-4">
               {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-                  onClick={() => setIsOpen(false)}
-                >
-                  {item.label}
-                </Link>
+                item.onClick ? (
+                  <button
+                    key={item.href}
+                    onClick={() => handleNavClick(item)}
+                    className="text-left text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    {item.label}
+                  </button>
+                ) : (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    {item.label}
+                  </Link>
+                )
               ))}
               <Button asChild className="mt-2">
                 <Link href="/login">Sign In</Link>

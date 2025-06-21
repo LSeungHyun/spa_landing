@@ -6,22 +6,22 @@
   :root {
     /* Core System Colors */
     --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
+    --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
+    --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
+    --popover-foreground: 222.2 84% 4.9%;
 
     /* Primary Brand Colors */
-    --primary: 222.2 84% 4.9%;
+    --primary: 222.2 47.4% 11.2%;
     --primary-foreground: 210 40% 98%;
 
     /* Secondary Colors */
-    --secondary: 210 40% 94%;
+    --secondary: 210 40% 96%;
     --secondary-foreground: 222.2 84% 4.9%;
 
     /* Accent Colors */
-    --accent: 210 40% 94%;
+    --accent: 210 40% 96%;
     --accent-foreground: 222.2 84% 4.9%;
 
     /* Muted Colors */
@@ -190,8 +190,7 @@
   }
 
   body {
-    background: var(--background-dark);
-    color: var(--brand-text-primary);
+    @apply bg-background text-foreground;
     min-height: 100vh;
     font-family: var(--font-body);
     line-height: var(--leading-normal);
@@ -358,5 +357,453 @@
     .typing-animation {
       animation: none;
     }
+  }
+
+  /* 모바일 최적화 스타일 */
+  .touch-friendly {
+    @apply min-h-[44px] min-w-[44px];
+  }
+  
+  /* 모바일 텍스트 가독성 */
+  .mobile-readable {
+    @apply text-base leading-relaxed;
+  }
+  
+  /* 스크롤 최적화 */
+  .smooth-scroll {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* 모바일 그라디언트 최적화 */
+  .mobile-gradient {
+    background: linear-gradient(135deg, #1e293b 0%, #1e40af 50%, #1e293b 100%);
+  }
+  
+  /* 모바일 카드 스타일 */
+  .mobile-card {
+    @apply bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl;
+  }
+  
+  /* 접근성 개선 */
+  .focus-visible-enhanced {
+    @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900;
+  }
+}
+
+/* 애니메이션 최적화 */
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.6s ease-out;
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.6s ease-out;
+  }
+  
+  .animate-scale-in {
+    animation: scaleIn 0.4s ease-out;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes bounce-gentle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+@keyframes progress-fill {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: var(--progress-width, 100%);
+  }
+}
+
+/* 모바일 반응형 미디어 쿼리 */
+@media (max-width: 640px) {
+  .hero-title {
+    @apply text-3xl leading-tight;
+  }
+  
+  .hero-subtitle {
+    @apply text-lg;
+  }
+  
+  .mobile-padding {
+    @apply px-4 py-6;
+  }
+  
+  .mobile-grid {
+    @apply grid-cols-1 gap-4;
+  }
+}
+
+/* 다크 모드 최적화 */
+@media (prefers-color-scheme: dark) {
+  .auto-dark {
+    @apply bg-slate-900 text-white;
+  }
+}
+
+/* 접근성 - 모션 감소 설정 */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ChatGPT 스타일 채팅 인터페이스 */
+.chat-message-user {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  border-radius: 18px 18px 4px 18px;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+}
+
+.chat-message-ai {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 18px 18px 18px 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.chat-input-container {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.chat-input-container:focus-within {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.chat-header {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.chat-loading-dots {
+  animation: loading-dots 1.4s ease-in-out infinite both;
+}
+
+.chat-loading-dots:nth-child(1) { animation-delay: -0.32s; }
+.chat-loading-dots:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes loading-dots {
+  0%, 80%, 100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* 스크롤바 스타일링 */
+.chat-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-scroll::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.chat-scroll::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.chat-scroll::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* 키보드 단축키 스타일 */
+kbd {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border: 1px solid #cbd5e1;
+  border-bottom-color: #94a3b8;
+  box-shadow: inset 0 -1px 0 #94a3b8;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* 샘플 프롬프트 호버 효과 */
+.sample-prompt-card {
+  background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  transition: all 0.2s ease;
+}
+
+.sample-prompt-card:hover {
+  background: linear-gradient(135deg, #bfdbfe 0%, #c7d2fe 100%);
+  border-color: rgba(59, 130, 246, 0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+/* 온라인 상태 인디케이터 */
+.online-indicator {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 4px rgba(34, 197, 94, 0.6);
+  }
+  50% {
+    opacity: 0.8;
+    box-shadow: 0 0 8px rgba(34, 197, 94, 0.8);
+  }
+}
+
+/* Mobile Navigation Bar Styles */
+.mobile-nav-bar {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(229, 231, 235, 0.5);
+  box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.mobile-nav-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 60px;
+  min-height: 52px;
+  padding: 12px 8px;
+  border-radius: 12px;
+  transition: all 0.2s ease-out;
+  cursor: pointer;
+  color: #6b7280;
+}
+
+.mobile-nav-item:hover {
+  background-color: rgba(243, 244, 246, 0.8);
+  color: #111827;
+  transform: translateY(-1px);
+}
+
+.mobile-nav-item.active {
+  background: linear-gradient(to top, rgba(219, 234, 254, 0.8), rgba(237, 233, 254, 0.8));
+  color: #2563eb;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
+}
+
+.mobile-nav-item.active .mobile-nav-icon {
+  transform: scale(1.1);
+}
+
+.mobile-nav-icon {
+  width: 20px;
+  height: 20px;
+  margin-bottom: 4px;
+  transition: all 0.2s ease-out;
+}
+
+.mobile-nav-label {
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+  line-height: 1.2;
+  transition: all 0.2s ease-out;
+}
+
+.mobile-nav-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: linear-gradient(to right, #ef4444, #ec4899);
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 9999px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  min-width: 18px;
+  text-align: center;
+  animation: badge-pulse 2s infinite;
+}
+
+.mobile-nav-progress {
+  background: #f3f4f6;
+  border-radius: 9999px;
+  height: 4px;
+  overflow: hidden;
+  margin: 8px 16px 0;
+}
+
+.mobile-nav-progress-bar {
+  background: linear-gradient(to right, #3b82f6, #8b5cf6);
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 0.5s ease-out;
+}
+
+.mobile-nav-progress-text {
+  text-align: center;
+  margin-top: 4px;
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.mobile-nav-active-indicator {
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  background-color: #2563eb;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+/* Safe area support for iPhone */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.h-safe-area-inset-bottom {
+  height: env(safe-area-inset-bottom);
+}
+
+/* Badge pulse animation */
+@keyframes badge-pulse {
+  0%, 100% { 
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% { 
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+}
+
+/* Mobile navigation hide/show animation */
+.mobile-nav-enter {
+  transform: translateY(100%);
+  transition: transform 0.3s ease-out;
+}
+
+.mobile-nav-enter-active {
+  transform: translateY(0);
+}
+
+.mobile-nav-exit {
+  transform: translateY(0);
+  transition: transform 0.3s ease-out;
+}
+
+.mobile-nav-exit-active {
+  transform: translateY(100%);
+}
+
+/* Enhanced touch targets for mobile */
+@media (max-width: 768px) {
+  .mobile-nav-item {
+    min-width: 64px;
+    min-height: 56px;
+    padding: 14px 10px;
+  }
+  
+  .mobile-nav-icon {
+    width: 22px;
+    height: 22px;
+  }
+  
+  .mobile-nav-label {
+    font-size: 11px;
+  }
+}
+
+/* Dark mode support for mobile navigation */
+@media (prefers-color-scheme: dark) {
+  .mobile-nav-bar {
+    background: rgba(15, 23, 42, 0.95);
+    border-top-color: rgba(71, 85, 105, 0.5);
+    box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.3);
+  }
+  
+  .mobile-nav-item {
+    color: #94a3b8;
+  }
+  
+  .mobile-nav-item:hover {
+    background-color: rgba(51, 65, 85, 0.8);
+    color: #e2e8f0;
+  }
+  
+  .mobile-nav-item.active {
+    background: linear-gradient(to top, rgba(30, 41, 59, 0.8), rgba(51, 65, 85, 0.8));
+    color: #60a5fa;
+  }
+  
+  .mobile-nav-progress {
+    background: #374151;
+  }
+  
+  .mobile-nav-progress-text {
+    color: #9ca3af;
+  }
+  
+  .mobile-nav-active-indicator {
+    background-color: #60a5fa;
   }
 }
