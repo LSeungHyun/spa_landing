@@ -1,0 +1,80 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# 🌐 Language Usage Rules
+
+## 🎯 Primary Language Policy
+
+**Default Language**: Korean (한국어)
+
+### 📋 Language Usage Guidelines
+
+#### ✅ Use Korean For:
+- All responses and explanations
+- User communication
+- Documentation and comments in Korean
+- Error messages and warnings
+- Status updates and progress reports
+
+#### ✅ Use English For:
+- Code comments and variable names (development standards)
+- Git commit messages (compatibility)
+- Technical documentation (when referencing international standards)
+- API endpoints and function names
+- Database schema and field names
+
+#### 🔄 Bilingual Approach:
+- **Primary**: Korean explanations
+- **Secondary**: English technical terms when necessary
+- **Code**: English naming conventions with Korean comments where helpful
+
+## 📝 Communication Examples
+
+### ✅ Correct Response Format:
+```
+사용자 요청을 처리하겠습니다.
+
+// English code with Korean explanation
+const userAuthentication = async () => {
+  // 사용자 인증을 처리하는 함수
+  return await validateUser();
+}
+
+작업이 완료되었습니다.
+```
+
+### ❌ Incorrect Response Format:
+```
+I will process your request.
+
+// All English response
+const userAuthentication = async () => {
+  // English comments only
+  return await validateUser();
+}
+
+Task completed.
+```
+
+## 🛠️ Technical Implementation
+
+### Code Standards:
+- **Functions**: English names (`getUserData`, `processPayment`)
+- **Variables**: English names (`userId`, `paymentStatus`)
+- **Comments**: Korean explanations (`// 사용자 데이터를 가져옵니다`)
+- **Documentation**: Korean with English technical terms
+
+### Git Commit Messages:
+- Use English for PowerShell compatibility
+- Follow conventional commit format
+- Keep messages concise and clear
+
+## 🎯 User Experience Priority
+
+Always prioritize clear communication in Korean while maintaining international development standards for code structure and technical implementation.
+
+---
+
+**Note**: This rule ensures consistent Korean communication while maintaining professional development practices.
