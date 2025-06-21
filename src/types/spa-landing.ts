@@ -1,5 +1,5 @@
 export interface PersonaType {
-    id: 'pm' | 'creator' | 'startup' | 'developer' | 'marketer' | 'other';
+    id: 'pm' | 'creator' | 'startup';
     title: string;
     description: string;
     icon: string;
@@ -53,7 +53,7 @@ export interface SPALandingState {
 export interface PreRegistrationFormData {
     email: string;
     name?: string;
-    persona: 'pm' | 'creator' | 'startup' | 'developer' | 'marketer' | 'other';
+    persona: 'pm' | 'creator' | 'startup';
     company?: string;
     company_size?: '1-10' | '11-50' | '51-200' | '201-1000' | '1000+' | 'freelancer';
     use_case?: string;

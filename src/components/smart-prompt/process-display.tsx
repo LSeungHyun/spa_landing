@@ -1,4 +1,4 @@
-import { ProcessStepCard } from "./process-step-card";
+import ProcessStepCard from "@/components/shared/process-step-card";
 import { PromptComparison } from "./prompt-comparison";
 import { ProcessStep } from "@/hooks/use-process-state";
 
@@ -17,7 +17,7 @@ export function ProcessDisplay({
 }: ProcessDisplayProps) {
     // Find the analysis step to get prompt comparison data
     const analysisStep = steps.find(step => step.id === 'analysis');
-    const showComparison = analysisStep?.status === 'completed' && analysisStep.result;
+    const showComparison = analysisStep?.status === 'completed';
 
     return (
         <div className="space-y-6">
@@ -27,21 +27,18 @@ export function ProcessDisplay({
                     <ProcessStepCard
                         key={step.id}
                         step={step}
-                        index={index}
                         isActive={index === currentStepIndex && isRunning}
-                        isCompleted={step.status === 'completed'}
-                        hasError={step.status === 'error'}
-                        elapsedTime={elapsedTime}
+                        isPending={index > currentStepIndex}
                     />
                 ))}
             </div>
 
             {/* Prompt Comparison - shows after analysis is complete */}
-            {showComparison && analysisStep?.result && (
+            {showComparison && (
                 <PromptComparison
-                    originalPrompt={analysisStep.result.originalPrompt || "기존 프롬프트를 분석 중입니다..."}
-                    improvedPrompt={analysisStep.result.improvedPrompt || "개선된 프롬프트를 생성 중입니다..."}
-                    improvements={analysisStep.result.improvements || []}
+                    originalPrompt="기존 프롬프트를 분석 중입니다..."
+                    improvedPrompt="개선된 프롬프트를 생성 중입니다..."
+                    improvements={analysisStep.improvements}
                     isVisible={true}
                 />
             )}

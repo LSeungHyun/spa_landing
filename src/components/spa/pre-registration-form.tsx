@@ -69,7 +69,10 @@ export function PreRegistrationForm({ isOpen, onClose, selectedPersona = 'pm' }:
             // 사전 등록 데이터 저장
             const preRegistrationData: Omit<PreRegistration, 'id' | 'created_at' | 'updated_at'> = {
                 email: data.email,
-                persona: data.persona
+                persona: data.persona,
+                marketing_consent: data.consent,
+                newsletter_consent: data.consent,
+                beta_interest: true
             };
 
             const { data: result, error } = await database.addPreRegistration(preRegistrationData);

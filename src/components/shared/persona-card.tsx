@@ -48,79 +48,63 @@ export function PersonaCard({ persona, isSelected, onSelect }: PersonaCardProps)
                         )}
                     </div>
 
-                    {/* Category Badge */}
-                    <Badge variant="secondary" className="w-fit">
-                        {persona.category}
-                    </Badge>
-
                     {/* Tabs */}
                     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                        <TabsList className="grid w-full grid-cols-4">
-                            <TabsTrigger value="problems" className="text-xs">문제점</TabsTrigger>
-                            <TabsTrigger value="solutions" className="text-xs">해결책</TabsTrigger>
+                        <TabsList className="grid w-full grid-cols-3">
+                            <TabsTrigger value="problem" className="text-xs">문제점</TabsTrigger>
+                            <TabsTrigger value="solution" className="text-xs">해결책</TabsTrigger>
                             <TabsTrigger value="features" className="text-xs">기능</TabsTrigger>
-                            <TabsTrigger value="scenarios" className="text-xs">시나리오</TabsTrigger>
                         </TabsList>
 
-                        <TabsContent value="problems" className="space-y-2 mt-4">
-                            {persona.problems.map((problem, index) => (
-                                <div key={index} className="flex items-start space-x-2">
-                                    <Target className="text-red-500 w-4 h-4 mt-0.5 flex-shrink-0" />
-                                    <span className="text-sm text-gray-700 dark:text-gray-300">{problem}</span>
-                                </div>
-                            ))}
+                        <TabsContent value="problem" className="space-y-2 mt-4">
+                            <div className="flex items-start space-x-2">
+                                <Target className="text-red-500 w-4 h-4 mt-0.5 flex-shrink-0" />
+                                <span className="text-sm text-gray-700 dark:text-gray-300">{persona.problem}</span>
+                            </div>
                         </TabsContent>
 
-                        <TabsContent value="solutions" className="space-y-2 mt-4">
-                            {persona.solutions.map((solution, index) => (
-                                <div key={index} className="flex items-start space-x-2">
-                                    <CheckCircle className="text-green-500 w-4 h-4 mt-0.5 flex-shrink-0" />
-                                    <span className="text-sm text-gray-700 dark:text-gray-300">{solution}</span>
-                                </div>
-                            ))}
+                        <TabsContent value="solution" className="space-y-2 mt-4">
+                            <div className="flex items-start space-x-2">
+                                <CheckCircle className="text-green-500 w-4 h-4 mt-0.5 flex-shrink-0" />
+                                <span className="text-sm text-gray-700 dark:text-gray-300">{persona.solution}</span>
+                            </div>
                         </TabsContent>
 
                         <TabsContent value="features" className="space-y-2 mt-4">
-                            {persona.keyFeatures.map((feature, index) => (
+                            {persona.features.map((feature, index) => (
                                 <div key={index} className="flex items-start space-x-2">
                                     <Zap className="text-blue-500 w-4 h-4 mt-0.5 flex-shrink-0" />
                                     <span className="text-sm text-gray-700 dark:text-gray-300">{feature}</span>
                                 </div>
                             ))}
                         </TabsContent>
-
-                        <TabsContent value="scenarios" className="space-y-3 mt-4">
-                            {persona.useCaseScenarios.map((scenario, index) => (
-                                <div key={index} className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
-                                    <h4 className="font-medium text-sm text-gray-900 dark:text-gray-100 mb-1">
-                                        {scenario.title}
-                                    </h4>
-                                    <p className="text-xs text-gray-600 dark:text-gray-400">
-                                        {scenario.description}
-                                    </p>
-                                </div>
-                            ))}
-                        </TabsContent>
                     </Tabs>
 
                     {/* Statistics */}
-                    {persona.statistics && (
-                        <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                            {persona.statistics.map((stat, index) => (
-                                <div key={index} className="text-center">
-                                    <div className="flex items-center justify-center space-x-1">
-                                        <TrendingUp className="text-blue-500 w-4 h-4" />
-                                        <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                                            {stat.value}
-                                        </span>
-                                    </div>
-                                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                                        {stat.label}
-                                    </p>
-                                </div>
-                            ))}
+                    <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <div className="text-center">
+                            <div className="flex items-center justify-center space-x-1">
+                                <TrendingUp className="text-blue-500 w-4 h-4" />
+                                <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                                    {persona.stats.timeReduction}
+                                </span>
+                            </div>
+                            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                                시간 단축
+                            </p>
                         </div>
-                    )}
+                        <div className="text-center">
+                            <div className="flex items-center justify-center space-x-1">
+                                <Target className="text-green-500 w-4 h-4" />
+                                <span className="text-lg font-bold text-green-600 dark:text-green-400">
+                                    {persona.stats.qualityImprovement}
+                                </span>
+                            </div>
+                            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                                품질 향상
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </Card>
         </motion.div>

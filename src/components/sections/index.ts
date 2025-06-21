@@ -1,6 +1,6 @@
 // Sections barrel exports
-export { SmartPromptHero } from './hero-section';
-export { FeaturesSection } from './features-section';
+export { HeroSection } from './hero-section';
+export { default as FeaturesSection } from './features-section';
 export { PricingSection } from './pricing-section';
 export { TestimonialsSection } from './testimonials-section';
 export { HowItWorksSection } from './how-it-works-section';

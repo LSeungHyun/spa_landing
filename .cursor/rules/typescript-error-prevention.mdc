@@ -1,0 +1,376 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# TypeScript Error Prevention & Build Quality Assurance
+
+## 🎯 Rule Purpose
+**CRITICAL**: Prevent TypeScript compilation errors, missing dependency issues, and prop type mismatches that cause build failures and development friction.
+
+**Context**: This rule addresses recurring patterns of errors identified in previous development sessions, including type mismatches, missing packages, incorrect imports, and component prop inconsistencies.
+
+## 🚨 MANDATORY Pre-Development Checklist
+
+### **BEFORE writing ANY component or modifying existing ones:**
+
+#### 1. **Type Safety Verification Protocol**
+```typescript
+// ✅ ALWAYS verify interface compatibility BEFORE implementation
+interface ComponentProps {
+  // Document EVERY prop with JSDoc
+  /** The current step in the process (0-based index) */
+  currentStep: number;
+  /** Array of process steps to display */
+  steps: ProcessStep[];
+  /** Optional callback when step changes */
+  onStepChange?: (step: number) => void;
+}
+
+// ✅ ALWAYS use discriminated unions for variant props
+type ComponentVariant = 
+  | { variant: 'default'; size?: 'sm' | 'md' | 'lg' }
+  | { variant: 'compact'; size?: 'sm' | 'md' }
+  | { variant: 'minimal'; size?: never }
+
+// ❌ NEVER use ambiguous boolean combinations
+interface BadProps {
+  isLarge?: boolean;
+  isSmall?: boolean;
+  isCompact?: boolean; // Conflicting states possible
+}
+```
+
+#### 2. **Dependency Verification Protocol**
+```bash
+# ✅ ALWAYS verify package existence BEFORE importing
+npm list @radix-ui/react-progress
+npm list @radix-ui/react-tabs
+npm list web-vitals
+
+# ✅ ALWAYS check package.json for version compatibility
+grep -A 5 -B 5 "react" package.json
+```
+
+#### 3. **Import Statement Validation**
+```typescript
+// ✅ CORRECT: Verify import paths exist
+import { Progress } from '@/components/ui/progress'        // Check file exists
+import { Tabs } from '@/components/ui/tabs'                // Check file exists
+import { ProcessStep } from '@/types/process'              // Check type exists
+
+// ✅ CORRECT: Use type-only imports for types
+import type { ProcessStep, ScenarioData } from '@/types/spa-landing'
+
+// ❌ WRONG: Importing non-existent modules
+import { NonExistentComponent } from '@/components/missing'
+```
+
+## 🔍 Component Development Error Prevention
+
+### **MANDATORY Component Creation Protocol**
+
+#### 1. **Interface-First Development**
+```typescript
+// STEP 1: Define complete interface with all required props
+interface ProcessDisplayProps {
+  // Core data
+  steps: ProcessStep[];
+  currentStep: number;
+  
+  // State management
+  isProcessing?: boolean;
+  isComplete?: boolean;
+  
+  // Event handlers with precise signatures
+  onStepClick?: (stepIndex: number, step: ProcessStep) => void;
+  onProcessComplete?: (result: ProcessResult) => void;
+  
+  // Styling & customization
+  variant?: 'default' | 'compact' | 'detailed';
+  className?: string;
+  
+  // Accessibility
+  'aria-label'?: string;
+  'data-testid'?: string;
+}
+
+// STEP 2: Validate interface against existing type definitions
+// Check: Do ProcessStep and ProcessResult types exist?
+// Check: Are all event handler signatures consistent with usage?
+```
+
+#### 2. **Prop Usage Validation Pattern**
+```typescript
+// ✅ CORRECT: Destructure with defaults and validation
+const ProcessDisplay: React.FC<ProcessDisplayProps> = ({
+  steps,
+  currentStep,
+  isProcessing = false,
+  isComplete = false,
+  onStepClick,
+  onProcessComplete,
+  variant = 'default',
+  className,
+  'aria-label': ariaLabel,
+  'data-testid': testId,
+  ...restProps
+}) => {
+  // VALIDATION: Check prop constraints
+  if (currentStep < 0 || currentStep >= steps.length) {
+    console.warn(`Invalid currentStep: ${currentStep}. Must be between 0 and ${steps.length - 1}`);
+  }
+  
+  // VALIDATION: Ensure required props are present
+  if (!steps || steps.length === 0) {
+    return <div>No steps provided</div>;
+  }
+  
+  // Implementation...
+};
+```
+
+#### 3. **Type Guard Implementation**
+```typescript
+// ✅ ALWAYS implement type guards for complex props
+const isValidProcessStep = (step: unknown): step is ProcessStep => {
+  return (
+    typeof step === 'object' &&
+    step !== null &&
+    'id' in step &&
+    'title' in step &&
+    'status' in step &&
+    typeof (step as ProcessStep).id === 'string' &&
+    typeof (step as ProcessStep).title === 'string'
+  );
+};
+
+// Usage in component
+const validSteps = steps.filter(isValidProcessStep);
+if (validSteps.length !== steps.length) {
+  console.error('Invalid steps detected:', steps.filter(step => !isValidProcessStep(step)));
+}
+```
+
+## 🛡️ Build Error Prevention Strategies
+
+### **MANDATORY Pre-Commit Verification**
+
+#### 1. **TypeScript Compilation Check**
+```bash
+# ✅ ALWAYS run BEFORE committing
+npm run type-check    # or tsc --noEmit
+npm run build        # Full build verification
+npm run lint         # ESLint validation
+```
+
+#### 2. **Dependency Audit Protocol**
+```bash
+# ✅ ALWAYS verify after adding new imports
+npm run build 2>&1 | grep -i "cannot find module"
+npm run build 2>&1 | grep -i "module not found"
+
+# If errors found, install missing dependencies:
+npm install @radix-ui/react-progress @radix-ui/react-tabs web-vitals
+```
+
+#### 3. **Component Integration Testing**
+```typescript
+// ✅ ALWAYS test component with actual props
+const TestComponent = () => {
+  const mockSteps: ProcessStep[] = [
+    { id: '1', title: 'Step 1', status: 'completed' },
+    { id: '2', title: 'Step 2', status: 'current' },
+    { id: '3', title: 'Step 3', status: 'pending' },
+  ];
+  
+  return (
+    <ProcessDisplay
+      steps={mockSteps}
+      currentStep={1}
+      onStepClick={(index, step) => console.log('Step clicked:', index, step)}
+    />
+  );
+};
+```
+
+## 🚫 Critical Anti-Patterns to NEVER Repeat
+
+### **TypeScript Errors That MUST Be Avoided**
+
+#### 1. **Missing Property Errors**
+```typescript
+// ❌ WRONG: Using component without required props
+<ProcessDisplay currentStep={0} />  // Missing 'steps' prop
+
+// ✅ CORRECT: Always provide all required props
+<ProcessDisplay 
+  steps={processSteps} 
+  currentStep={currentStepIndex}
+/>
+```
+
+#### 2. **Type Mismatch Errors**
+```typescript
+// ❌ WRONG: Incorrect prop types
+<ScenarioCard 
+  scenario="string"           // Should be ScenarioData object
+  isActive={1}               // Should be boolean
+  onClick={() => {}}         // Missing required parameters
+/>
+
+// ✅ CORRECT: Proper type matching
+<ScenarioCard 
+  scenario={scenarioData}    // Correct ScenarioData type
+  isActive={isCurrentScenario}  // Boolean value
+  onClick={(scenario) => handleScenarioSelect(scenario)}  // Proper signature
+/>
+```
+
+#### 3. **Import/Export Mismatches**
+```typescript
+// ❌ WRONG: Importing non-existent exports
+import { NonExistentComponent } from '@/components/shared';
+
+// ✅ CORRECT: Verify exports in index.ts files
+// Check src/components/shared/index.ts for available exports
+import { ProcessDisplay, ScenarioCard } from '@/components/shared';
+```
+
+## 🔧 Automated Error Prevention Tools
+
+### **MANDATORY Development Setup**
+
+#### 1. **TypeScript Strict Configuration**
+```json
+// tsconfig.json - NEVER compromise on these settings
+{
+  "compilerOptions": {
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitReturns": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true
+  }
+}
+```
+
+#### 2. **ESLint Rules for Error Prevention**
+```json
+// .eslintrc.json
+{
+  "rules": {
+    "@typescript-eslint/no-unused-vars": "error",
+    "@typescript-eslint/no-explicit-any": "error",
+    "@typescript-eslint/prefer-nullish-coalescing": "error",
+    "@typescript-eslint/prefer-optional-chain": "error",
+    "react/prop-types": "off",  // Using TypeScript instead
+    "react/jsx-key": "error",
+    "react-hooks/exhaustive-deps": "error"
+  }
+}
+```
+
+#### 3. **Pre-commit Hooks**
+```json
+// package.json
+{
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run type-check && npm run lint && npm run test"
+    }
+  }
+}
+```
+
+## 📋 Error Recovery Protocols
+
+### **When Build Errors Occur:**
+
+#### 1. **Systematic Error Resolution**
+```bash
+# Step 1: Clean build artifacts
+rm -rf .next node_modules/.cache
+
+# Step 2: Reinstall dependencies
+npm ci
+
+# Step 3: Check for missing packages
+npm run build 2>&1 | tee build-errors.log
+grep "Cannot find module" build-errors.log
+
+# Step 4: Install missing packages
+npm install [missing-package-name]
+
+# Step 5: Verify TypeScript types
+npm run type-check
+```
+
+#### 2. **Component Error Debugging**
+```typescript
+// ✅ Add debugging wrapper for problematic components
+const DebugWrapper = <P extends object>(
+  Component: React.ComponentType<P>,
+  componentName: string
+) => {
+  return (props: P) => {
+    console.log(`${componentName} props:`, props);
+    
+    try {
+      return <Component {...props} />;
+    } catch (error) {
+      console.error(`Error in ${componentName}:`, error);
+      return <div>Error rendering {componentName}</div>;
+    }
+  };
+};
+
+// Usage
+const DebugProcessDisplay = DebugWrapper(ProcessDisplay, 'ProcessDisplay');
+```
+
+## 🎯 Success Metrics & Validation
+
+### **Quality Gates That MUST Pass**
+
+#### 1. **Zero Error Tolerance**
+- ✅ TypeScript compilation: 0 errors
+- ✅ ESLint validation: 0 errors
+- ✅ Build process: successful completion
+- ✅ Component rendering: no runtime errors
+
+#### 2. **Component Quality Checklist**
+- [ ] All props properly typed with interfaces
+- [ ] Default values provided for optional props
+- [ ] Event handlers have correct signatures
+- [ ] Type guards implemented for complex props
+- [ ] Error boundaries handle edge cases
+- [ ] Accessibility attributes included
+- [ ] Test coverage for critical paths
+
+#### 3. **Dependency Health Check**
+- [ ] All imports resolve successfully
+- [ ] Package versions compatible
+- [ ] No circular dependencies
+- [ ] Tree-shaking optimized imports
+
+---
+
+## 🚨 ENFORCEMENT: This Rule is NON-NEGOTIABLE
+
+**Violation Consequences:**
+- Immediate build failure investigation required
+- Component refactoring to meet type safety standards
+- Dependency audit and cleanup
+- Code review for similar patterns across codebase
+
+**Success Indicators:**
+- Clean TypeScript compilation
+- Successful builds without warnings
+- Runtime stability without prop-related errors
+- Consistent component API patterns
+
+---
+
+*Remember: Prevention is infinitely better than debugging. Invest time in proper setup to avoid hours of error hunting.*

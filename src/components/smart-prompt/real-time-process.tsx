@@ -3,21 +3,18 @@
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { useProcessState } from "@/hooks/use-process-state";
-import { ProcessControlPanel } from "./process-control-panel";
+import ProcessControlPanel from "./process-control-panel";
 import { ProcessDisplay } from "./process-display";
 
 export function RealTimeProcess() {
     const {
         steps,
-        isRunning,
-        isPaused,
-        currentStepIndex,
-        elapsedTime,
+        processState,
         startProcess,
         pauseProcess,
         resetProcess,
-        selectedSample,
-        setSelectedSample
+        formatTime,
+        overallProgress
     } = useProcessState();
 
     return (
@@ -35,24 +32,29 @@ export function RealTimeProcess() {
                 <div className="max-w-6xl mx-auto">
                     {/* Control Panel */}
                     <ProcessControlPanel
-                        selectedSample={selectedSample}
-                        onSampleChange={setSelectedSample}
-                        isRunning={isRunning}
-                        isPaused={isPaused}
-                        onStart={startProcess}
-                        onPause={pauseProcess}
+                        selectedSample=""
+                        onSampleChange={() => {}}
+                        isRunning={processState.isRunning}
+                        onStartPause={() => {
+                            if (processState.isRunning) {
+                                pauseProcess();
+                            } else {
+                                startProcess();
+                            }
+                        }}
                         onReset={resetProcess}
-                        currentStepIndex={currentStepIndex}
-                        totalSteps={steps.length}
-                        elapsedTime={elapsedTime}
+                        totalProgress={overallProgress}
+                        formatTime={formatTime}
+                        currentStepElapsed={processState.elapsedTime}
+                        currentStepTotal={30000} // 30초 가정
                     />
 
                     {/* Process Display */}
                     <ProcessDisplay
                         steps={steps}
-                        isRunning={isRunning}
-                        currentStepIndex={currentStepIndex}
-                        elapsedTime={elapsedTime}
+                        isRunning={processState.isRunning}
+                        currentStepIndex={processState.currentStep}
+                        elapsedTime={processState.elapsedTime}
                     />
                 </div>
             </Container>

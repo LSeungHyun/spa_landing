@@ -37,7 +37,7 @@ export function ScenarioNavigation({
             <div className="mb-6">
                 <div className="flex items-center justify-between mb-3">
                     <h3 className="text-xl font-semibold text-brand-text-primary">
-                        {currentScenario.title}
+                        시나리오 {currentIndex + 1}
                     </h3>
                     <div className="text-sm text-brand-text-secondary">
                         {currentIndex + 1} / {scenarios.length}
@@ -45,15 +45,15 @@ export function ScenarioNavigation({
                 </div>
 
                 <p className="text-brand-text-secondary leading-relaxed mb-4">
-                    {currentScenario.description}
+                    AI가 어떻게 프롬프트를 개선하는지 확인해보세요
                 </p>
 
                 <div className="flex items-center gap-2 text-sm">
                     <span className="px-3 py-1 bg-brand-accent-blue/20 text-brand-accent-blue rounded-full">
-                        {currentScenario.category}
+                        개선 예시
                     </span>
                     <span className="text-brand-text-secondary">
-                        예상 소요시간: {currentScenario.estimatedTime}
+                        실시간 처리
                     </span>
                 </div>
             </div>

@@ -34,9 +34,6 @@ export function PersonaCard({ persona, isSelected, onSelect }: PersonaCardProps)
                     <h3 className="text-lg font-semibold text-brand-text-primary">
                         {persona.title}
                     </h3>
-                    <p className="text-sm text-brand-text-secondary">
-                        {persona.subtitle}
-                    </p>
                 </div>
             </div>
 
