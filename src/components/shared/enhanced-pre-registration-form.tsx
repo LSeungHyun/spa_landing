@@ -13,8 +13,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, User, Building, Target, Users, Zap, Mail } from 'lucide-react';
-import { database } from '@/lib/supabase';
-import type { PreRegistrationFormData, ApiResponse, PreRegistrationResponse } from '@/types/spa-landing';
 
 // 폼 유효성 검사 스키마
 const preRegistrationSchema = z.object({
@@ -39,7 +37,7 @@ const preRegistrationSchema = z.object({
 type PreRegistrationFormValues = z.infer<typeof preRegistrationSchema>;
 
 interface EnhancedPreRegistrationFormProps {
-  onSuccess?: (data: PreRegistrationResponse) => void;
+  onSuccess?: (data: any) => void;
   onClose?: () => void;
   className?: string;
 }
@@ -116,67 +114,62 @@ export function EnhancedPreRegistrationForm({
     setIsSubmitting(true);
 
     try {
-      // 이메일 중복 확인
-      const { exists, error: checkError } = await database.checkEmailExists(data.email);
-      
-      if (checkError) {
-        toast.error('이메일 확인 중 오류가 발생했습니다.');
-        return;
+      // API를 통한 사전 등록
+      const response = await fetch('/api/pre-register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: data.email,
+          name_or_nickname: data.name || undefined,
+          expected_feature: data.use_case || undefined,
+          // 추가 정보들은 expected_feature에 포함
+          additional_info: {
+            persona: data.persona,
+            company: data.company,
+            company_size: data.company_size,
+            referral_source: data.referral_source,
+            marketing_consent: data.marketing_consent,
+            newsletter_consent: data.newsletter_consent,
+            beta_interest: data.beta_interest,
+            expected_usage: data.expected_usage,
+            current_tools: data.current_tools,
+            pain_points: data.pain_points,
+            platform_preference: data.platform_preference,
+            user_agent: navigator.userAgent,
+            utm_source: new URLSearchParams(window.location.search).get('utm_source'),
+            utm_medium: new URLSearchParams(window.location.search).get('utm_medium'),
+            utm_campaign: new URLSearchParams(window.location.search).get('utm_campaign'),
+          }
+        }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        // 성공 처리
+        toast.success('🎉 사전 등록이 완료되었습니다!');
+        
+        if (data.newsletter_consent) {
+          toast.success('📧 뉴스레터 구독이 설정되었습니다.');
+        }
+
+        if (data.beta_interest) {
+          toast.success('🚀 베타 테스트 알림을 받으실 수 있습니다.');
+        }
+
+        onSuccess?.(result);
+        onClose?.();
+      } else if (response.status === 409) {
+        toast.error(result.error || '이미 등록된 이메일입니다.');
+      } else {
+        toast.error(result.error || '등록 중 오류가 발생했습니다. 다시 시도해주세요.');
       }
-
-      if (exists) {
-        toast.error('이미 등록된 이메일입니다.');
-        return;
-      }
-
-      // 사전 등록 데이터 저장
-      const registrationData = {
-        email: data.email,
-        name: data.name || null,
-        persona: data.persona,
-        company: data.company || null,
-        company_size: data.company_size || null,
-        use_case: data.use_case || null,
-        referral_source: data.referral_source || null,
-        marketing_consent: data.marketing_consent,
-        newsletter_consent: data.newsletter_consent,
-        beta_interest: data.beta_interest,
-        expected_usage: data.expected_usage || null,
-        current_tools: data.current_tools || [],
-        pain_points: data.pain_points || [],
-        platform_preference: data.platform_preference || null,
-        ip_address: null, // 클라이언트에서는 설정하지 않음
-        user_agent: navigator.userAgent,
-        utm_source: new URLSearchParams(window.location.search).get('utm_source'),
-        utm_medium: new URLSearchParams(window.location.search).get('utm_medium'),
-        utm_campaign: new URLSearchParams(window.location.search).get('utm_campaign'),
-      };
-
-      const { data: result, error } = await database.addPreRegistration(registrationData);
-
-      if (error) {
-        console.error('Registration error:', error);
-        toast.error('등록 중 오류가 발생했습니다. 다시 시도해주세요.');
-        return;
-      }
-
-      // 성공 처리
-      toast.success('🎉 사전 등록이 완료되었습니다!');
-      
-      if (data.newsletter_consent) {
-        toast.success('📧 뉴스레터 구독이 설정되었습니다.');
-      }
-
-      if (data.beta_interest) {
-        toast.success('🚀 베타 테스트 알림을 받으실 수 있습니다.');
-      }
-
-      onSuccess?.(result);
-      onClose?.();
 
     } catch (error) {
-      console.error('Unexpected error:', error);
-      toast.error('예상치 못한 오류가 발생했습니다.');
+      console.error('Registration error:', error);
+      toast.error('네트워크 오류가 발생했습니다. 다시 시도해주세요.');
     } finally {
       setIsSubmitting(false);
     }

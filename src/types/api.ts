@@ -46,4 +46,23 @@ export interface ApiEndpoint {
     method: HttpMethod;
     path: string;
     config?: RequestConfig;
+}
+
+// Pre-registration related types
+export interface PreRegistrationData {
+    email: string;
+    name_or_nickname?: string;
+    expected_feature?: string;
+    registered_at?: string; // 자동 생성되는 필드
+}
+
+export interface PreRegistrationRequest {
+    email: string;
+    name_or_nickname?: string;
+    expected_feature?: string;
+    additional_info?: Record<string, any>; // 클라이언트에서 추가 정보 전송용
+}
+
+export interface PreRegistrationResponse extends ApiResponse<PreRegistrationData> {
+    message: string;
 } 

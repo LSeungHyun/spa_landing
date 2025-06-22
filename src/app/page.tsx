@@ -151,6 +151,7 @@ export default function HomePage() {
         setInputText('');
     };
 
+    // 실제 API를 사용하는 사전 등록 함수
     const handlePreRegistration = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!email.trim()) {
@@ -161,19 +162,35 @@ export default function HomePage() {
         setIsRegistering(true);
 
         try {
-            // 실제 등록 로직 시뮬레이션
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            
-            toast.success('🎉 사전 등록 완료! 출시 알림을 받으실 거예요.');
-            setEmail('');
-            
-            // 성공 후 감사 메시지
-            setTimeout(() => {
-                toast.success('🎁 얼리버드 혜택이 적용되었습니다!');
-            }, 1500);
+            const response = await fetch('/api/pre-register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: email.trim(),
+                }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                toast.success('🎉 사전 등록 완료! 출시 알림을 받으실 거예요.');
+                setEmail('');
+                
+                // 성공 후 감사 메시지
+                setTimeout(() => {
+                    toast.success('🎁 얼리버드 혜택이 적용되었습니다!');
+                }, 1500);
+            } else if (response.status === 409) {
+                toast.error(data.error || '이미 등록된 이메일입니다');
+            } else {
+                toast.error(data.error || '등록에 실패했습니다. 다시 시도해주세요.');
+            }
 
         } catch (error) {
-            toast.error('등록에 실패했습니다. 다시 시도해주세요.');
+            console.error('Registration error:', error);
+            toast.error('네트워크 오류가 발생했습니다. 다시 시도해주세요.');
         } finally {
             setIsRegistering(false);
         }
@@ -187,6 +204,16 @@ export default function HomePage() {
 
     const scrollToDemo = () => {
         demoRef.current?.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    // 사전 등록 섹션으로 스크롤하는 함수
+    const scrollToPreRegistration = () => {
+        if (!showPreRegistration) {
+            setShowPreRegistration(true);
+        }
+        setTimeout(() => {
+            preRegRef.current?.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
     };
 
     return (
@@ -217,10 +244,10 @@ export default function HomePage() {
                                 체험하기
                             </button>
                             <button 
-                                onClick={() => preRegRef.current?.scrollIntoView({ behavior: 'smooth' })}
+                                onClick={scrollToPreRegistration}
                                 className="text-blue-200 hover:text-white transition-colors text-sm font-medium"
                             >
-                                사전 등록
+                                사전등록
                             </button>
                             <Button 
                                 variant="outline" 
@@ -256,12 +283,12 @@ export default function HomePage() {
                                 </button>
                                 <button 
                                     onClick={() => {
-                                        preRegRef.current?.scrollIntoView({ behavior: 'smooth' });
+                                        scrollToPreRegistration();
                                         setMobileMenuOpen(false);
                                     }}
                                     className="text-blue-200 hover:text-white transition-colors text-sm font-medium text-left"
                                 >
-                                    사전 등록
+                                    사전등록
                                 </button>
                                 <Button 
                                     variant="outline" 
@@ -307,7 +334,7 @@ export default function HomePage() {
                                     지금 바로 체험하기
                                 </Button>
                                 <Button 
-                                    onClick={() => preRegRef.current?.scrollIntoView({ behavior: 'smooth' })}
+                                    onClick={scrollToPreRegistration}
                                     variant="outline" 
                                     size="lg" 
                                     className="w-full sm:w-auto border-2 border-blue-400 text-blue-400 hover:bg-blue-400 hover:text-white px-8 py-4 rounded-xl font-semibold transition-all duration-200"
@@ -632,7 +659,7 @@ export default function HomePage() {
                     if (section === 'demo') {
                         scrollToDemo();
                     } else if (section === 'pre-registration') {
-                        preRegRef.current?.scrollIntoView({ behavior: 'smooth' });
+                        scrollToPreRegistration();
                     }
                 }}
             />

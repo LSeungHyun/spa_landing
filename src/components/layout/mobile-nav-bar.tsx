@@ -143,7 +143,10 @@ export function MobileNavBar({
             id: 'reservation',
             label: '예약',
             icon: Calendar,
-            action: () => scrollToSection('pre-registration'),
+            action: () => {
+                onNavigate?.('pre-registration');
+                scrollToSection('pre-registration');
+            },
             badge: showPreRegistration || improveCount >= 1 ? undefined : 'HOT',
         });
 
