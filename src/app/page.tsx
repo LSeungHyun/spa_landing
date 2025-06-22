@@ -24,7 +24,6 @@ export default function HomePage() {
     const [isMounted, setIsMounted] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [showPreRegistration, setShowPreRegistration] = useState(false);
-    const [showEnhancedForm, setShowEnhancedForm] = useState(false);
     const [email, setEmail] = useState('');
     const [isRegistering, setIsRegistering] = useState(false);
     const [hasTriedDemo, setHasTriedDemo] = useState(false);
@@ -197,9 +196,8 @@ export default function HomePage() {
     };
 
     const handleEnhancedRegistrationSuccess = (data: any) => {
-        setShowEnhancedForm(false);
         setShowPreRegistration(false);
-        toast.success('🎉 상세 정보가 성공적으로 등록되었습니다!');
+        toast.success('🎉 사전 등록이 성공적으로 완료되었습니다!');
     };
 
     const scrollToDemo = () => {
@@ -527,100 +525,35 @@ export default function HomePage() {
                             </div>
 
                             {/* 혜택 리스트 */}
-                            <div className="grid md:grid-cols-3 gap-4 mb-8">
+                            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                                 <div className="bg-white/10 backdrop-blur-lg rounded-xl p-4 border border-white/20">
-                                    <div className="text-2xl mb-2">🎁</div>
-                                    <h3 className="font-semibold text-white mb-1">평생 무료</h3>
-                                    <p className="text-sm text-blue-200">베이직 플랜 영구 무료</p>
-                                </div>
-                                <div className="bg-white/10 backdrop-blur-lg rounded-xl p-4 border border-white/20">
-                                    <div className="text-2xl mb-2">⚡</div>
+                                    <div className="text-2xl mb-2">🚀</div>
                                     <h3 className="font-semibold text-white mb-1">우선 액세스</h3>
-                                    <p className="text-sm text-blue-200">신기능 최우선 제공</p>
+                                    <p className="text-sm text-blue-200">정식 출시 전 우선 액세스 기회</p>
                                 </div>
                                 <div className="bg-white/10 backdrop-blur-lg rounded-xl p-4 border border-white/20">
                                     <div className="text-2xl mb-2">👑</div>
                                     <h3 className="font-semibold text-white mb-1">프리미엄 체험</h3>
-                                    <p className="text-sm text-blue-200">30일 무료 체험</p>
+                                    <p className="text-sm text-blue-200">프리미엄 기능 1개월 무료 체험</p>
+                                </div>
+                                <div className="bg-white/10 backdrop-blur-lg rounded-xl p-4 border border-white/20">
+                                    <div className="text-2xl mb-2">🏆</div>
+                                    <h3 className="font-semibold text-white mb-1">창립 멤버 뱃지</h3>
+                                    <p className="text-sm text-blue-200">등록자 전용 창립 멤버 뱃지</p>
+                                </div>
+                                <div className="bg-white/10 backdrop-blur-lg rounded-xl p-4 border border-white/20">
+                                    <div className="text-2xl mb-2">💡</div>
+                                    <h3 className="font-semibold text-white mb-1">기능 제안 크레딧</h3>
+                                    <p className="text-sm text-blue-200">채택 시 기능 제안 크레딧 및 우선순위 부여</p>
                                 </div>
                             </div>
 
-                            {/* 등록 방식 선택 */}
-                            <div className="flex flex-col sm:flex-row gap-4 mb-8">
-                                <Button
-                                    onClick={() => setShowEnhancedForm(false)}
-                                    variant={!showEnhancedForm ? "default" : "outline"}
-                                    className={cn(
-                                        "flex-1 py-3",
-                                        !showEnhancedForm 
-                                            ? "bg-blue-600 text-white" 
-                                            : "border-white/20 text-white hover:bg-white/10"
-                                    )}
-                                >
-                                    <Mail className="w-4 h-4 mr-2" />
-                                    빠른 등록
-                                </Button>
-                                <Button
-                                    onClick={() => setShowEnhancedForm(true)}
-                                    variant={showEnhancedForm ? "default" : "outline"}
-                                    className={cn(
-                                        "flex-1 py-3",
-                                        showEnhancedForm 
-                                            ? "bg-blue-600 text-white" 
-                                            : "border-white/20 text-white hover:bg-white/10"
-                                    )}
-                                >
-                                    <Gift className="w-4 h-4 mr-2" />
-                                    상세 등록 (더 많은 혜택)
-                                </Button>
+                            {/* 사전 등록 폼 */}
+                            <div className="bg-white rounded-2xl p-4">
+                                <EnhancedPreRegistrationForm
+                                    onSuccess={handleEnhancedRegistrationSuccess}
+                                />
                             </div>
-
-                            {/* 등록 폼 */}
-                            {showEnhancedForm ? (
-                                <div className="bg-white rounded-2xl p-4">
-                                    <EnhancedPreRegistrationForm
-                                        onSuccess={handleEnhancedRegistrationSuccess}
-                                        onClose={() => setShowEnhancedForm(false)}
-                                    />
-                                </div>
-                            ) : (
-                                <Card className="bg-white/10 backdrop-blur-lg border-white/20 p-6 sm:p-8">
-                                    <form onSubmit={handlePreRegistration} className="space-y-4">
-                                        <div className="relative">
-                                            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                                            <Input
-                                                type="email"
-                                                value={email}
-                                                onChange={(e) => setEmail(e.target.value)}
-                                                placeholder="이메일 주소를 입력하세요"
-                                                className="pl-12 h-12 bg-slate-800/50 border-white/20 text-white placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500/50"
-                                                disabled={isRegistering}
-                                                required
-                                            />
-                                        </div>
-                                        <Button
-                                            type="submit"
-                                            disabled={isRegistering || !email.trim()}
-                                            className="w-full h-12 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold rounded-lg shadow-xl transform hover:scale-105 transition-all duration-200 focus-visible-enhanced"
-                                        >
-                                            {isRegistering ? (
-                                                <>
-                                                    <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                                                    등록 중...
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <Sparkles className="w-5 h-5 mr-2" />
-                                                    무료 사전 등록하기
-                                                </>
-                                            )}
-                                        </Button>
-                                    </form>
-                                    <p className="text-xs text-blue-200 mt-4 text-center">
-                                        ✓ 스팸 없음 ✓ 언제든 구독 해지 ✓ 개인정보 보호
-                                    </p>
-                                </Card>
-                            )}
 
                             {/* 사회적 증거 */}
                             <div className="mt-8 text-center">
