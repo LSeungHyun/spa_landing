@@ -1,0 +1,327 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Code Editing Safety Protocol & Error Prevention
+
+## 🎯 Mission Critical: Zero-Error Code Editing
+**Objective**: Eliminate common editing mistakes that break builds and cause runtime errors
+**Principle**: Surgical precision over bulk operations, validation over assumption
+**Standard**: Every edit must preserve functional integrity while achieving the desired change
+
+## 🚨 Critical Error Prevention Rules
+
+### **ABSOLUTE PRIORITY: Pre-Edit Validation Protocol**
+
+#### 1. **MANDATORY Pre-Edit Analysis**
+```
+BEFORE making ANY edit, you MUST:
+1. Read the ENTIRE file to understand context
+2. Identify ALL dependencies (imports, exports, references)
+3. Map component/function relationships
+4. Verify HTML/JSX structure integrity
+5. Plan the edit with surgical precision
+```
+
+**FORBIDDEN BEHAVIORS:**
+- ❌ NEVER edit without reading the complete file first
+- ❌ NEVER make bulk deletions without dependency analysis
+- ❌ NEVER assume imports are unused without verification
+- ❌ NEVER edit HTML/JSX structure without matching validation
+
+#### 2. **Import Statement Protection Protocol**
+
+**CRITICAL RULE: Imports are Sacred Until Proven Otherwise**
+
+```typescript
+// ✅ CORRECT: Import analysis before removal
+// STEP 1: Search for ALL usages of the import
+// STEP 2: Verify no dynamic references exist
+// STEP 3: Check for type-only usage
+// STEP 4: Confirm no indirect dependencies
+
+// ❌ WRONG: Deleting imports during bulk code removal
+// This causes "Unexpected token" and "Cannot find name" errors
+```
+
+**Import Validation Checklist:**
+- [ ] Search entire file for component/function name
+- [ ] Check for destructured usage patterns
+- [ ] Verify no type annotations depend on import
+- [ ] Confirm no dynamic string references exist
+- [ ] Validate no JSX usage in conditional blocks
+
+#### 3. **HTML/JSX Structure Integrity Protocol**
+
+**CRITICAL RULE: Every Opening Tag Must Have Verified Closing**
+
+```jsx
+// ✅ CORRECT: Bracket matching validation
+// BEFORE editing JSX:
+// 1. Count opening tags: <div>, <section>, <span>
+// 2. Count closing tags: </div>, </section>, </span>
+// 3. Verify self-closing tags: <img />, <br />
+// 4. Check conditional JSX blocks for completeness
+
+// ❌ WRONG: Editing JSX without structure validation
+// This causes "Unexpected token" and parsing errors
+```
+
+**JSX Structure Validation Steps:**
+1. **Visual Bracket Counting**: Manually count opening/closing tags
+2. **Indentation Verification**: Ensure consistent nesting levels
+3. **Conditional Block Integrity**: Verify {condition && <Component />} completeness
+4. **Fragment Handling**: Ensure React.Fragment or <></> pairs match
+
+## 🔧 Surgical Editing Methodology
+
+### **MUST FOLLOW: Precision Editing Rules**
+
+#### 1. **The "Read-Plan-Edit-Validate" Cycle**
+
+```
+STEP 1: COMPLETE FILE ANALYSIS
+- Read entire file from start to finish
+- Map all imports and their usage locations
+- Identify component boundaries and dependencies
+- Note HTML/JSX structure patterns
+
+STEP 2: SURGICAL PLANNING
+- Define EXACT lines to modify/remove
+- List ALL affected imports/exports
+- Plan HTML structure changes with matching pairs
+- Identify potential side effects
+
+STEP 3: PRECISE EXECUTION
+- Edit ONLY the planned sections
+- Preserve ALL functional imports
+- Maintain HTML/JSX structure integrity
+- Make minimal, targeted changes
+
+STEP 4: IMMEDIATE VALIDATION
+- Verify imports still match usage
+- Check HTML/JSX bracket matching
+- Confirm TypeScript compilation
+- Test component functionality
+```
+
+#### 2. **Import Management Best Practices**
+
+```typescript
+// ✅ CORRECT: Conservative import handling
+// When removing code, follow this protocol:
+
+// STEP 1: Identify what you're removing
+const componentToRemove = 'SomeComponent'
+
+// STEP 2: Search for ALL usage patterns
+// - Direct usage: <SomeComponent />
+// - Conditional usage: {condition && <SomeComponent />}
+// - Variable assignment: const comp = SomeComponent
+// - Type usage: someVar: SomeComponent
+// - Dynamic usage: components[SomeComponent]
+
+// STEP 3: Only remove import if ZERO usage found
+// STEP 4: Double-check with global search
+
+// ❌ WRONG: Removing imports during bulk deletion
+// This breaks the build and causes parser errors
+```
+
+#### 3. **HTML/JSX Editing Safety Protocol**
+
+```jsx
+// ✅ CORRECT: Safe JSX editing methodology
+
+// BEFORE editing JSX structure:
+// 1. Identify the parent container
+// 2. Count child elements
+// 3. Note any conditional rendering
+// 4. Plan the exact change
+
+// EXAMPLE: Safe div removal
+// ORIGINAL:
+<div className="container">
+  <div className="wrapper">  // ← Removing this
+    <h1>Title</h1>
+    <p>Content</p>
+  </div>                     // ← And this
+</div>
+
+// PLANNED RESULT:
+<div className="container">
+  <h1>Title</h1>
+  <p>Content</p>
+</div>
+
+// EXECUTION: Remove wrapper div pair, preserve children
+```
+
+## 🚫 Error Pattern Recognition & Prevention
+
+### **NEVER DO: Common Failure Patterns**
+
+#### 1. **The "Bulk Delete Trap"**
+```typescript
+// ❌ WRONG: Deleting large code blocks without analysis
+// This often removes necessary imports and breaks structure
+
+// ✅ CORRECT: Targeted removal with preservation
+// 1. Identify what needs to stay
+// 2. Carefully remove only unnecessary parts
+// 3. Preserve all functional dependencies
+```
+
+#### 2. **The "Import Assumption Error"**
+```typescript
+// ❌ WRONG: "This import looks unused, I'll remove it"
+import { SomeComponent } from './components'
+
+// Later in file (missed during quick scan):
+{showAdvanced && <SomeComponent />}
+
+// ✅ CORRECT: Thorough usage verification
+// 1. Global search for component name
+// 2. Check conditional rendering blocks
+// 3. Verify no dynamic usage patterns
+```
+
+#### 3. **The "Structure Mismatch Disaster"**
+```jsx
+// ❌ WRONG: Incomplete JSX editing
+<div>
+  <section>
+    <h1>Title</h1>
+    // Accidentally removing closing </section>
+</div>
+
+// ✅ CORRECT: Paired editing
+// 1. Identify opening tag
+// 2. Find matching closing tag
+// 3. Edit both together or neither
+```
+
+## 🧪 Validation & Testing Protocol
+
+### **MUST IMPLEMENT: Edit Verification Steps**
+
+#### 1. **Immediate Post-Edit Validation**
+```bash
+# After EVERY edit, run these checks:
+npm run type-check    # TypeScript validation
+npm run lint         # ESLint validation
+npm run build        # Build verification
+```
+
+#### 2. **Manual Verification Checklist**
+- [ ] All imports have corresponding usage
+- [ ] All JSX tags are properly paired
+- [ ] No TypeScript errors in console
+- [ ] Component renders without errors
+- [ ] All functionality preserved
+
+#### 3. **Error Recovery Protocol**
+```
+IF edit causes errors:
+1. STOP immediately
+2. Identify the root cause
+3. Revert to working state
+4. Re-plan the edit more carefully
+5. Execute with surgical precision
+```
+
+## 🎯 Advanced Prevention Strategies
+
+### **PROACTIVE MEASURES**
+
+#### 1. **Component Boundary Respect**
+```typescript
+// ✅ CORRECT: Edit within component boundaries
+// Understand where each component starts and ends
+// Never edit across component boundaries without full context
+
+const ComponentA = () => {
+  // Component A scope - safe to edit here
+  return <div>A</div>
+}
+
+const ComponentB = () => {
+  // Component B scope - separate editing context
+  return <div>B</div>
+}
+```
+
+#### 2. **Dependency Chain Awareness**
+```typescript
+// ✅ CORRECT: Understand the dependency flow
+// Parent Component → Child Component → Grandchild
+// Editing child affects both parent and grandchild
+// Always consider the full chain
+```
+
+#### 3. **Incremental Editing Strategy**
+```
+Instead of large changes:
+1. Make small, targeted edits
+2. Validate after each change
+3. Build up to the desired result
+4. Maintain working state throughout
+```
+
+## 📋 Emergency Recovery Procedures
+
+### **WHEN THINGS GO WRONG**
+
+#### 1. **Import Error Recovery**
+```typescript
+// SYMPTOM: "Cannot find name 'ComponentName'"
+// SOLUTION:
+// 1. Check if import was accidentally removed
+// 2. Search for component usage in file
+// 3. Re-add missing import
+// 4. Verify import path is correct
+```
+
+#### 2. **JSX Structure Error Recovery**
+```jsx
+// SYMPTOM: "Unexpected token" or parsing errors
+// SOLUTION:
+// 1. Check for unmatched opening/closing tags
+// 2. Verify proper JSX fragment usage
+// 3. Count brackets and parentheses
+// 4. Fix structure from inside out
+```
+
+#### 3. **Build Failure Recovery**
+```bash
+# SYSTEMATIC APPROACH:
+# 1. Read error messages carefully
+# 2. Identify the exact file and line
+# 3. Understand what the parser expected
+# 4. Fix the specific issue
+# 5. Validate fix doesn't break other parts
+```
+
+---
+
+## 🎯 Success Metrics
+
+**This protocol is successful when:**
+- Zero "Unexpected token" errors occur
+- No imports are accidentally removed
+- HTML/JSX structure remains intact
+- TypeScript compilation passes on first try
+- Components render without runtime errors
+
+**This protocol has FAILED when:**
+- Build breaks after editing
+- Components become unusable
+- Import errors appear
+- JSX parsing fails
+- Functionality is lost
+
+---
+
+**REMEMBER: Code editing is surgery, not demolition. Precision and care prevent disasters. When in doubt, make smaller changes and validate frequently.**
+

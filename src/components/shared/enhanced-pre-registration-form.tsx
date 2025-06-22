@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -21,17 +21,6 @@ const preRegistrationSchema = z.object({
   persona: z.enum(['pm', 'creator', 'startup', 'developer', 'marketer', 'other'], {
     required_error: '역할을 선택해주세요',
   }),
-  company: z.string().optional(),
-  company_size: z.enum(['1-10', '11-50', '51-200', '201-1000', '1000+', 'freelancer']).optional(),
-  use_case: z.string().optional(),
-  referral_source: z.enum(['google', 'social_media', 'friend', 'blog', 'ad', 'other']).optional(),
-  marketing_consent: z.boolean().default(false),
-  newsletter_consent: z.boolean().default(false),
-  beta_interest: z.boolean().default(true),
-  expected_usage: z.enum(['daily', 'weekly', 'monthly', 'occasionally']).optional(),
-  current_tools: z.array(z.string()).optional(),
-  pain_points: z.array(z.string()).optional(),
-  platform_preference: z.enum(['web', 'mobile', 'both', 'api']).optional(),
 });
 
 type PreRegistrationFormValues = z.infer<typeof preRegistrationSchema>;
@@ -48,8 +37,6 @@ export function EnhancedPreRegistrationForm({
   className = '',
 }: EnhancedPreRegistrationFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [step, setStep] = useState(1);
-  const totalSteps = 3;
 
   const {
     register,
@@ -59,11 +46,7 @@ export function EnhancedPreRegistrationForm({
     formState: { errors, isValid },
   } = useForm<PreRegistrationFormValues>({
     resolver: zodResolver(preRegistrationSchema),
-    defaultValues: {
-      marketing_consent: false,
-      newsletter_consent: false,
-      beta_interest: true,
-    },
+    defaultValues: {},
     mode: 'onChange',
   });
 
@@ -78,37 +61,6 @@ export function EnhancedPreRegistrationForm({
     { value: 'other', label: '기타', icon: Building, description: '기타 직무' },
   ];
 
-  const companySizeOptions = [
-    { value: 'freelancer', label: '프리랜서' },
-    { value: '1-10', label: '1-10명' },
-    { value: '11-50', label: '11-50명' },
-    { value: '51-200', label: '51-200명' },
-    { value: '201-1000', label: '201-1000명' },
-    { value: '1000+', label: '1000명 이상' },
-  ];
-
-  const referralOptions = [
-    { value: 'google', label: '구글 검색' },
-    { value: 'social_media', label: '소셜 미디어' },
-    { value: 'friend', label: '지인 추천' },
-    { value: 'blog', label: '블로그/기사' },
-    { value: 'ad', label: '온라인 광고' },
-    { value: 'other', label: '기타' },
-  ];
-
-  const usageOptions = [
-    { value: 'daily', label: '매일' },
-    { value: 'weekly', label: '주 2-3회' },
-    { value: 'monthly', label: '월 2-3회' },
-    { value: 'occasionally', label: '가끔' },
-  ];
-
-  const platformOptions = [
-    { value: 'web', label: '웹 브라우저' },
-    { value: 'mobile', label: '모바일 앱' },
-    { value: 'both', label: '웹 + 모바일' },
-    { value: 'api', label: 'API 연동' },
-  ];
 
   const onSubmit = async (data: PreRegistrationFormValues) => {
     setIsSubmitting(true);
@@ -123,20 +75,9 @@ export function EnhancedPreRegistrationForm({
         body: JSON.stringify({
           email: data.email,
           name_or_nickname: data.name || undefined,
-          expected_feature: data.use_case || undefined,
-          // 추가 정보들은 expected_feature에 포함
+          // 추가 정보들
           additional_info: {
             persona: data.persona,
-            company: data.company,
-            company_size: data.company_size,
-            referral_source: data.referral_source,
-            marketing_consent: data.marketing_consent,
-            newsletter_consent: data.newsletter_consent,
-            beta_interest: data.beta_interest,
-            expected_usage: data.expected_usage,
-            current_tools: data.current_tools,
-            pain_points: data.pain_points,
-            platform_preference: data.platform_preference,
             user_agent: navigator.userAgent,
             utm_source: new URLSearchParams(window.location.search).get('utm_source'),
             utm_medium: new URLSearchParams(window.location.search).get('utm_medium'),
@@ -150,14 +91,6 @@ export function EnhancedPreRegistrationForm({
       if (response.ok) {
         // 성공 처리
         toast.success('🎉 사전 등록이 완료되었습니다!');
-        
-        if (data.newsletter_consent) {
-          toast.success('📧 뉴스레터 구독이 설정되었습니다.');
-        }
-
-        if (data.beta_interest) {
-          toast.success('🚀 베타 테스트 알림을 받으실 수 있습니다.');
-        }
 
         onSuccess?.(result);
         onClose?.();
@@ -175,306 +108,106 @@ export function EnhancedPreRegistrationForm({
     }
   };
 
-  const nextStep = () => {
-    if (step < totalSteps) {
-      setStep(step + 1);
-    }
-  };
-
-  const prevStep = () => {
-    if (step > 1) {
-      setStep(step - 1);
-    }
-  };
-
-  const renderStep1 = () => (
-    <div className="space-y-6">
-      <div>
-        <Label htmlFor="email" className="text-sm font-medium">
-          이메일 주소 *
-        </Label>
-        <Input
-          id="email"
-          type="email"
-          placeholder="your@email.com"
-          className="mt-1"
-          {...register('email')}
-        />
-        {errors.email && (
-          <p className="text-sm text-red-600 mt-1">{errors.email.message}</p>
-        )}
-      </div>
-
-      <div>
-        <Label htmlFor="name" className="text-sm font-medium">
-          이름 (선택사항)
-        </Label>
-        <Input
-          id="name"
-          placeholder="홍길동"
-          className="mt-1"
-          {...register('name')}
-        />
-      </div>
-
-      <div>
-        <Label className="text-sm font-medium">역할 *</Label>
-        <div className="grid grid-cols-2 gap-3 mt-2">
-          {personaOptions.map((option) => {
-            const Icon = option.icon;
-            return (
-              <button
-                key={option.value}
-                type="button"
-                onClick={() => setValue('persona', option.value as any)}
-                className={`p-3 border rounded-lg text-left transition-all ${
-                  watchedValues.persona === option.value
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
-              >
-                <div className="flex items-center space-x-2 mb-1">
-                  <Icon className="w-4 h-4" />
-                  <span className="font-medium text-sm">{option.label}</span>
-                </div>
-                <p className="text-xs text-gray-600">{option.description}</p>
-              </button>
-            );
-          })}
-        </div>
-        {errors.persona && (
-          <p className="text-sm text-red-600 mt-1">{errors.persona.message}</p>
-        )}
-      </div>
-    </div>
-  );
-
-  const renderStep2 = () => (
-    <div className="space-y-6">
-      <div>
-        <Label htmlFor="company" className="text-sm font-medium">
-          회사명 (선택사항)
-        </Label>
-        <Input
-          id="company"
-          placeholder="회사명을 입력해주세요"
-          className="mt-1"
-          {...register('company')}
-        />
-      </div>
-
-      <div>
-        <Label className="text-sm font-medium">회사 규모</Label>
-        <Select onValueChange={(value) => setValue('company_size', value as any)}>
-          <SelectTrigger className="mt-1">
-            <SelectValue placeholder="회사 규모를 선택해주세요" />
-          </SelectTrigger>
-          <SelectContent>
-            {companySizeOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div>
-        <Label htmlFor="use_case" className="text-sm font-medium">
-          사용 목적 (선택사항)
-        </Label>
-        <Textarea
-          id="use_case"
-          placeholder="어떤 용도로 사용하실 예정인가요?"
-          className="mt-1"
-          rows={3}
-          {...register('use_case')}
-        />
-      </div>
-
-      <div>
-        <Label className="text-sm font-medium">어떻게 알게 되셨나요?</Label>
-        <Select onValueChange={(value) => setValue('referral_source', value as any)}>
-          <SelectTrigger className="mt-1">
-            <SelectValue placeholder="경로를 선택해주세요" />
-          </SelectTrigger>
-          <SelectContent>
-            {referralOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div>
-        <Label className="text-sm font-medium">예상 사용 빈도</Label>
-        <Select onValueChange={(value) => setValue('expected_usage', value as any)}>
-          <SelectTrigger className="mt-1">
-            <SelectValue placeholder="사용 빈도를 선택해주세요" />
-          </SelectTrigger>
-          <SelectContent>
-            {usageOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div>
-        <Label className="text-sm font-medium">선호 플랫폼</Label>
-        <Select onValueChange={(value) => setValue('platform_preference', value as any)}>
-          <SelectTrigger className="mt-1">
-            <SelectValue placeholder="플랫폼을 선택해주세요" />
-          </SelectTrigger>
-          <SelectContent>
-            {platformOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-    </div>
-  );
-
-  const renderStep3 = () => (
-    <div className="space-y-6">
-      <div className="space-y-4">
-        <div className="flex items-start space-x-3">
-          <Checkbox
-            id="marketing_consent"
-            checked={watchedValues.marketing_consent}
-            onCheckedChange={(checked) => setValue('marketing_consent', !!checked)}
-          />
-          <div>
-            <Label htmlFor="marketing_consent" className="text-sm font-medium">
-              마케팅 정보 수신 동의
-            </Label>
-            <p className="text-xs text-gray-600 mt-1">
-              제품 업데이트, 이벤트, 할인 혜택 등의 마케팅 정보를 받아보실 수 있습니다.
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-start space-x-3">
-          <Checkbox
-            id="newsletter_consent"
-            checked={watchedValues.newsletter_consent}
-            onCheckedChange={(checked) => setValue('newsletter_consent', !!checked)}
-          />
-          <div>
-            <Label htmlFor="newsletter_consent" className="text-sm font-medium">
-              뉴스레터 구독
-            </Label>
-            <p className="text-xs text-gray-600 mt-1">
-              AI 프롬프트 작성 팁과 업계 인사이트를 담은 뉴스레터를 받아보세요.
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-start space-x-3">
-          <Checkbox
-            id="beta_interest"
-            checked={watchedValues.beta_interest}
-            onCheckedChange={(checked) => setValue('beta_interest', !!checked)}
-          />
-          <div>
-            <Label htmlFor="beta_interest" className="text-sm font-medium">
-              베타 테스트 참여 관심
-            </Label>
-            <p className="text-xs text-gray-600 mt-1">
-              출시 전 베타 버전을 먼저 체험하고 피드백을 제공해주세요.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-blue-50 p-4 rounded-lg">
-        <h4 className="font-medium text-sm mb-2">🎁 얼리버드 혜택</h4>
-        <ul className="text-xs text-gray-700 space-y-1">
-          <li>• 출시 시 30% 할인 쿠폰</li>
-          <li>• 프리미엄 기능 1개월 무료</li>
-          <li>• 베타 테스터 전용 커뮤니티 초대</li>
-          <li>• 개발진과의 직접 소통 기회</li>
-        </ul>
-      </div>
-    </div>
-  );
-
   return (
     <Card className={`w-full max-w-2xl mx-auto ${className}`}>
       <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          무료 사전 등록
-          <span className="text-sm font-normal text-gray-500">
-            {step}/{totalSteps}
-          </span>
-        </CardTitle>
+        <CardTitle>무료 사전 등록</CardTitle>
         <CardDescription>
           Smart Prompt Assistant 출시 알림을 받고 특별 혜택을 누려보세요!
         </CardDescription>
-        
-        {/* 진행 바 */}
-        <div className="w-full bg-gray-200 rounded-full h-2 mt-4">
-          <div
-            className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-            style={{ width: `${(step / totalSteps) * 100}%` }}
-          />
-        </div>
       </CardHeader>
 
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          {step === 1 && renderStep1()}
-          {step === 2 && renderStep2()}
-          {step === 3 && renderStep3()}
+          {/* 기본 정보 */}
+          <div className="space-y-6">
+            <div>
+              <Label htmlFor="email" className="text-sm font-medium">
+                이메일 주소 *
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="your@email.com"
+                className="mt-1"
+                {...register('email')}
+              />
+              {errors.email && (
+                <p className="text-sm text-red-600 mt-1">{errors.email.message}</p>
+              )}
+            </div>
 
-          <div className="flex justify-between pt-6">
-            {step > 1 && (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={prevStep}
-                disabled={isSubmitting}
-              >
-                이전
-              </Button>
-            )}
-            
-            <div className="flex-1" />
+            <div>
+              <Label htmlFor="name" className="text-sm font-medium">
+                이름 또는 닉네임 (선택사항)
+              </Label>
+              <Input
+                id="name"
+                placeholder="홍길동"
+                className="mt-1"
+                {...register('name')}
+              />
+            </div>
 
-            {step < totalSteps ? (
-              <Button
-                type="button"
-                onClick={nextStep}
-                disabled={!watchedValues.email || !watchedValues.persona}
-              >
-                다음
-              </Button>
-            ) : (
-              <Button
-                type="submit"
-                disabled={isSubmitting || !isValid}
-                className="min-w-[120px]"
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    등록 중...
-                  </>
-                ) : (
-                  '등록 완료'
-                )}
-              </Button>
-            )}
+            <div>
+              <Label className="text-sm font-medium">주요 역할 *</Label>
+              <div className="grid grid-cols-2 gap-3 mt-2">
+                {personaOptions.map((option) => {
+                  const Icon = option.icon;
+                  return (
+                    <div
+                      key={option.value}
+                      className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                        watchedValues.persona === option.value
+                          ? 'border-blue-500 bg-blue-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                      onClick={() => setValue('persona', option.value as any)}
+                    >
+                      <div className="flex items-center space-x-2">
+                        <Icon className="w-4 h-4" />
+                        <span className="text-sm font-medium">{option.label}</span>
+                      </div>
+                      <p className="text-xs text-gray-600 mt-1">{option.description}</p>
+                    </div>
+                  );
+                })}
+              </div>
+              {errors.persona && (
+                <p className="text-sm text-red-600 mt-1">{errors.persona.message}</p>
+              )}
+            </div>
+          </div>
+
+          {/* 얼리버드 혜택 카드 */}
+          <div className="bg-blue-50 p-4 rounded-lg">
+              <h4 className="font-medium text-sm mb-2">🎁 얼리버드 혜택</h4>
+              <ul className="text-xs text-gray-700 space-y-1">
+                <li>• 출시 시 30% 할인 쿠폰</li>
+                <li>• 프리미엄 기능 1개월 무료</li>
+                <li>• 베타 테스터 전용 커뮤니티 초대</li>
+                <li>• 개발진과의 직접 소통 기회</li>
+              </ul>
+            </div>
+
+          <div className="pt-6">
+            <Button
+              type="submit"
+              disabled={isSubmitting || !watchedValues.email || !watchedValues.persona}
+              className="w-full min-w-[120px]"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  등록 중...
+                </>
+              ) : (
+                '등록 완료'
+              )}
+            </Button>
           </div>
         </form>
       </CardContent>
     </Card>
   );
-} 
+}

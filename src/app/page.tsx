@@ -103,11 +103,11 @@ export default function HomePage() {
             
             // 개선 횟수에 따른 차별화된 메시지
             if (improveCount === 0) {
-                toast.success('🎉 프롬프트가 10배 더 구체해졌어요!');
+                toast.success('🎉 프롬프트가 10배 더 향상되었어요!');
             } else if (improveCount === 1) {
-                toast.success('🔥 또 다른 프롬프트도 개선해보세요!');
+                toast.success('🎉 프롬프트가 10배 더 향상되었어요!');
             } else {
-                toast.success('✨ 완벽해요! 이제 무제한 사용해보세요!');
+                toast.success('🎉 프롬프트가 10배 더 향상되었어요!');
             }
 
         } catch (error) {
