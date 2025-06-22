@@ -1,0 +1,187 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Notion Work Log Management Protocol
+
+## 🎯 CRITICAL DIRECTIVE: Workspace Hierarchy Compliance
+
+### **MANDATORY EXECUTION SEQUENCE**
+When user requests creation of work logs (업무일지) in Notion:
+
+1. **NEVER** create pages at workspace root level
+2. **ALWAYS** follow the exact hierarchy: `🖥️ 개발 워크스페이스` → `SPA 프로젝트(승현)` → `📋 업무일지 (Work log)`
+3. **MUST** use the correct parent page ID for all work log entries
+
+### **ABSOLUTE REQUIREMENTS**
+
+#### 🔴 CRITICAL PARENT PAGE IDENTIFICATION
+- **Target Parent**: `SPA 프로젝트(승현)` 
+- **Parent Page ID**: `214ce2a8-927c-80-44-9484-e51c04af048e`
+- **Parent URL**: `https://www.notion.so/214ce2a8927c80449484e51c04af048e`
+
+#### 🔴 MANDATORY VERIFICATION STEPS
+Before creating ANY work log page:
+1. **VERIFY** the parent page exists and is accessible
+2. **CONFIRM** the user wants the work log under SPA project specifically
+3. **VALIDATE** the parent page ID matches the SPA project page
+4. **CHECK** existing work log structure for naming consistency
+
+### **EXECUTION PROTOCOL**
+
+#### ✅ CORRECT Implementation Pattern
+```typescript
+// ALWAYS use this exact parent specification
+{
+  "parent": {
+    "page_id": "214ce2a8-927c-80-44-9484-e51c04af048e",
+    "type": "page_id"
+  },
+  "pages": [{
+    "properties": {
+      "title": "📋 업무일지 - YYYY.MM.DD"
+    },
+    "content": "Work log content..."
+  }]
+}
+```
+
+#### ❌ FORBIDDEN Actions
+- **NEVER** omit the parent specification
+- **NEVER** create work logs at workspace root
+- **NEVER** use generic page creation without parent context
+- **NEVER** assume default workspace location
+
+### **ERROR PREVENTION MECHANISMS**
+
+#### 🛡️ Pre-Creation Validation Checklist
+Before executing `mcp_notion_create-pages`:
+- [ ] Parent page ID is explicitly set to SPA project
+- [ ] Title follows exact naming convention: `📋 업무일지 - YYYY.MM.DD`
+- [ ] Content structure matches existing work log format
+- [ ] User context confirms SPA project work log intent
+
+#### 🔍 Context Analysis Requirements
+When user mentions "업무일지" or "work log":
+1. **ASSUME** they mean SPA project work log unless explicitly stated otherwise
+2. **SEARCH** for existing work logs to understand structure
+3. **FETCH** the SPA project page to confirm current structure
+4. **VALIDATE** the intended location with user if ambiguous
+
+### **PROMPT ENGINEERING SAFEGUARDS**
+
+#### 🎯 Chain-of-Thought Validation
+Before any Notion page creation:
+```
+1. IDENTIFY: What type of page is being requested?
+2. LOCATE: Where should this page be created in the hierarchy?
+3. VERIFY: Is the parent page correctly identified?
+4. CONFIRM: Does this match user's intended workspace structure?
+5. EXECUTE: Only proceed if all validations pass
+```
+
+#### 🔄 Self-Correction Protocol
+If error occurs:
+1. **ACKNOWLEDGE** the specific mistake made
+2. **ANALYZE** root cause (missing parent, wrong hierarchy, etc.)
+3. **CORRECT** by following proper protocol
+4. **DOCUMENT** the error pattern for future prevention
+
+### **WORKSPACE STRUCTURE REFERENCE**
+
+#### 📊 Hierarchy Map
+```
+🖥️ 개발 워크스페이스 (Development Workspace)
+├── 📋 신규 프로젝트 시작 체크리스트
+├── 🛠️ 공용 개발 리소스
+├── 👰🏻‍♀️ 웨딩 사이트 (보류)
+├── 🎲 보드게임 랭킹 사이트 (아카이브)
+├── SPA 프로젝트(승현) ← **TARGET PARENT**
+│   ├── 🧭 프로젝트 관리 (Planning & PM)
+│   ├── ✨ 기획 및 설계 (Ideation & Specs)
+│   ├── 📚 자료 아카이브 (Resources & Archive)
+│   └── 📋 업무일지 (Work log) ← **WORK LOGS GO HERE**
+│       ├── 📋 업무일지 - 2025.06.19
+│       ├── 📋 업무일지 - 2025.06.21
+│       └── 📋 업무일지 - 2025.06.22
+└── 참고문서
+```
+
+### **NAMING CONVENTIONS**
+
+#### 📝 Work Log Title Format
+- **Pattern**: `📋 업무일지 - YYYY.MM.DD`
+- **Example**: `📋 업무일지 - 2025.06.22`
+- **Emoji**: Always use 📋 (clipboard emoji)
+- **Date Format**: YYYY.MM.DD (Korean style with dots)
+
+#### 🏷️ Content Structure Template
+```markdown
+# YYYY.MM.DD 개발 업무 일지
+
+## 📋 작업 개요
+**프로젝트**: SPA Landing (Smart Prompt Assistant)
+**작업일**: YYYY년 M월 D일
+**담당자**: [담당자명]
+
+## 🎯 주요 완료 작업
+[구체적인 작업 내용]
+
+## 🔧 기술적 세부사항
+[기술적 구현 내용]
+
+## 📊 성과 및 결과
+[달성된 목표와 결과]
+
+## 🔄 Git 커밋 정보
+[커밋 해시 및 변경사항]
+
+## 🎯 다음 단계 계획
+[향후 작업 계획]
+```
+
+### **EMERGENCY PROTOCOLS**
+
+#### 🚨 If Wrong Location Created
+1. **IMMEDIATELY** acknowledge the error
+2. **MOVE** the page to correct location using `mcp_notion_move-pages`
+3. **VERIFY** the page is now in correct hierarchy
+4. **APOLOGIZE** and explain the correction
+
+#### 🔧 Recovery Commands
+```typescript
+// Move incorrectly placed work log
+mcp_notion_move-pages({
+  "page_or_database_ids": ["INCORRECT_PAGE_ID"],
+  "new_parent": {
+    "page_id": "214ce2a8-927c-80-44-9484-e51c04af048e",
+    "type": "page_id"
+  }
+})
+```
+
+### **QUALITY ASSURANCE**
+
+#### ✅ Success Criteria
+- Work log appears under SPA 프로젝트(승현)
+- Title follows exact naming convention
+- Content structure is consistent
+- User confirms correct placement
+
+#### 📈 Continuous Improvement
+- Monitor for any hierarchy placement errors
+- Update parent page IDs if workspace structure changes
+- Refine protocols based on error patterns
+- Maintain documentation accuracy
+
+---
+
+## 🎯 SUMMARY IMPERATIVE
+
+**NEVER FORGET**: When creating work logs, ALWAYS use parent page ID `214ce2a8-927c-80-44-9484-e51c04af048e` for SPA 프로젝트(승현). This is NON-NEGOTIABLE.
+
+**VERIFICATION MANTRA**: "Parent first, content second, validation always."
+
+**ERROR PREVENTION**: When in doubt, search for existing work logs to understand structure before creating new ones.
+
