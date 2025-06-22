@@ -88,9 +88,6 @@ export function Header({
                 </Link>
               )
             ))}
-            <Button asChild>
-              <Link href="/login">Sign In</Link>
-            </Button>
           </nav>
 
           {/* Mobile Navigation */}
@@ -127,9 +124,6 @@ export function Header({
                   </Link>
                 )
               ))}
-              <Button asChild className="mt-2">
-                <Link href="/login">Sign In</Link>
-              </Button>
             </nav>
           </div>
         )}

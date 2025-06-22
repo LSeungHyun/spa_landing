@@ -103,11 +103,11 @@ export default function HomePage() {
             
             // 개선 횟수에 따른 차별화된 메시지
             if (improveCount === 0) {
-                toast.success('🎉 프롬프트가 10배 더 향상되었어요!');
+                toast.success('🚀 프롬프트가 10배 향상되었습니다!');
             } else if (improveCount === 1) {
-                toast.success('🎉 프롬프트가 10배 더 향상되었어요!');
+                toast.success('⚡ 프롬프트 성능이 극적으로 개선되었습니다!');
             } else {
-                toast.success('🎉 프롬프트가 10배 더 향상되었어요!');
+                toast.success('🎯 완벽한 프롬프트로 변환되었습니다!');
             }
 
         } catch (error) {
@@ -247,13 +247,7 @@ export default function HomePage() {
                             >
                                 사전등록
                             </button>
-                            <Button 
-                                variant="outline" 
-                                size="sm" 
-                                className="border-blue-400 text-blue-400 hover:bg-blue-400 hover:text-white"
-                            >
-                                로그인
-                            </Button>
+
                         </nav>
 
                         {/* Mobile Menu Button */}
@@ -288,13 +282,7 @@ export default function HomePage() {
                                 >
                                     사전등록
                                 </button>
-                                <Button 
-                                    variant="outline" 
-                                    size="sm" 
-                                    className="border-blue-400 text-blue-400 hover:bg-blue-400 hover:text-white w-fit"
-                                >
-                                    로그인
-                                </Button>
+
                             </nav>
                         </div>
                     )}
@@ -485,17 +473,17 @@ export default function HomePage() {
                                     <div className="mt-6 p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl border border-green-200/50 animate-fade-in">
                                         <div className="flex items-center space-x-2 text-green-700 mb-2">
                                             <CheckCircle className="w-5 h-5" />
-                                            <span className="font-medium">체험 완료!</span>
+                                            <span className="font-medium">프롬프트 개선 완료!</span>
                                         </div>
                                         <p className="text-sm text-gray-700 leading-relaxed">
                                             {improveCount < 2 
-                                                ? `${2 - improveCount}번 더 체험하시면 무제한 이용 혜택을 받을 수 있어요! 🎉`
-                                                : '🎉 축하합니다! 이제 무제한으로 이용하실 수 있습니다!'
+                                                ? `🚀 프롬프트가 ${(improveCount + 1) * 10}배 향상되었습니다! ${2 - improveCount}번 더 체험해보세요.`
+                                                : '⚡ 프롬프트 성능이 극적으로 개선되었습니다!'
                                             }
                                         </p>
                                         {improveCount >= 2 && (
                                             <div className="mt-2 text-xs text-green-600">
-                                                ✨ 사전 등록하시면 더 많은 혜택을 받으실 수 있어요!
+                                                🎯 사전 등록하고 더 강력한 AI 기능을 경험해보세요!
                                             </div>
                                         )}
                                     </div>
@@ -520,12 +508,12 @@ export default function HomePage() {
                                     체험이 마음에 드셨나요? 🚀
                                 </h2>
                                 <p className="text-xl text-blue-100 mb-6">
-                                    사전 등록하시면 <strong className="text-yellow-300">평생 무료</strong> + <strong className="text-yellow-300">프리미엄 기능</strong>을 먼저 경험하실 수 있어요!
+                                    사전 등록하고 특별한 혜택을 받아보세요!
                                 </p>
                             </div>
 
                             {/* 혜택 리스트 */}
-                            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                            <div className="grid md:grid-cols-3 gap-4 mb-8">
                                 <div className="bg-white/10 backdrop-blur-lg rounded-xl p-4 border border-white/20">
                                     <div className="text-2xl mb-2">🚀</div>
                                     <h3 className="font-semibold text-white mb-1">우선 액세스</h3>
@@ -540,11 +528,6 @@ export default function HomePage() {
                                     <div className="text-2xl mb-2">🏆</div>
                                     <h3 className="font-semibold text-white mb-1">창립 멤버 뱃지</h3>
                                     <p className="text-sm text-blue-200">등록자 전용 창립 멤버 뱃지</p>
-                                </div>
-                                <div className="bg-white/10 backdrop-blur-lg rounded-xl p-4 border border-white/20">
-                                    <div className="text-2xl mb-2">💡</div>
-                                    <h3 className="font-semibold text-white mb-1">기능 제안 크레딧</h3>
-                                    <p className="text-sm text-blue-200">채택 시 기능 제안 크레딧 및 우선순위 부여</p>
                                 </div>
                             </div>
 
