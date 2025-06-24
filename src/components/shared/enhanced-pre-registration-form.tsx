@@ -18,9 +18,7 @@ import { Loader2, User, Building, Target, Users, Zap, Mail } from 'lucide-react'
 const preRegistrationSchema = z.object({
   email: z.string().email('올바른 이메일 주소를 입력해주세요'),
   name: z.string().optional(),
-  persona: z.enum(['pm', 'creator', 'startup', 'developer', 'marketer', 'other'], {
-    required_error: '역할을 선택해주세요',
-  }),
+  persona: z.enum(['pm', 'creator', 'startup', 'developer', 'marketer', 'other']).optional(),
 });
 
 type PreRegistrationFormValues = z.infer<typeof preRegistrationSchema>;
@@ -150,7 +148,7 @@ export function EnhancedPreRegistrationForm({
             </div>
 
             <div>
-              <Label className="text-sm font-medium">주요 역할 *</Label>
+              <Label className="text-sm font-medium">주요 역할 (선택사항)</Label>
               <div className="grid grid-cols-2 gap-3 mt-2">
                 {personaOptions.map((option) => {
                   const Icon = option.icon;
@@ -193,7 +191,7 @@ export function EnhancedPreRegistrationForm({
           <div className="pt-6">
             <Button
               type="submit"
-              disabled={isSubmitting || !watchedValues.email || !watchedValues.persona}
+              disabled={isSubmitting || !watchedValues.email}
               className="w-full min-w-[120px]"
             >
               {isSubmitting ? (
@@ -202,7 +200,7 @@ export function EnhancedPreRegistrationForm({
                   등록 중...
                 </>
               ) : (
-                '등록 완료'
+                '사전 등록하기'
               )}
             </Button>
           </div>

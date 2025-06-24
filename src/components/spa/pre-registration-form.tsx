@@ -15,7 +15,7 @@ interface PreRegistrationFormProps {
 
 interface FormData {
     email: string;
-    persona: 'pm' | 'creator' | 'startup';
+    persona?: 'pm' | 'creator' | 'startup';
     consent: boolean;
 }
 
@@ -69,7 +69,7 @@ export function PreRegistrationForm({ isOpen, onClose, selectedPersona = 'pm' }:
             // 사전 등록 데이터 저장
             const preRegistrationData: Omit<PreRegistration, 'id' | 'created_at' | 'updated_at'> = {
                 email: data.email,
-                persona: data.persona,
+                persona: data.persona || 'other',
                 marketing_consent: data.consent,
                 newsletter_consent: data.consent,
                 beta_interest: true
@@ -194,15 +194,16 @@ export function PreRegistrationForm({ isOpen, onClose, selectedPersona = 'pm' }:
                                 {/* 페르소나 선택 */}
                                 <div>
                                     <label htmlFor="persona" className="block text-sm font-medium text-gray-700 mb-2">
-                                        직무/역할
+                                        직무/역할 (선택사항)
                                     </label>
                                     <div className="relative">
                                         <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                                         <select
-                                            {...register('persona', { required: '역할을 선택해주세요' })}
+                                            {...register('persona')}
                                             className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all appearance-none bg-white"
                                             disabled={isSubmitting}
                                         >
+                                            <option value="">선택해주세요</option>
                                             {Object.entries(personaLabels).map(([value, label]) => (
                                                 <option key={value} value={value}>
                                                     {label}
