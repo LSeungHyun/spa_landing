@@ -410,18 +410,26 @@ export default function HomePage() {
                                     <label htmlFor="prompt-input" className="sr-only">
                                         프롬프트 입력
                                     </label>
-                                    <div className="relative bg-gray-50 rounded-xl border border-gray-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all duration-200 chat-input-container">
+                                    <div className={cn(
+                                        "relative rounded-xl border transition-all duration-300 transform",
+                                        "bg-gradient-to-br from-blue-50/50 to-purple-50/50",
+                                        inputText.length > 0 
+                                            ? "border-blue-400 ring-4 ring-blue-500/20 scale-[1.02] shadow-lg" 
+                                            : "border-gray-200 hover:border-blue-300",
+                                        "focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/20",
+                                        "focus-within:scale-[1.02] focus-within:shadow-lg"
+                                    )}>
                                         <textarea
                                             id="prompt-input"
                                             value={inputText}
                                             onChange={(e) => setInputText(e.target.value)}
-                                            placeholder="개선하고 싶은 프롬프트를 입력하세요..."
+                                            placeholder="예: 고객에게 제품 소개 이메일을 작성해주세요..."
                                             className={cn(
-                                                "w-full min-h-[120px] sm:min-h-[140px] p-4 pr-16 bg-transparent border-none",
+                                                "w-full min-h-[160px] sm:min-h-[180px] p-4 pr-16 bg-transparent border-none",
                                                 "text-gray-900 placeholder:text-gray-500",
                                                 "focus:outline-none focus:ring-0",
-                                                "resize-none transition-all duration-200 mobile-readable",
-                                                "leading-relaxed"
+                                                "resize-none transition-all duration-200",
+                                                "leading-relaxed text-base"
                                             )}
                                             disabled={isLoading}
                                             onKeyDown={(e) => {
@@ -435,7 +443,7 @@ export default function HomePage() {
                                         {/* 마법의 지팡이 버튼 - 개선된 스타일 */}
                                         <button
                                             onClick={handleImprovePrompt}
-                                            disabled={isLoading || !inputText.trim()}
+                                            disabled={isLoading || !inputText.trim() || inputText.length < 10 || inputText.length > 500}
                                             className={cn(
                                                 "absolute right-3 bottom-3 px-4 py-2.5 rounded-lg transition-all duration-200",
                                                 "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700",
@@ -462,19 +470,94 @@ export default function HomePage() {
                                         </button>
                                     </div>
 
-                                    {/* 키보드 단축키 힌트 */}
-                                    <div className="flex items-center justify-between mt-3 text-xs text-gray-500">
+                                    {/* 문자 수 카운터 및 입력 가이드 */}
+                                    <div className="flex items-center justify-between mt-3 text-xs">
                                         <div className="flex items-center space-x-4">
-                                            <span>💡 샘플을 클릭하여 빠르게 시작해보세요</span>
+                                            <span className="text-gray-500">💡 샘플을 클릭하여 빠르게 시작해보세요</span>
                                         </div>
-                                        <div className="hidden sm:flex items-center space-x-1">
-                                            <kbd className="px-2 py-1 bg-gray-200 rounded text-xs font-mono">Ctrl</kbd>
-                                            <span>+</span>
-                                            <kbd className="px-2 py-1 bg-gray-200 rounded text-xs font-mono">Enter</kbd>
-                                            <span>로 실행</span>
+                                        <div className="flex items-center space-x-3">
+                                            {/* 문자 수 카운터 */}
+                                            <div className={cn(
+                                                "flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium",
+                                                inputText.length < 10 
+                                                    ? "bg-red-100 text-red-600" 
+                                                    : inputText.length > 500 
+                                                    ? "bg-red-100 text-red-600"
+                                                    : inputText.length > 400
+                                                    ? "bg-yellow-100 text-yellow-600"
+                                                    : "bg-green-100 text-green-600"
+                                            )}>
+                                                <span>{inputText.length}</span>
+                                                <span>/</span>
+                                                <span>500</span>
+                                            </div>
+                                            {/* 키보드 단축키 힌트 */}
+                                            <div className="hidden sm:flex items-center space-x-1 text-gray-500">
+                                                <kbd className="px-2 py-1 bg-gray-200 rounded text-xs font-mono">Ctrl</kbd>
+                                                <span>+</span>
+                                                <kbd className="px-2 py-1 bg-gray-200 rounded text-xs font-mono">Enter</kbd>
+                                                <span>로 실행</span>
+                                            </div>
                                         </div>
                                     </div>
+                                    
+                                    {/* 입력 검증 메시지 */}
+                                    {inputText.length > 0 && (
+                                        <div className={cn(
+                                            "mt-2 text-xs flex items-center space-x-1",
+                                            inputText.length < 10 
+                                                ? "text-red-600" 
+                                                : inputText.length > 500 
+                                                ? "text-red-600"
+                                                : "text-green-600"
+                                        )}>
+                                            {inputText.length < 10 ? (
+                                                <>
+                                                    <span>⚠️</span>
+                                                    <span>프롬프트가 너무 짧습니다. 최소 10자 이상 입력해주세요.</span>
+                                                </>
+                                            ) : inputText.length > 500 ? (
+                                                <>
+                                                    <span>⚠️</span>
+                                                    <span>프롬프트가 너무 깁니다. 500자 이하로 줄여주세요.</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <span>✅</span>
+                                                    <span>좋은 길이의 프롬프트입니다!</span>
+                                                </>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
+
+                                {/* 작성 팁 섹션 */}
+                                {inputText.length === 0 && (
+                                    <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200/50">
+                                        <h5 className="text-sm font-semibold text-blue-800 mb-2 flex items-center">
+                                            <span className="mr-2">💡</span>
+                                            효과적인 프롬프트 작성 팁
+                                        </h5>
+                                        <div className="grid sm:grid-cols-2 gap-3 text-xs text-blue-700">
+                                            <div className="flex items-start space-x-2">
+                                                <span className="text-blue-500 font-bold">1.</span>
+                                                <span>구체적인 목적과 상황을 명시하세요</span>
+                                            </div>
+                                            <div className="flex items-start space-x-2">
+                                                <span className="text-blue-500 font-bold">2.</span>
+                                                <span>원하는 결과물의 형식을 설명하세요</span>
+                                            </div>
+                                            <div className="flex items-start space-x-2">
+                                                <span className="text-blue-500 font-bold">3.</span>
+                                                <span>대상 독자나 사용자를 고려하세요</span>
+                                            </div>
+                                            <div className="flex items-start space-x-2">
+                                                <span className="text-blue-500 font-bold">4.</span>
+                                                <span>톤앤매너나 스타일을 지정하세요</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
 
                                 {/* 샘플 프롬프트 섹션 - 개선된 스타일 */}
                                 <div className="mt-6">

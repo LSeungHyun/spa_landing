@@ -22,7 +22,7 @@ src/components/
 - 총 파일 수: 약 56개
 - 평균 파일 크기: 4.6KB
 - 최대 파일 크기: 35KB (persona-selector.tsx)
-- 중복 파일: SmartPromptHero, AIDemo 등
+- 중복 파일: SmartPromptHero 등
 
 ### After (개선 후)
 - 총 파일 수: 71개 (tsx: 63개, ts: 8개)
@@ -38,7 +38,7 @@ src/components/
   - `persona-data.ts`: 페르소나 데이터
   - `persona-card.tsx`: 개별 카드 컴포넌트
   
-- **ai-demo.tsx** (591줄 → 80줄)
+- **twelve-scenarios-demo.tsx**: 12가지 시나리오 데모 컴포넌트
   - `demo-scenarios.ts`: 데모 시나리오 데이터
   - `demo-interface.tsx`: 인터랙티브 인터페이스
 
@@ -93,8 +93,8 @@ import { PersonaCard, DemoInterface } from '@/components/shared';
 
 ## 🧹 정리 완료 사항
 
-- ✅ 중복 파일 제거 (SmartPromptHero, AIDemo)
-- ✅ 대용량 파일 분리 (persona-selector, ai-demo)
+- ✅ 중복 파일 제거 (SmartPromptHero)
+- ✅ 대용량 파일 분리 (persona-selector)
 - ✅ 기능별 폴더 분리 및 이동
 - ✅ Import 경로 수정 및 검증
 - ✅ Barrel exports 생성
@@ -116,8 +116,8 @@ import { PersonaCard, DemoInterface } from '@/components/shared';
 ```
 src/components/
 ├── demo/                    # 데모 관련 컴포넌트
-│   ├── ai-demo.tsx         # AI 데모 메인 컴포넌트
-│   ├── persona-selector.tsx # 페르소나 선택기
+│   ├── twelve-scenarios-demo.tsx # 12가지 시나리오 데모
+│   ├── before-after-demo.tsx # 전후 비교 데모
 │   └── index.ts            # Barrel exports
 ├── sections/               # 페이지 섹션 컴포넌트
 │   ├── hero-section.tsx    # 히어로 섹션
@@ -164,7 +164,7 @@ src/components/
 ### 2. 컴포넌트 크기 최적화
 **이전 (Phase 3)**:
 - `persona-selector.tsx`: 748줄 (35KB)
-- `ai-demo.tsx`: 591줄 (25KB)
+- 대용량 컴포넌트들이 존재했음
 
 **이후**:
 - 각 컴포넌트 평균 80-200줄로 축소
@@ -179,7 +179,7 @@ src/components/
 
 ### 중복 제거
 - `SmartPromptHero` 중복 파일 제거
-- `AIDemo` 컴포넌트 통합
+- 불필요한 컴포넌트 정리
 
 ### 대용량 파일 분리
 1. **PersonaSelector** (748줄 → 4개 파일):
@@ -188,10 +188,10 @@ src/components/
    - `persona-card.tsx`: 카드 컴포넌트
    - `persona-selector.tsx`: 메인 컴포넌트
 
-2. **AIDemo** (591줄 → 3개 파일):
+2. **데모 컴포넌트들** 최적화:
    - `demo-scenarios.ts`: 시나리오 데이터
    - `demo-interface.tsx`: 인터페이스 컴포넌트
-   - `ai-demo.tsx`: 메인 컴포넌트
+   - `twelve-scenarios-demo.tsx`: 12가지 시나리오 데모
 
 ### 폴더별 Import 패턴
 
@@ -206,7 +206,7 @@ import { PersonaCard, DemoInterface } from '@/components/shared';
 import { personas, demoScenarios } from '@/components/data';
 
 // Demo components
-import { AIDemo, PersonaSelector } from '@/components/demo';
+import { TwelveScenariosDemo, BeforeAfterDemo } from '@/components/demo';
 ```
 
 ## 🔧 마이그레이션 가이드

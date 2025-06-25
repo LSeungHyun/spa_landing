@@ -39,7 +39,7 @@ Phase 2: ✅ 완료
 Phase 3: ✅ 완료
 - 클라이언트 훅: src/hooks/use-usage-limit-sync.ts ✅
 - UI 컴포넌트: src/components/shared/usage-indicator.tsx ✅
-- 클라이언트 통합: src/components/demo/ai-demo.tsx ✅ (업데이트 완료)
+- 클라이언트 통합: 루트 페이지 및 데모 컴포넌트 ✅ (업데이트 완료)
 - 환경변수 설정: src/lib/env.ts ✅ (업데이트 완료)
 ```
 
@@ -312,9 +312,9 @@ Phase 3: ✅ 완료
   - 검증 기준: ✅ UI 정확성 및 반응성 확인
   - 완료일: 2024-12-19
 
-- [x] **AI Demo 컴포넌트 실제 API 통합**
+- [x] **데모 컴포넌트 실제 API 통합**
   - 상태: ✅ 완료
-  - 파일 경로: `src/components/demo/ai-demo.tsx`
+  - 파일 경로: 루트 페이지 및 데모 컴포넌트들
   - 세부사항: 시뮬레이션에서 실제 API 호출로 변경
   - 구현 내용:
     - ✅ 실제 `/api/generate` API 호출
