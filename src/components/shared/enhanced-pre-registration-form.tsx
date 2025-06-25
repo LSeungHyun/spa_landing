@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -35,6 +35,7 @@ export function EnhancedPreRegistrationForm({
   className = '',
 }: EnhancedPreRegistrationFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [apiStatus, setApiStatus] = useState<'unknown' | 'checking' | 'available' | 'unavailable'>('unknown');
 
   const {
     register,
@@ -58,7 +59,6 @@ export function EnhancedPreRegistrationForm({
     { value: 'marketer', label: '마케터', icon: Mail, description: '마케팅 및 홍보' },
     { value: 'other', label: '기타', icon: Building, description: '기타 직무' },
   ];
-
 
   const onSubmit = async (data: PreRegistrationFormValues) => {
     setIsSubmitting(true);
@@ -84,27 +84,102 @@ export function EnhancedPreRegistrationForm({
         }),
       });
 
+      // 응답이 JSON인지 확인
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        console.error('API returned non-JSON response:', {
+          status: response.status,
+          statusText: response.statusText,
+          contentType,
+          url: response.url
+        });
+
+        // HTML 응답인 경우 (보통 404나 500 에러 페이지)
+        if (contentType && contentType.includes('text/html')) {
+          throw new Error('API_NOT_AVAILABLE');
+        }
+
+        throw new Error('INVALID_RESPONSE_FORMAT');
+      }
+
       const result = await response.json();
 
       if (response.ok) {
         // 성공 처리
         toast.success('🎉 사전 등록이 완료되었습니다!');
-
         onSuccess?.(result);
         onClose?.();
       } else if (response.status === 409) {
         toast.error(result.error || '이미 등록된 이메일입니다.');
       } else {
+        console.error('API error response:', {
+          status: response.status,
+          error: result.error,
+          details: result.details
+        });
         toast.error(result.error || '등록 중 오류가 발생했습니다. 다시 시도해주세요.');
       }
 
     } catch (error) {
       console.error('Registration error:', error);
-      toast.error('네트워크 오류가 발생했습니다. 다시 시도해주세요.');
+
+      // 에러 타입에 따른 적절한 메시지 표시
+      if (error instanceof Error) {
+        switch (error.message) {
+          case 'API_NOT_AVAILABLE':
+            toast.error('서비스가 일시적으로 이용할 수 없습니다. 잠시 후 다시 시도해주세요.');
+            break;
+          case 'INVALID_RESPONSE_FORMAT':
+            toast.error('서버 응답 형식이 올바르지 않습니다. 관리자에게 문의해주세요.');
+            break;
+          default:
+            if (error.message.includes('fetch')) {
+              toast.error('네트워크 연결을 확인하고 다시 시도해주세요.');
+            } else {
+              toast.error('등록 중 오류가 발생했습니다. 다시 시도해주세요.');
+            }
+        }
+      } else {
+        toast.error('네트워크 오류가 발생했습니다. 다시 시도해주세요.');
+      }
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  // 개발 모드에서 API 상태 확인
+  const checkApiStatus = useCallback(async () => {
+    if (process.env.NODE_ENV !== 'development') return;
+
+    setApiStatus('checking');
+    try {
+      const response = await fetch('/api/pre-register', { method: 'GET' });
+      const contentType = response.headers.get('content-type');
+
+      if (response.ok && contentType?.includes('application/json')) {
+        const data = await response.json();
+        console.log('API Status Check:', data);
+        setApiStatus('available');
+      } else {
+        console.error('API Status Check Failed:', {
+          status: response.status,
+          contentType,
+          url: response.url
+        });
+        setApiStatus('unavailable');
+      }
+    } catch (error) {
+      console.error('API Status Check Error:', error);
+      setApiStatus('unavailable');
+    }
+  }, []);
+
+  // 컴포넌트 마운트 시 API 상태 확인 (개발 모드에서만)
+  React.useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      checkApiStatus();
+    }
+  }, [checkApiStatus]);
 
   return (
     <Card className={`w-full max-w-2xl mx-auto ${className}`}>
@@ -113,6 +188,30 @@ export function EnhancedPreRegistrationForm({
         <CardDescription>
           Smart Prompt Assistant 출시 알림을 받고 특별 혜택을 누려보세요!
         </CardDescription>
+
+        {/* 개발 모드에서만 API 상태 표시 */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className={`text-xs px-2 py-1 rounded-md ${apiStatus === 'checking' ? 'bg-yellow-100 text-yellow-800' :
+            apiStatus === 'available' ? 'bg-green-100 text-green-800' :
+              apiStatus === 'unavailable' ? 'bg-red-100 text-red-800' :
+                'bg-gray-100 text-gray-800'
+            }`}>
+            API 상태: {
+              apiStatus === 'checking' ? '확인 중...' :
+                apiStatus === 'available' ? '정상' :
+                  apiStatus === 'unavailable' ? '오류' :
+                    '알 수 없음'
+            }
+            {apiStatus === 'unavailable' && (
+              <button
+                onClick={checkApiStatus}
+                className="ml-2 underline hover:no-underline"
+              >
+                다시 확인
+              </button>
+            )}
+          </div>
+        )}
       </CardHeader>
 
       <CardContent>
@@ -155,11 +254,10 @@ export function EnhancedPreRegistrationForm({
                   return (
                     <div
                       key={option.value}
-                      className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                        watchedValues.persona === option.value
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
+                      className={`p-3 border rounded-lg cursor-pointer transition-colors ${watchedValues.persona === option.value
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                        }`}
                       onClick={() => setValue('persona', option.value as any)}
                     >
                       <div className="flex items-center space-x-2">
@@ -179,14 +277,14 @@ export function EnhancedPreRegistrationForm({
 
           {/* 얼리버드 혜택 카드 */}
           <div className="bg-blue-50 p-4 rounded-lg">
-              <h4 className="font-medium text-sm mb-2">🎁 얼리버드 혜택</h4>
-              <ul className="text-xs text-gray-700 space-y-1">
-                <li>• 출시 시 30% 할인 쿠폰</li>
-                <li>• 프리미엄 기능 1개월 무료</li>
-                <li>• 베타 테스터 전용 커뮤니티 초대</li>
-                <li>• 개발진과의 직접 소통 기회</li>
-              </ul>
-            </div>
+            <h4 className="font-medium text-sm mb-2">🎁 얼리버드 혜택</h4>
+            <ul className="text-xs text-gray-700 space-y-1">
+              <li>• 출시 시 30% 할인 쿠폰</li>
+              <li>• 프리미엄 기능 1개월 무료</li>
+              <li>• 베타 테스터 전용 커뮤니티 초대</li>
+              <li>• 개발진과의 직접 소통 기회</li>
+            </ul>
+          </div>
 
           <div className="pt-6">
             <Button

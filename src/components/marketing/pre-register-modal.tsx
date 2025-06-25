@@ -13,20 +13,55 @@ interface PreRegisterModalProps {
 export default function PreRegisterModal({ isOpen, onClose }: PreRegisterModalProps) {
     const [email, setEmail] = useState('');
     const [isRegistered, setIsRegistered] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
-    const handleEmailSubmit = (e: React.FormEvent) => {
+    const handleEmailSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!email.trim()) {
             toast.error('이메일을 입력해주세요');
             return;
         }
-        setIsRegistered(true);
-        toast.success('사전등록이 완료되었습니다!');
+
+        setIsLoading(true);
+
+        try {
+            const response = await fetch('/api/pre-register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: email.trim()
+                })
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                setIsRegistered(true);
+                toast.success('사전등록이 완료되었습니다!');
+            } else {
+                // 서버에서 온 에러 메시지 표시
+                if (result.details?.code === 'EMAIL_ALREADY_EXISTS') {
+                    toast.error('이미 등록된 이메일입니다');
+                } else if (result.details?.code === 'VALIDATION_ERROR') {
+                    toast.error('올바른 이메일 주소를 입력해주세요');
+                } else {
+                    toast.error(result.error || '등록 중 오류가 발생했습니다');
+                }
+            }
+        } catch (error) {
+            console.error('API 호출 오류:', error);
+            toast.error('네트워크 오류가 발생했습니다. 다시 시도해주세요.');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const handleClose = () => {
         setEmail('');
         setIsRegistered(false);
+        setIsLoading(false);
         onClose();
     };
 
@@ -48,12 +83,24 @@ export default function PreRegisterModal({ isOpen, onClose }: PreRegisterModalPr
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             className="bg-brand-dark-primary border-brand-border-primary text-brand-text-primary"
+                            disabled={isLoading}
                         />
                         <Button
                             type="submit"
-                            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled={isLoading}
                         >
-                            사전등록하기
+                            {isLoading ? (
+                                <div className="flex items-center justify-center">
+                                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    등록 중...
+                                </div>
+                            ) : (
+                                '사전등록하기'
+                            )}
                         </Button>
                     </form>
                 ) : (
@@ -91,6 +138,7 @@ export default function PreRegisterModal({ isOpen, onClose }: PreRegisterModalPr
                     variant="ghost"
                     onClick={handleClose}
                     className="w-full mt-4 text-brand-text-secondary hover:text-brand-text-primary"
+                    disabled={isLoading}
                 >
                     닫기
                 </Button>

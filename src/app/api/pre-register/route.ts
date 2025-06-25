@@ -33,11 +33,11 @@ function createSuccessResponse(data: any, status: number = 200) {
 function createErrorResponse(error: string, status: number = 500, details?: any) {
   console.error('API Error:', error, details)
   return NextResponse.json(
-    { 
+    {
       error,
       ...(details && { details })
     },
-    { 
+    {
       status,
       headers: corsHeaders,
     }
@@ -54,7 +54,7 @@ export async function OPTIONS() {
 
 // GET 메서드 - API 상태 확인
 export async function GET() {
-  return createSuccessResponse({ 
+  return createSuccessResponse({
     message: 'Pre-registration API endpoint',
     status: 'active',
     env: {
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
       return createErrorResponse(
         '서버 설정 오류가 발생했습니다. 관리자에게 문의해주세요.',
         500,
-        { 
+        {
           code: 'SUPABASE_NOT_CONFIGURED',
           env: {
             hasClientConfig: !!(env.client.NEXT_PUBLIC_SUPABASE_URL && env.client.NEXT_PUBLIC_SUPABASE_ANON_KEY),
@@ -99,10 +99,10 @@ export async function POST(request: NextRequest) {
         { code: 'INVALID_JSON' }
       )
     }
-    
+
     // Zod 스키마로 데이터 검증
     const validationResult = preRegisterSchema.safeParse(body)
-    
+
     if (!validationResult.success) {
       return createErrorResponse(
         '입력 데이터가 올바르지 않습니다.',
@@ -122,7 +122,7 @@ export async function POST(request: NextRequest) {
     // 이메일 중복 확인
     try {
       console.log('🔍 Checking email existence:', email)
-      
+
       const { data: existingUser, error: checkError } = await supabase
         .from('pre_registrations')
         .select('email')
@@ -174,10 +174,18 @@ export async function POST(request: NextRequest) {
         name_or_nickname: name_or_nickname?.trim() || null,
         expected_feature: finalExpectedFeature,
       }
-      
-      console.log('💾 Inserting data:', { email: insertData.email, hasName: !!insertData.name_or_nickname })
 
-      const { data, error: insertError } = await supabase
+      console.log('💾 Inserting data:', {
+        email: insertData.email,
+        hasName: !!insertData.name_or_nickname,
+        usingAdmin: !!supabaseAdmin,
+        clientType: supabaseAdmin ? 'admin' : 'client'
+      })
+
+      // RLS 우회를 위해 Service Role을 사용하려고 시도
+      const insertClient = supabaseAdmin || supabaseClient;
+
+      const { data, error: insertError } = await insertClient
         .from('pre_registrations')
         .insert([insertData])
         .select()
@@ -185,7 +193,7 @@ export async function POST(request: NextRequest) {
 
       if (insertError) {
         console.error('❌ Database insert error:', insertError)
-        
+
         // 테이블이 존재하지 않는 경우
         if (insertError.code === '42P01') {
           return createErrorResponse(
@@ -194,7 +202,7 @@ export async function POST(request: NextRequest) {
             { code: 'TABLE_NOT_EXISTS', dbError: insertError.message }
           )
         }
-        
+
         return createErrorResponse(
           '등록 중 오류가 발생했습니다.',
           500,
