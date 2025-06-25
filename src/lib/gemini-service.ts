@@ -33,7 +33,7 @@ export class GeminiService {
 
     public async generatePrompt(idea: string, persona: string = 'researcher'): Promise<string> {
         try {
-            const model = this.genAI.getGenerativeModel({ model: 'gemini-pro' });
+            const model = this.genAI.getGenerativeModel({ model: 'gemini-2.5-pro' });
 
             const prompt = `
                 You are an expert academic writing assistant specialized in creating compelling research paper abstracts and introductions.
@@ -64,7 +64,7 @@ export class GeminiService {
 
     public async improvePrompt(originalPrompt: string): Promise<string> {
         try {
-            const model = this.genAI.getGenerativeModel({ model: 'gemini-pro' });
+            const model = this.genAI.getGenerativeModel({ model: 'gemini-2.5-pro' });
 
             const prompt = `
                 You are an expert prompt engineer specializing in optimizing AI prompts for better results.

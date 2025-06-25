@@ -9,16 +9,31 @@ import {
     CheckCircle2,
     Sparkles,
     Target,
-    Zap
+    Zap,
+    AlertTriangle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Container } from '@/components/ui/container';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { useUsageLimitSync } from '@/hooks/use-usage-limit-sync';
+import { UsageIndicator } from '@/components/shared/usage-indicator';
 
 interface InteractiveHeroSectionProps {
     onPreRegisterClick?: () => void;
+}
+
+// API 응답 타입 정의
+interface ImprovePromptResponse {
+    improvedPrompt?: string;
+    error?: string;
+    usageInfo?: {
+        remainingCount: number;
+        usageCount: number;
+        resetTime: string;
+        maxUsageCount: number;
+    };
 }
 
 export function InteractiveHeroSection({ onPreRegisterClick }: InteractiveHeroSectionProps) {
@@ -27,6 +42,9 @@ export function InteractiveHeroSection({ onPreRegisterClick }: InteractiveHeroSe
     const [isTyping, setIsTyping] = useState(false);
     const [displayText, setDisplayText] = useState('');
     const [currentIndex, setCurrentIndex] = useState(0);
+
+    // 사용 제한 동기화 훅
+    const usageSync = useUsageLimitSync();
 
     // 타이핑 애니메이션 효과
     useEffect(() => {
@@ -51,6 +69,17 @@ export function InteractiveHeroSection({ onPreRegisterClick }: InteractiveHeroSe
             return;
         }
 
+        // 사용 제한 확인
+        if (!usageSync.canUse) {
+            toast.error('일일 사용 한도를 초과했습니다. 내일 다시 시도해주세요.');
+            if (onPreRegisterClick) {
+                setTimeout(() => {
+                    onPreRegisterClick();
+                }, 1500);
+            }
+            return;
+        }
+
         setIsLoading(true);
 
         try {
@@ -62,19 +91,54 @@ export function InteractiveHeroSection({ onPreRegisterClick }: InteractiveHeroSe
                 body: JSON.stringify({ prompt: inputText }),
             });
 
+            const data: ImprovePromptResponse = await response.json();
+
             if (!response.ok) {
-                throw new Error('프롬프트 향상에 실패했습니다');
+                // 사용 제한 초과 에러 처리
+                if (response.status === 429) {
+                    toast.error(data.error || '일일 사용 한도를 초과했습니다.');
+                    if (onPreRegisterClick) {
+                        setTimeout(() => {
+                            onPreRegisterClick();
+                        }, 2000);
+                    }
+                } else {
+                    toast.error(data.error || '프롬프트 향상에 실패했습니다');
+                }
+
+                // 서버에서 사용 정보가 온 경우 동기화
+                if (data.usageInfo) {
+                    usageSync.updateFromServerResponse({
+                        usageCount: data.usageInfo.usageCount,
+                        remainingCount: data.usageInfo.remainingCount,
+                        maxUsageCount: data.usageInfo.maxUsageCount,
+                        resetTime: data.usageInfo.resetTime,
+                    });
+                }
+                return;
             }
 
-            const data = await response.json();
+            // 성공 응답 처리
+            if (data.improvedPrompt) {
+                // 타이핑 애니메이션 시작
+                setDisplayText(data.improvedPrompt);
+                setCurrentIndex(0);
+                setIsTyping(true);
+                setInputText(''); // 기존 텍스트 클리어
 
-            // 타이핑 애니메이션 시작
-            setDisplayText(data.improvedPrompt);
-            setCurrentIndex(0);
-            setIsTyping(true);
-            setInputText(''); // 기존 텍스트 클리어
+                toast.success('프롬프트가 향상되었습니다!');
+            }
 
-            toast.success('프롬프트가 향상되었습니다!');
+            // 서버에서 사용 정보가 온 경우 동기화
+            if (data.usageInfo) {
+                usageSync.updateFromServerResponse({
+                    usageCount: data.usageInfo.usageCount,
+                    remainingCount: data.usageInfo.remainingCount,
+                    maxUsageCount: data.usageInfo.maxUsageCount,
+                    resetTime: data.usageInfo.resetTime,
+                });
+            }
+
         } catch (error) {
             toast.error('프롬프트 향상에 실패했습니다. 다시 시도해주세요.');
             console.error(error);
@@ -147,6 +211,19 @@ export function InteractiveHeroSection({ onPreRegisterClick }: InteractiveHeroSe
                         <p className="text-lg md:text-xl text-brand-text-secondary max-w-3xl mx-auto mb-8">
                             AI가 분석하고 개선하는 스마트 프롬프트로 더 정확하고 유용한 답변을 얻어보세요
                         </p>
+
+                        {/* 사용 현황 표시 */}
+                        <motion.div
+                            className="flex justify-center mb-6"
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 0.5, delay: 0.3 }}
+                        >
+                            <UsageIndicator
+                                variant="compact"
+                                className="bg-brand-surface-primary/50 backdrop-blur-sm border-brand-surface-secondary/30"
+                            />
+                        </motion.div>
                     </motion.div>
 
                     {/* 프롬프트 입력 섹션 */}
@@ -157,6 +234,24 @@ export function InteractiveHeroSection({ onPreRegisterClick }: InteractiveHeroSe
                         className="mb-8"
                     >
                         <Card className="bg-brand-surface-primary/80 backdrop-blur-xl border-brand-surface-secondary/20 shadow-2xl p-6">
+                            {/* 사용 제한 경고 */}
+                            {usageSync.isLimitReached && (
+                                <motion.div
+                                    className="mb-4 p-4 bg-red-500/10 border border-red-500/20 rounded-lg"
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: 'auto' }}
+                                    exit={{ opacity: 0, height: 0 }}
+                                >
+                                    <div className="flex items-center gap-2 text-red-400">
+                                        <AlertTriangle className="w-5 h-5" />
+                                        <span className="font-medium">일일 사용 한도 초과</span>
+                                    </div>
+                                    <p className="text-red-300 mt-1 text-sm">
+                                        내일 다시 시도하거나 사전 등록을 통해 더 많은 사용 기회를 얻으세요.
+                                    </p>
+                                </motion.div>
+                            )}
+
                             {/* 입력 필드 */}
                             <div className="relative mb-6">
                                 <textarea
@@ -168,15 +263,16 @@ export function InteractiveHeroSection({ onPreRegisterClick }: InteractiveHeroSe
                                         "text-brand-text-primary placeholder:text-brand-text-secondary/60",
                                         "focus:outline-none focus:ring-2 focus:ring-brand-accent-blue/50 focus:border-brand-accent-blue/50",
                                         "resize-none transition-all duration-200",
-                                        isTyping && "animate-pulse"
+                                        isTyping && "animate-pulse",
+                                        usageSync.isLimitReached && "opacity-50 cursor-not-allowed"
                                     )}
-                                    disabled={isLoading || isTyping}
+                                    disabled={isLoading || isTyping || usageSync.isLimitReached}
                                 />
 
                                 {/* 프롬프트 향상 버튼 - 입력 필드 우측 하단 */}
                                 <button
                                     onClick={handleImprovePrompt}
-                                    disabled={isLoading || isTyping || !inputText.trim()}
+                                    disabled={isLoading || isTyping || !inputText.trim() || usageSync.isLimitReached}
                                     className={cn(
                                         "absolute right-3 bottom-3 p-2 rounded-lg transition-all duration-200",
                                         "bg-yellow-400/80 hover:bg-yellow-400",
@@ -198,27 +294,43 @@ export function InteractiveHeroSection({ onPreRegisterClick }: InteractiveHeroSe
                             <div className="flex flex-wrap gap-3 justify-between items-center">
                                 <div className="flex gap-2">
                                     <Button
-                                        onClick={handleCopy}
-                                        disabled={!inputText.trim()}
                                         variant="outline"
                                         size="sm"
+                                        onClick={handleCopy}
+                                        disabled={!inputText.trim()}
                                         className="border-brand-surface-secondary/30 text-brand-text-secondary hover:text-brand-text-primary hover:bg-brand-surface-secondary/20"
                                     >
-                                        <Copy className="w-4 h-4 mr-1" />
+                                        <Copy className="w-4 h-4 mr-2" />
                                         복사
+                                    </Button>
+
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => setInputText('')}
+                                        disabled={!inputText.trim() || isLoading || isTyping}
+                                        className="border-brand-surface-secondary/30 text-brand-text-secondary hover:text-brand-text-primary hover:bg-brand-surface-secondary/20"
+                                    >
+                                        초기화
                                     </Button>
                                 </div>
 
-                                <div className="text-sm text-brand-text-secondary">
-                                    {isTyping ? (
-                                        <span className="flex items-center gap-2">
-                                            <Loader2 className="w-4 h-4 animate-spin" />
-                                            향상된 프롬프트 생성 중...
-                                        </span>
-                                    ) : (
-                                        inputText.length > 0 && `${inputText.length}자`
-                                    )}
-                                </div>
+                                {/* 사용 제한 초과 시 사전 등록 버튼 */}
+                                {usageSync.isLimitReached && onPreRegisterClick && (
+                                    <motion.div
+                                        initial={{ opacity: 0, scale: 0.9 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        transition={{ duration: 0.3 }}
+                                    >
+                                        <Button
+                                            onClick={onPreRegisterClick}
+                                            className="bg-gradient-to-r from-brand-accent-blue to-brand-accent-purple hover:from-brand-accent-blue/90 hover:to-brand-accent-purple/90 text-white"
+                                        >
+                                            <Sparkles className="w-4 h-4 mr-2" />
+                                            사전 등록하고 더 사용하기
+                                        </Button>
+                                    </motion.div>
+                                )}
                             </div>
                         </Card>
                     </motion.div>
@@ -231,66 +343,70 @@ export function InteractiveHeroSection({ onPreRegisterClick }: InteractiveHeroSe
                         className="mb-12"
                     >
                         <h3 className="text-lg font-semibold text-brand-text-primary mb-4 text-center">
-                            💡 샘플 프롬프트를 클릭해보세요
+                            💡 샘플 프롬프트로 시작해보세요
                         </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            {samplePrompts.map((prompt, index) => (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            {samplePrompts.map((sample, index) => (
                                 <motion.button
                                     key={index}
-                                    onClick={() => handleSampleClick(prompt)}
-                                    className="p-4 bg-brand-surface-secondary/30 hover:bg-brand-surface-secondary/50 border border-brand-surface-secondary/20 rounded-lg text-left transition-all duration-200 group"
+                                    onClick={() => handleSampleClick(sample)}
+                                    disabled={usageSync.isLimitReached}
+                                    className={cn(
+                                        "p-4 text-left bg-brand-surface-primary/40 hover:bg-brand-surface-primary/60 border border-brand-surface-secondary/20 rounded-lg transition-all duration-200",
+                                        "text-brand-text-secondary hover:text-brand-text-primary",
+                                        "disabled:opacity-50 disabled:cursor-not-allowed"
+                                    )}
                                     whileHover={{ scale: 1.02 }}
                                     whileTap={{ scale: 0.98 }}
                                 >
-                                    <div className="flex items-start gap-3">
-                                        <div className="w-8 h-8 bg-brand-accent-blue/20 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-brand-accent-blue/30 transition-colors">
-                                            <Sparkles className="w-4 h-4 text-brand-accent-blue" />
-                                        </div>
-                                        <p className="text-sm text-brand-text-secondary group-hover:text-brand-text-primary transition-colors">
-                                            {prompt}
-                                        </p>
+                                    <div className="flex items-start gap-2">
+                                        <Target className="w-4 h-4 mt-0.5 text-brand-accent-blue flex-shrink-0" />
+                                        <span className="text-sm">{sample}</span>
                                     </div>
                                 </motion.button>
                             ))}
                         </div>
                     </motion.div>
 
-                    {/* 특징 소개 */}
+                    {/* 특징 카드들 */}
                     <motion.div
-                        initial={{ opacity: 0, y: 20 }}
+                        initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.6 }}
-                        className="text-center"
+                        className="grid grid-cols-1 md:grid-cols-3 gap-6"
                     >
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div className="flex flex-col items-center gap-3">
-                                <div className="w-12 h-12 bg-brand-accent-blue/20 rounded-xl flex items-center justify-center">
-                                    <Target className="w-6 h-6 text-brand-accent-blue" />
+                        {[
+                            {
+                                icon: <Sparkles className="w-6 h-6" />,
+                                title: "AI 기반 최적화",
+                                description: "고급 AI가 당신의 프롬프트를 분석하고 개선합니다"
+                            },
+                            {
+                                icon: <Target className="w-6 h-6" />,
+                                title: "정확한 결과",
+                                description: "더 구체적이고 명확한 프롬프트로 원하는 답변을 얻으세요"
+                            },
+                            {
+                                icon: <Zap className="w-6 h-6" />,
+                                title: "즉시 사용 가능",
+                                description: "개선된 프롬프트를 바로 복사해서 사용할 수 있습니다"
+                            }
+                        ].map((feature, index) => (
+                            <Card
+                                key={index}
+                                className="p-6 bg-brand-surface-primary/40 backdrop-blur-sm border-brand-surface-secondary/20 hover:bg-brand-surface-primary/60 transition-all duration-300"
+                            >
+                                <div className="text-brand-accent-blue mb-3">
+                                    {feature.icon}
                                 </div>
-                                <h4 className="font-semibold text-brand-text-primary">정확한 분석</h4>
-                                <p className="text-sm text-brand-text-secondary text-center">
-                                    AI가 프롬프트의 의도를 정확히 파악하고 개선점을 찾아냅니다
+                                <h4 className="font-semibold text-brand-text-primary mb-2">
+                                    {feature.title}
+                                </h4>
+                                <p className="text-sm text-brand-text-secondary">
+                                    {feature.description}
                                 </p>
-                            </div>
-                            <div className="flex flex-col items-center gap-3">
-                                <div className="w-12 h-12 bg-brand-accent-purple/20 rounded-xl flex items-center justify-center">
-                                    <Wand2 className="w-6 h-6 text-brand-accent-purple" />
-                                </div>
-                                <h4 className="font-semibold text-brand-text-primary">스마트 최적화</h4>
-                                <p className="text-sm text-brand-text-secondary text-center">
-                                    더 구체적이고 효과적인 프롬프트로 자동 변환됩니다
-                                </p>
-                            </div>
-                            <div className="flex flex-col items-center gap-3">
-                                <div className="w-12 h-12 bg-brand-accent-cyan/20 rounded-xl flex items-center justify-center">
-                                    <Zap className="w-6 h-6 text-brand-accent-cyan" />
-                                </div>
-                                <h4 className="font-semibold text-brand-text-primary">즉시 적용</h4>
-                                <p className="text-sm text-brand-text-secondary text-center">
-                                    향상된 프롬프트를 바로 복사해서 사용할 수 있습니다
-                                </p>
-                            </div>
-                        </div>
+                            </Card>
+                        ))}
                     </motion.div>
                 </div>
             </Container>
