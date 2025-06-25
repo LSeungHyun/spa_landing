@@ -82,10 +82,10 @@ export async function POST(req: NextRequest) {
 
         // 3. 사용 제한 확인
         const limitCheck = await usageLimitService.checkUsageLimit(clientIP);
-        
+
         if (limitCheck.error) {
             console.error('Usage limit check failed:', limitCheck.error);
-            
+
             // 데이터베이스 오류인 경우 제한 없이 진행 (fallback)
             if (limitCheck.error.code === 'DATABASE_ERROR') {
                 console.warn('Database error, proceeding without usage limit check');
@@ -99,68 +99,57 @@ export async function POST(req: NextRequest) {
 
         // 4. 사용 제한 초과 확인
         if (!limitCheck.canUse) {
+            // resetTime이 유효한 Date 객체인지 확인하고 안전하게 처리
+            const safeResetTime = limitCheck.resetTime && limitCheck.resetTime instanceof Date && !isNaN(limitCheck.resetTime.getTime())
+                ? limitCheck.resetTime
+                : new Date(Date.now() + 24 * 60 * 60 * 1000); // 24시간 후로 fallback
+
             const usageInfo = {
                 remainingCount: limitCheck.remainingCount,
                 usageCount: limitCheck.usageCount,
-                resetTime: limitCheck.resetTime.toISOString(),
+                resetTime: safeResetTime.toISOString(),
                 maxUsageCount: 3,
             };
 
             return createErrorResponse(
-                `일일 사용 한도(3회)를 초과했습니다. ${limitCheck.resetTime.toLocaleDateString('ko-KR')} ${limitCheck.resetTime.toLocaleTimeString('ko-KR')}에 초기화됩니다.`,
+                `일일 사용 한도(3회)를 초과했습니다. ${safeResetTime.toLocaleDateString('ko-KR')} ${safeResetTime.toLocaleTimeString('ko-KR')}에 초기화됩니다.`,
                 429,
                 usageInfo
             );
         }
 
-        // 5. 사용 횟수 증가 (API 호출 전)
-        const incrementResult = await usageLimitService.incrementUsage(clientIP);
-        
-        if (!incrementResult.success) {
-            console.error('Failed to increment usage:', incrementResult.error);
-            
-            // 사용 제한 초과인 경우
-            if (incrementResult.error?.code === 'USAGE_LIMIT_EXCEEDED') {
-                const usageInfo = {
-                    remainingCount: incrementResult.remainingCount,
-                    usageCount: incrementResult.usageCount,
-                    resetTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-                    maxUsageCount: 3,
-                };
-
-                return createErrorResponse(
-                    '사용 한도를 초과했습니다. 내일 다시 시도해주세요.',
-                    429,
-                    usageInfo
-                );
-            }
-
-            // 기타 오류인 경우 fallback으로 진행
-            console.warn('Usage increment failed, proceeding without increment');
-        } else {
-            usageIncremented = true;
-        }
+        // 5. 사용 횟수는 API 호출 성공 후에만 증가시킴 (미리 증가시키지 않음)
+        // usageIncremented는 나중에 API 성공 시 설정됨
 
         // 6. Gemini API 호출
+        console.log('=== Starting Gemini API call ===');
+        console.log('Prompt length:', prompt.length);
+        console.log('Client IP:', clientIP);
+
         const geminiService = GeminiService.getInstance();
         let improvedPrompt: string;
 
         try {
+            console.log('Calling geminiService.improvePrompt...');
             improvedPrompt = await geminiService.improvePrompt(prompt);
-        } catch (geminiError) {
-            console.error('Gemini API Error:', geminiError);
+            console.log('Gemini API call successful, response length:', improvedPrompt.length);
 
-            // 7. API 실패 시 사용 횟수 롤백
-            if (usageIncremented && clientIP) {
-                try {
-                    const rollbackResult = await usageLimitService.rollbackUsage(clientIP);
-                    if (!rollbackResult.success) {
-                        console.error('Failed to rollback usage:', rollbackResult.error);
-                    }
-                } catch (rollbackError) {
-                    console.error('Rollback error:', rollbackError);
-                }
+            // API 호출 성공 시에만 사용 횟수 증가
+            const incrementResult = await usageLimitService.incrementUsage(clientIP);
+            if (incrementResult.success) {
+                usageIncremented = true;
+                console.log('Usage count incremented successfully');
+            } else {
+                console.warn('Failed to increment usage after successful API call:', incrementResult.error);
             }
+        } catch (geminiError) {
+            console.error('=== Gemini API Error Details ===');
+            console.error('Error type:', typeof geminiError);
+            console.error('Error message:', geminiError instanceof Error ? geminiError.message : geminiError);
+            console.error('Error stack:', geminiError instanceof Error ? geminiError.stack : 'No stack');
+            console.error('Full error object:', geminiError);
+
+            // API 실패 시에는 사용 횟수가 증가되지 않았으므로 롤백 불필요
 
             // Gemini API 에러 처리
             if (geminiError instanceof Error) {
@@ -170,11 +159,18 @@ export async function POST(req: NextRequest) {
                         500
                     );
                 }
-                
-                if (geminiError.message.includes('quota')) {
+
+                if (geminiError.message.includes('API key not valid')) {
                     return createErrorResponse(
-                        'API 할당량을 초과했습니다. 잠시 후 다시 시도해주세요.',
-                        429
+                        'Gemini API 키가 유효하지 않습니다. Google AI Studio에서 새로운 키를 발급받아주세요.',
+                        401
+                    );
+                }
+
+                if (geminiError.message.includes('quota') || geminiError.message.includes('Too Many Requests')) {
+                    return createErrorResponse(
+                        'Gemini API 무료 할당량이 초과되었습니다. 잠시 후 다시 시도해주세요. (이는 사용자의 일일 한도와는 별개입니다)',
+                        503 // Service Unavailable - 일시적인 서비스 문제
                     );
                 }
 
@@ -193,12 +189,21 @@ export async function POST(req: NextRequest) {
         }
 
         // 8. 성공 응답 생성
+        // 사용 횟수 증가 후 최신 상태 조회
+        const finalLimitCheck = await usageLimitService.checkUsageLimit(clientIP);
+
+        // resetTime 안전 처리
+        let safeResetTime: Date;
+        if (finalLimitCheck.resetTime && finalLimitCheck.resetTime instanceof Date && !isNaN(finalLimitCheck.resetTime.getTime())) {
+            safeResetTime = finalLimitCheck.resetTime;
+        } else {
+            safeResetTime = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24시간 후로 fallback
+        }
+
         const usageInfo = {
-            remainingCount: incrementResult.success ? incrementResult.remainingCount : limitCheck.remainingCount - 1,
-            usageCount: incrementResult.success ? incrementResult.usageCount : limitCheck.usageCount + 1,
-            resetTime: incrementResult.success && incrementResult.resetTime 
-                ? incrementResult.resetTime.toISOString()
-                : new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+            remainingCount: finalLimitCheck.remainingCount,
+            usageCount: finalLimitCheck.usageCount,
+            resetTime: safeResetTime.toISOString(),
             maxUsageCount: 3,
         };
 
@@ -207,7 +212,7 @@ export async function POST(req: NextRequest) {
     } catch (error) {
         console.error('Unexpected API Error:', error);
 
-        // 예상치 못한 오류 시 사용 횟수 롤백
+        // 예상치 못한 오류 시 사용 횟수 롤백 (API 성공 후에만 증가되었으므로)
         if (usageIncremented && clientIP) {
             try {
                 const rollbackResult = await usageLimitService.rollbackUsage(clientIP);

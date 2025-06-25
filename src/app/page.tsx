@@ -18,6 +18,18 @@ interface ChatMessage {
     timestamp: Date;
 }
 
+// API 응답 타입 정의
+interface ImprovePromptResponse {
+    improvedPrompt?: string;
+    error?: string;
+    usageInfo?: {
+        remainingCount: number;
+        usageCount: number;
+        resetTime: string;
+        maxUsageCount: number;
+    };
+}
+
 export default function HomePage() {
     const [inputText, setInputText] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -81,33 +93,50 @@ export default function HomePage() {
         setHasTriedDemo(true);
 
         try {
-            // 실제적인 프롬프트 개선 로직
-            await new Promise(resolve => setTimeout(resolve, 1500)); // 리얼한 로딩 시간
+            // 실제 Gemini API를 사용한 프롬프트 개선
+            const response = await fetch('/api/improve-prompt', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ prompt: inputText }),
+            });
 
-            const improvedPrompt = `${inputText}
+            const data: ImprovePromptResponse = await response.json();
 
-[개선된 프롬프트]
-위 요청을 다음과 같이 구체화하여 작성해주세요:
+            if (!response.ok) {
+                // 에러 상태 코드별 처리
+                if (response.status === 429) {
+                    // 사용 제한 초과 (실제 사용자 한도)
+                    toast.error(data.error || '일일 사용 한도(3회)를 초과했습니다.');
+                    // 사전 등록 유도
+                    setTimeout(() => {
+                        scrollToPreRegistration();
+                    }, 2000);
+                } else if (response.status === 503) {
+                    // Gemini API 할당량 초과 (서비스 문제)
+                    toast.warning('AI 서비스가 일시적으로 사용량이 많습니다. 잠시 후 다시 시도해주세요.', {
+                        description: '이는 사용자의 일일 한도와는 별개의 문제입니다.'
+                    });
+                } else {
+                    toast.error(data.error || '프롬프트 향상에 실패했습니다');
+                }
+                return;
+            }
 
-1. 목적: ${inputText.includes('이메일') ? '고객 관계 강화 및 제품 가치 전달' : '명확한 목표 달성'}
-2. 대상: ${inputText.includes('고객') ? '기존 고객 및 잠재 고객' : '관련 이해관계자'}
-3. 톤앤매너: 전문적이면서 친근한 어조
-4. 구조: 도입 - 핵심 내용 - 행동 유도 순서
-5. 길이: ${inputText.includes('이메일') ? '200-300단어' : '적절한 분량'}
-6. 포함 요소: 구체적인 예시와 실행 가능한 액션 아이템
+            // 성공 응답 처리
+            if (data.improvedPrompt) {
+                setInputText(data.improvedPrompt);
+                setImproveCount(prev => prev + 1);
 
-이 가이드라인을 바탕으로 ${inputText}를 작성해주세요.`;
-
-            setInputText(improvedPrompt);
-            setImproveCount(prev => prev + 1);
-            
-            // 개선 횟수에 따른 차별화된 메시지
-            if (improveCount === 0) {
-                toast.success('🚀 프롬프트가 10배 향상되었습니다!');
-            } else if (improveCount === 1) {
-                toast.success('⚡ 프롬프트 성능이 극적으로 개선되었습니다!');
-            } else {
-                toast.success('🎯 완벽한 프롬프트로 변환되었습니다!');
+                // 개선 횟수에 따른 차별화된 메시지
+                if (improveCount === 0) {
+                    toast.success('🚀 AI가 프롬프트를 10배 향상시켰습니다!');
+                } else if (improveCount === 1) {
+                    toast.success('⚡ AI 프롬프트 성능이 극적으로 개선되었습니다!');
+                } else {
+                    toast.success('🎯 AI가 완벽한 프롬프트로 변환했습니다!');
+                }
             }
 
         } catch (error) {
@@ -137,7 +166,7 @@ export default function HomePage() {
                 '좋은 프롬프트네요! 이런 식으로 작성하면 AI가 더 정확한 답변을 드릴 수 있어요.',
                 '프롬프트가 훨씬 명확해졌어요. 실제로 사용해보시면 차이를 느끼실 거예요!'
             ];
-            
+
             const aiMessage: ChatMessage = {
                 id: (Date.now() + 1).toString(),
                 type: 'ai',
@@ -176,7 +205,7 @@ export default function HomePage() {
             if (response.ok) {
                 toast.success('🎉 사전 등록 완료! 출시 알림을 받으실 거예요.');
                 setEmail('');
-                
+
                 // 성공 후 감사 메시지
                 setTimeout(() => {
                     toast.success('🎁 얼리버드 혜택이 적용되었습니다!');
@@ -235,13 +264,13 @@ export default function HomePage() {
 
                         {/* Desktop Navigation */}
                         <nav className="hidden md:flex items-center space-x-6">
-                            <button 
+                            <button
                                 onClick={scrollToDemo}
                                 className="text-blue-200 hover:text-white transition-colors text-sm font-medium"
                             >
                                 체험하기
                             </button>
-                            <button 
+                            <button
                                 onClick={scrollToPreRegistration}
                                 className="text-blue-200 hover:text-white transition-colors text-sm font-medium"
                             >
@@ -264,7 +293,7 @@ export default function HomePage() {
                     {mobileMenuOpen && (
                         <div className="md:hidden border-t border-white/10 py-4 animate-slide-down">
                             <nav className="flex flex-col space-y-4">
-                                <button 
+                                <button
                                     onClick={() => {
                                         scrollToDemo();
                                         setMobileMenuOpen(false);
@@ -273,7 +302,7 @@ export default function HomePage() {
                                 >
                                     체험하기
                                 </button>
-                                <button 
+                                <button
                                     onClick={() => {
                                         scrollToPreRegistration();
                                         setMobileMenuOpen(false);
@@ -304,25 +333,25 @@ export default function HomePage() {
                                     프롬프트를 <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">10배 더 스마트</span>하게
                                 </h1>
                                 <p className="text-xl sm:text-2xl text-blue-100 max-w-3xl mx-auto leading-relaxed">
-                                    AI와 대화할 때 더 정확하고 유용한 답변을 얻는 비밀, 
+                                    AI와 대화할 때 더 정확하고 유용한 답변을 얻는 비밀,
                                     <strong className="text-white"> 바로 프롬프트 작성법</strong>입니다.
                                 </p>
                             </div>
 
                             {/* CTA 버튼들 */}
                             <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4 animate-slide-up">
-                                <Button 
+                                <Button
                                     onClick={scrollToDemo}
-                                    size="lg" 
+                                    size="lg"
                                     className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold px-8 py-4 rounded-xl shadow-xl transform hover:scale-105 transition-all duration-200 focus-visible-enhanced"
                                 >
                                     <Wand2 className="w-5 h-5 mr-2" />
                                     지금 바로 체험하기
                                 </Button>
-                                <Button 
+                                <Button
                                     onClick={scrollToPreRegistration}
-                                    variant="outline" 
-                                    size="lg" 
+                                    variant="outline"
+                                    size="lg"
                                     className="w-full sm:w-auto border-2 border-blue-400 text-blue-400 hover:bg-blue-400 hover:text-white px-8 py-4 rounded-xl font-semibold transition-all duration-200"
                                 >
                                     <Gift className="w-5 h-5 mr-2" />
@@ -476,7 +505,7 @@ export default function HomePage() {
                                             <span className="font-medium">프롬프트 개선 완료!</span>
                                         </div>
                                         <p className="text-sm text-gray-700 leading-relaxed">
-                                            {improveCount < 2 
+                                            {improveCount < 2
                                                 ? `🚀 프롬프트가 ${(improveCount + 1) * 10}배 향상되었습니다! ${2 - improveCount}번 더 체험해보세요.`
                                                 : '⚡ 프롬프트 성능이 극적으로 개선되었습니다!'
                                             }
@@ -566,7 +595,7 @@ export default function HomePage() {
             </footer>
 
             {/* 모바일 네비게이션 바 */}
-            <MobileNavBar 
+            <MobileNavBar
                 hasTriedDemo={hasTriedDemo}
                 improveCount={improveCount}
                 showPreRegistration={showPreRegistration}

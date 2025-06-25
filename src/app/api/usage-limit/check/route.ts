@@ -6,118 +6,96 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { extractClientIP } from '@/lib/utils/ip-utils'
 import { usageLimitService } from '@/lib/services/usage-limit-service'
+import { supabaseAdmin } from '@/lib/supabase-client'
 
-// API 응답 타입 정의
-interface UsageLimitCheckAPIResponse {
-    usageCount: number
-    remainingCount: number
-    maxUsageCount: number
-    resetTime: string
-    canUse: boolean
-    ipAddress?: string
-    error?: string
+function getClientIP(request: NextRequest): string {
+    const forwarded = request.headers.get('x-forwarded-for')
+    const real = request.headers.get('x-real-ip')
+    const connection = request.headers.get('x-vercel-forwarded-for')
+
+    if (forwarded) {
+        return forwarded.split(',')[0].trim()
+    }
+    if (real) {
+        return real
+    }
+    if (connection) {
+        return connection.split(',')[0].trim()
+    }
+
+    return request.ip || '127.0.0.1'
 }
 
-// 에러 응답 생성 헬퍼
-function createErrorResponse(
-    error: string,
-    status: number
-): NextResponse<UsageLimitCheckAPIResponse> {
-    return NextResponse.json({
-        error,
-        usageCount: 0,
-        remainingCount: 3,
-        maxUsageCount: 3,
-        resetTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-        canUse: false
-    }, { status })
-}
-
-// 성공 응답 생성 헬퍼
-function createSuccessResponse(
-    data: Omit<UsageLimitCheckAPIResponse, 'error'>
-): NextResponse<UsageLimitCheckAPIResponse> {
-    return NextResponse.json(data)
-}
-
-// CORS 헤더 설정
-function setCORSHeaders(response: NextResponse): NextResponse {
-    response.headers.set('Access-Control-Allow-Origin', '*')
-    response.headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS')
-    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-    response.headers.set('Access-Control-Max-Age', '86400')
-    return response
-}
-
-export async function GET(req: NextRequest) {
+export async function GET(request: NextRequest) {
     try {
-        // 1. 클라이언트 IP 추출
-        const clientIP = extractClientIP(req)
-        if (!clientIP) {
-            console.error('Failed to extract client IP')
-            const response = createErrorResponse(
-                'IP 주소를 확인할 수 없습니다.',
-                400
-            )
-            return setCORSHeaders(response)
-        }
+        const clientIP = getClientIP(request)
 
-        console.log(`Usage limit check request from IP: ${clientIP}`)
-
-        // 2. 사용 제한 상태 확인
+        // 1. 서비스 레벨에서 사용 제한 확인
         const limitCheck = await usageLimitService.checkUsageLimit(clientIP)
 
-        if (limitCheck.error) {
-            console.error('Usage limit check failed:', limitCheck.error)
+        // 2. 실제 데이터베이스 기록 조회
+        let dbRecord = null
+        try {
+            const { data, error } = await supabaseAdmin
+                .from('ip_usage_limits')
+                .select('*')
+                .eq('ip_address', clientIP)
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .single()
 
-            // 데이터베이스 오류인 경우 기본값 반환
-            if (limitCheck.error.code === 'DATABASE_ERROR') {
-                console.warn('Database error, returning default values')
-                const response = createSuccessResponse({
-                    usageCount: 0,
-                    remainingCount: 3,
-                    maxUsageCount: 3,
-                    resetTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-                    canUse: true,
-                    ipAddress: clientIP
-                })
-                return setCORSHeaders(response)
+            if (!error && data) {
+                dbRecord = data
             }
-
-            const response = createErrorResponse(
-                '사용 제한 확인 중 오류가 발생했습니다.',
-                500
-            )
-            return setCORSHeaders(response)
+        } catch (dbError) {
+            console.warn('Failed to fetch database record:', dbError)
         }
 
-        // 3. 성공 응답 생성
-        const response = createSuccessResponse({
-            usageCount: limitCheck.usageCount,
-            remainingCount: limitCheck.remainingCount,
-            maxUsageCount: 3, // 하드코딩된 최대 사용 횟수
-            resetTime: limitCheck.resetTime.toISOString(),
-            canUse: limitCheck.canUse,
-            ipAddress: process.env.NODE_ENV === 'development' ? clientIP : undefined
+        return NextResponse.json({
+            ipAddress: clientIP,
+            maxUsageCount: 3,
+            resetTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+
+            // 서비스 레벨 정보
+            serviceLevel: {
+                canUse: limitCheck.canUse,
+                remainingCount: limitCheck.remainingCount,
+                usageCount: limitCheck.usageCount,
+                isFromCache: limitCheck.isFromCache,
+                error: limitCheck.error
+            },
+
+            // 실제 데이터베이스 기록
+            databaseRecord: dbRecord,
+
+            // 디버그 정보
+            debug: {
+                hasError: !!limitCheck.error,
+                errorCode: limitCheck.error?.code,
+                errorMessage: limitCheck.error?.message
+            }
         })
 
-        return setCORSHeaders(response)
-
     } catch (error) {
-        console.error('Unexpected error in usage limit check:', error)
-
-        const response = createErrorResponse(
-            '서버 내부 오류가 발생했습니다.',
-            500
+        console.error('Error in usage limit check:', error)
+        return NextResponse.json(
+            {
+                error: 'Failed to check usage limit',
+                details: error instanceof Error ? error.message : 'Unknown error'
+            },
+            { status: 500 }
         )
-        return setCORSHeaders(response)
     }
 }
 
-// CORS preflight 요청 처리
 export async function OPTIONS(request: NextRequest) {
-    const response = new NextResponse(null, { status: 200 })
-    return setCORSHeaders(response)
+    return new NextResponse(null, {
+        status: 200,
+        headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        },
+    })
 } 

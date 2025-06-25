@@ -65,31 +65,60 @@ export class UsageLimitService {
 
             if (cachedRecord) {
                 const canUse = cachedRecord.usage_count < this.config.maxUsage
+                // 캐시에서 가져올 때도 resetTime 안전 처리
+                const safeResetTime = new Date(Date.now() + this.config.resetPeriodHours * 60 * 60 * 1000);
+
                 return {
                     canUse,
                     remainingCount: Math.max(0, this.config.maxUsage - cachedRecord.usage_count),
                     usageCount: cachedRecord.usage_count,
-                    resetTime: new Date(Date.now() + this.config.resetPeriodHours * 60 * 60 * 1000),
+                    resetTime: safeResetTime,
                     isFromCache: true,
                 }
             }
 
-            // 2. ?곗씠?곕쿋?댁뒪?먯꽌 議고쉶
-            const { data, error } = await supabase.rpc('check_ip_usage_limit', {
-                ip_addr: ipAddress,
-                max_count: this.config.maxUsage,
-            })
+            // 2. 데이터베이스에서 직접 조회 (RPC 대신 직접 쿼리 사용)
+            const { data, error } = await supabase
+                .from('ip_usage_limits')
+                .select('*')
+                .eq('ip_address', ipAddress)
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .single()
 
-            if (error) {
+            let currentCount = 0;
+            let lastUsedAt = null;
+
+            if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
                 console.error('Database error in checkUsageLimit:', error)
                 return this.createErrorResponse(UsageLimitErrorCode.DATABASE_ERROR, error.message)
             }
 
-            const result = data as {
-                can_use: boolean
-                current_count: number
-                remaining_count: number
-                reset_time: string
+            if (data) {
+                currentCount = data.usage_count || 0;
+                lastUsedAt = data.last_used_at;
+
+                // 24시간이 지났는지 확인
+                if (lastUsedAt) {
+                    const lastUsed = new Date(lastUsedAt);
+                    const now = new Date();
+                    const hoursDiff = (now.getTime() - lastUsed.getTime()) / (1000 * 60 * 60);
+
+                    if (hoursDiff >= 24) {
+                        // 24시간이 지났으면 카운트 리셋
+                        currentCount = 0;
+                    }
+                }
+            }
+
+            const canUse = currentCount < this.config.maxUsage;
+            const remainingCount = Math.max(0, this.config.maxUsage - currentCount);
+
+            const result = {
+                can_use: canUse,
+                current_count: currentCount,
+                remaining_count: remainingCount,
+                reset_time: new Date(Date.now() + this.config.resetPeriodHours * 60 * 60 * 1000).toISOString()
             }
 
             // 3. 罹먯떆?????
@@ -103,11 +132,24 @@ export class UsageLimitService {
             }
             await cache.set(cacheKey, recordToCache, CacheTTL.IP_USAGE)
 
+            // resetTime 안전 처리
+            let safeResetTime: Date;
+            try {
+                safeResetTime = new Date(result.reset_time);
+                // 유효하지 않은 날짜인 경우 체크
+                if (isNaN(safeResetTime.getTime())) {
+                    throw new Error('Invalid date');
+                }
+            } catch {
+                // fallback: 현재 시간에서 24시간 후
+                safeResetTime = new Date(Date.now() + this.config.resetPeriodHours * 60 * 60 * 1000);
+            }
+
             return {
                 canUse: result.can_use,
                 remainingCount: result.remaining_count,
                 usageCount: result.current_count,
-                resetTime: new Date(result.reset_time),
+                resetTime: safeResetTime,
                 isFromCache: false,
             }
         } catch (error) {
@@ -156,10 +198,25 @@ export class UsageLimitService {
             }
 
             // 2. ?곗씠?곕쿋?댁뒪?먯꽌 ?먯옄??利앷?
-            const { data, error } = await supabase.rpc('increment_ip_usage', {
-                ip_addr: ipAddress,
-                max_count: this.config.maxUsage,
-            })
+            // 데이터베이스에서 직접 사용 횟수 증가
+            const now = new Date().toISOString();
+            const newCount = limitCheck.usageCount + 1;
+
+            // upsert를 사용하여 레코드가 없으면 생성, 있으면 업데이트
+            const { data, error } = await supabase
+                .from('ip_usage_limits')
+                .upsert({
+                    ip_address: ipAddress,
+                    usage_count: newCount,
+                    last_used_at: now,
+                    updated_at: now,
+                    // 새 레코드인 경우에만 created_at 설정
+                    ...(limitCheck.usageCount === 0 && { created_at: now })
+                }, {
+                    onConflict: 'ip_address'
+                })
+                .select()
+                .single()
 
             if (error) {
                 console.error('Database error in incrementUsage:', error)
@@ -174,26 +231,10 @@ export class UsageLimitService {
                 }
             }
 
-            const result = data as {
-                success: boolean
-                new_count: number
-                remaining_count: number
-            }
-
-            if (!result.success) {
-                return {
-                    success: false,
-                    error: {
-                        code: UsageLimitErrorCode.USAGE_LIMIT_EXCEEDED,
-                        message: 'Usage limit exceeded during increment',
-                        details: {
-                            maxCount: this.config.maxUsage,
-                            currentCount: result.new_count,
-                        },
-                    },
-                    remainingCount: result.remaining_count,
-                    usageCount: result.new_count,
-                }
+            const result = {
+                success: true,
+                new_count: newCount,
+                remaining_count: Math.max(0, this.config.maxUsage - newCount)
             }
 
             // 3. 罹먯떆 ?낅뜲?댄듃

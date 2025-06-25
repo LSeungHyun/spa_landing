@@ -170,7 +170,13 @@ export function AIDemo({ persona, onTextGenerated }: AIDemoProps) {
                 const errorData = data as GenerateErrorResponse;
 
                 if (response.status === 429) {
-                    toast.error(errorData.error || '일일 사용 한도를 초과했습니다.');
+                    // 사용 제한 초과 (실제 사용자 한도)
+                    toast.error(errorData.error || '일일 사용 한도(3회)를 초과했습니다.');
+                } else if (response.status === 503) {
+                    // Gemini API 할당량 초과 (서비스 문제)
+                    toast.warning('AI 서비스가 일시적으로 사용량이 많습니다. 잠시 후 다시 시도해주세요.', {
+                        description: '이는 사용자의 일일 한도와는 별개의 문제입니다.'
+                    });
                 } else {
                     toast.error(errorData.error || '프롬프트 생성에 실패했습니다');
                 }
