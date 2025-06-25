@@ -1,27 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { usageLimitService } from '@/lib/services/usage-limit-service'
-
-function getClientIP(request: NextRequest): string {
-    const forwarded = request.headers.get('x-forwarded-for')
-    const real = request.headers.get('x-real-ip')
-    const connection = request.headers.get('x-vercel-forwarded-for')
-
-    if (forwarded) {
-        return forwarded.split(',')[0].trim()
-    }
-    if (real) {
-        return real
-    }
-    if (connection) {
-        return connection.split(',')[0].trim()
-    }
-
-    return request.ip || '127.0.0.1'
-}
+import { getClientIP, getProductionSafeIP, logIPExtraction } from '@/lib/utils/ip-utils'
 
 export async function POST(request: NextRequest) {
     try {
-        const clientIP = getClientIP(request)
+        // 개선된 IP 추출 로직 사용
+        const ipInfo = getClientIP(request)
+        const clientIP = getProductionSafeIP(ipInfo)
+        
+        // IP 추출 결과 로깅 (개발 환경)
+        logIPExtraction(ipInfo, 'usage-limit-reset')
 
         console.log(`Resetting usage limit for IP: ${clientIP}`)
 
@@ -31,7 +19,14 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({
                 success: true,
                 message: 'Usage limit reset successfully',
-                ipAddress: clientIP
+                ipAddress: clientIP,
+                // 디버깅 정보 (개발 환경에서만)
+                ipInfo: process.env.NODE_ENV === 'development' ? {
+                    originalIP: ipInfo.address,
+                    productionSafeIP: clientIP,
+                    source: ipInfo.source,
+                    isLocal: ipInfo.isLocal
+                } : undefined
             })
         } else {
             return NextResponse.json({

@@ -1,8 +1,8 @@
 /**
- * IP 주소 추출 및 정규화 유틸리티
+ * IP 주소 추출 및 검증 유틸리티
  * 
- * Next.js Request 객체에서 실제 클라이언트 IP 주소를 추출하고
- * IPv4/IPv6 처리, 프록시 헤더 고려, IP 정규화 등을 수행합니다.
+ * 다양한 프록시 환경에서 실제 클라이언트 IP를 정확하게 추출하고
+ * 유효성을 검증하는 함수들을 제공합니다.
  */
 
 import { NextRequest } from 'next/server'
@@ -13,6 +13,274 @@ import {
     DEFAULT_IP_EXTRACTION_OPTIONS,
     IP_ADDRESS_REGEX
 } from '@/types/usage-limit'
+
+/**
+ * IP 주소 정보
+ */
+export interface IPInfo {
+  /** 추출된 IP 주소 */
+  address: string
+  /** IP 버전 (4 또는 6) */
+  version: 4 | 6
+  /** 로컬 IP 여부 */
+  isLocal: boolean
+  /** 프라이빗 IP 여부 */
+  isPrivate: boolean
+  /** IP를 추출한 소스 */
+  source: 'x-forwarded-for' | 'x-real-ip' | 'x-vercel-forwarded-for' | 'request-ip' | 'fallback'
+  /** 원본 헤더 값들 */
+  headers: {
+    'x-forwarded-for'?: string
+    'x-real-ip'?: string
+    'x-vercel-forwarded-for'?: string
+    'request-ip'?: string
+  }
+}
+
+/**
+ * IPv4 주소 유효성 검증
+ */
+export function isValidIPv4(ip: string): boolean {
+  const ipv4Regex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/
+  return ipv4Regex.test(ip)
+}
+
+/**
+ * IPv6 주소 유효성 검증
+ */
+export function isValidIPv6(ip: string): boolean {
+  // IPv4-mapped IPv6 주소 처리
+  if (ip.includes('::ffff:')) {
+    const ipv4Part = ip.split('::ffff:')[1]
+    return isValidIPv4(ipv4Part)
+  }
+  
+  const ipv6Regex = /^(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$|^::1$|^::$/
+  return ipv6Regex.test(ip)
+}
+
+/**
+ * 로컬 IP 주소 여부 확인
+ */
+export function isLocalIP(ip: string): boolean {
+  const localIPs = [
+    '127.0.0.1',
+    '::1',
+    'localhost',
+    '0.0.0.0',
+    '::'
+  ]
+  return localIPs.includes(ip)
+}
+
+/**
+ * 프라이빗 IP 주소 여부 확인
+ */
+export function isPrivateIP(ip: string): boolean {
+  if (isLocalIP(ip)) return true
+  
+  // IPv4 프라이빗 범위
+  const privateRanges = [
+    /^10\./,
+    /^172\.(1[6-9]|2[0-9]|3[0-1])\./,
+    /^192\.168\./,
+    /^169\.254\./ // Link-local
+  ]
+  
+  return privateRanges.some(range => range.test(ip))
+}
+
+/**
+ * IP 주소 정규화
+ */
+export function normalizeIP(ip: string): string {
+  // IPv6 localhost를 IPv4로 변환
+  if (ip === '::1') {
+    return '127.0.0.1'
+  }
+  
+  // IPv4-mapped IPv6 주소를 IPv4로 변환
+  if (ip.includes('::ffff:')) {
+    const ipv4Part = ip.split('::ffff:')[1]
+    if (isValidIPv4(ipv4Part)) {
+      return ipv4Part
+    }
+  }
+  
+  return ip.trim()
+}
+
+/**
+ * 헤더에서 IP 주소 목록 추출
+ */
+function extractIPsFromHeader(headerValue: string): string[] {
+  if (!headerValue) return []
+  
+  return headerValue
+    .split(',')
+    .map(ip => ip.trim())
+    .filter(ip => ip.length > 0)
+}
+
+/**
+ * 가장 적절한 클라이언트 IP 선택
+ */
+function selectBestClientIP(ips: string[]): string | null {
+  // 유효한 IP들만 필터링
+  const validIPs = ips.filter(ip => {
+    const normalized = normalizeIP(ip)
+    return isValidIPv4(normalized) || isValidIPv6(normalized)
+  })
+  
+  if (validIPs.length === 0) return null
+  
+  // 우선순위: 퍼블릭 IP > 프라이빗 IP > 로컬 IP
+  const publicIPs = validIPs.filter(ip => !isPrivateIP(normalizeIP(ip)))
+  if (publicIPs.length > 0) {
+    return normalizeIP(publicIPs[0])
+  }
+  
+  const privateIPs = validIPs.filter(ip => isPrivateIP(normalizeIP(ip)) && !isLocalIP(normalizeIP(ip)))
+  if (privateIPs.length > 0) {
+    return normalizeIP(privateIPs[0])
+  }
+  
+  // 마지막 옵션으로 로컬 IP
+  return normalizeIP(validIPs[0])
+}
+
+/**
+ * 요청에서 클라이언트 IP 추출 (개선된 버전)
+ */
+export function getClientIP(request: NextRequest): IPInfo {
+  const headers = {
+    'x-forwarded-for': request.headers.get('x-forwarded-for') || undefined,
+    'x-real-ip': request.headers.get('x-real-ip') || undefined,
+    'x-vercel-forwarded-for': request.headers.get('x-vercel-forwarded-for') || undefined,
+    'request-ip': request.ip || undefined,
+  }
+  
+  // 디버깅 정보 로깅 (개발 환경에서만)
+  if (process.env.NODE_ENV === 'development') {
+    console.log('🔍 IP 추출 디버깅:', {
+      headers,
+      url: request.url,
+      method: request.method
+    })
+  }
+  
+  // 1. X-Forwarded-For 헤더 확인 (가장 일반적)
+  if (headers['x-forwarded-for']) {
+    const ips = extractIPsFromHeader(headers['x-forwarded-for'])
+    const bestIP = selectBestClientIP(ips)
+    if (bestIP) {
+      return createIPInfo(bestIP, 'x-forwarded-for', headers)
+    }
+  }
+  
+  // 2. X-Real-IP 헤더 확인
+  if (headers['x-real-ip']) {
+    const ip = normalizeIP(headers['x-real-ip'])
+    if (isValidIPv4(ip) || isValidIPv6(ip)) {
+      return createIPInfo(ip, 'x-real-ip', headers)
+    }
+  }
+  
+  // 3. X-Vercel-Forwarded-For 헤더 확인 (Vercel 환경)
+  if (headers['x-vercel-forwarded-for']) {
+    const ips = extractIPsFromHeader(headers['x-vercel-forwarded-for'])
+    const bestIP = selectBestClientIP(ips)
+    if (bestIP) {
+      return createIPInfo(bestIP, 'x-vercel-forwarded-for', headers)
+    }
+  }
+  
+  // 4. Request IP 확인
+  if (headers['request-ip']) {
+    const ip = normalizeIP(headers['request-ip'])
+    if (isValidIPv4(ip) || isValidIPv6(ip)) {
+      return createIPInfo(ip, 'request-ip', headers)
+    }
+  }
+  
+  // 5. 폴백: 개발 환경에 따른 기본값
+  const fallbackIP = process.env.NODE_ENV === 'development' 
+    ? '127.0.0.1' 
+    : '0.0.0.0' // 프로덕션에서는 알 수 없는 IP
+    
+  return createIPInfo(fallbackIP, 'fallback', headers)
+}
+
+/**
+ * IPInfo 객체 생성
+ */
+function createIPInfo(
+  address: string, 
+  source: IPInfo['source'], 
+  headers: IPInfo['headers']
+): IPInfo {
+  const normalizedIP = normalizeIP(address)
+  
+  return {
+    address: normalizedIP,
+    version: isValidIPv4(normalizedIP) ? 4 : 6,
+    isLocal: isLocalIP(normalizedIP),
+    isPrivate: isPrivateIP(normalizedIP),
+    source,
+    headers
+  }
+}
+
+/**
+ * 프로덕션 환경에서 사용할 IP 주소 결정
+ * 개발 환경의 로컬 IP는 더 의미있는 값으로 대체
+ */
+export function getProductionSafeIP(ipInfo: IPInfo): string {
+  // 프로덕션 환경에서는 원본 IP 사용
+  if (process.env.NODE_ENV === 'production') {
+    return ipInfo.address
+  }
+  
+  // 개발 환경에서 로컬 IP인 경우 테스트용 IP 생성
+  if (ipInfo.isLocal) {
+    // 세션 기반 가상 IP 생성 (테스트 목적)
+    const sessionHash = Math.abs(
+      Array.from(JSON.stringify(ipInfo.headers))
+        .reduce((hash, char) => ((hash << 5) - hash + char.charCodeAt(0)) & 0xffffffff, 0)
+    )
+    
+    // 192.168.1.x 형태의 테스트 IP 생성
+    const testIP = `192.168.1.${(sessionHash % 254) + 1}`
+    
+    console.log(`🧪 개발 환경: 로컬 IP ${ipInfo.address} → 테스트 IP ${testIP}`)
+    return testIP
+  }
+  
+  return ipInfo.address
+}
+
+/**
+ * IP 추출 결과 로깅 (디버깅용)
+ */
+export function logIPExtraction(ipInfo: IPInfo, context?: string): void {
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`🌐 IP 추출 결과 ${context ? `(${context})` : ''}:`, {
+      address: ipInfo.address,
+      version: `IPv${ipInfo.version}`,
+      isLocal: ipInfo.isLocal,
+      isPrivate: ipInfo.isPrivate,
+      source: ipInfo.source,
+      headers: ipInfo.headers
+    })
+  }
+}
+
+/**
+ * IP 주소 추출 및 정규화 유틸리티
+ * 
+ * Next.js Request 객체에서 실제 클라이언트 IP 주소를 추출하고
+ * IPv4/IPv6 처리, 프록시 헤더 고려, IP 정규화 등을 수행합니다.
+ */
 
 /**
  * Next.js Request 객체에서 실제 클라이언트 IP 주소를 추출합니다.
@@ -392,85 +660,10 @@ export function formatIPAddressForLog(ipInfo: IPAddressInfo): string {
 }
 
 /**
- * 요청에서 지역 정보를 추출합니다 (Vercel/Cloudflare 등).
- * 
- * @param request - Next.js Request 객체
- * @returns 지역 정보
+ * 지역 정보 추출 (Vercel 등의 Edge 환경에서)
  */
 export function extractRegionInfo(request: NextRequest): string | undefined {
-    try {
-        // Vercel의 geo 정보 사용
-        if (request.geo) {
-            return `${request.geo.country}-${request.geo.region}`
-        }
-
-        // Cloudflare 헤더 확인
-        const cfCountry = request.headers.get('cf-ipcountry')
-        if (cfCountry) {
-            return cfCountry
-        }
-
-        // 기타 지역 정보 헤더 확인
-        const geoCountry = request.headers.get('x-geo-country')
-        if (geoCountry) {
-            return geoCountry
-        }
-
-        return undefined
-
-    } catch (error) {
-        console.error('지역 정보 추출 중 오류 발생:', error)
-        return undefined
-    }
-}
-
-/**
- * 간단한 클라이언트 IP 추출 함수 (API 라우트에서 사용)
- * 
- * @param request - Next.js Request 객체
- * @returns 클라이언트 IP 주소 (문자열) 또는 null
- */
-export function extractClientIP(request: NextRequest): string | null {
-    try {
-        // 1. X-Forwarded-For 헤더 확인 (가장 일반적)
-        const xForwardedFor = request.headers.get('x-forwarded-for')
-        if (xForwardedFor) {
-            const ip = xForwardedFor.split(',')[0].trim()
-            if (isValidIPAddress(ip)) {
-                return ip
-            }
-        }
-
-        // 2. X-Real-IP 헤더 확인 (Nginx 등에서 사용)
-        const xRealIP = request.headers.get('x-real-ip')
-        if (xRealIP && isValidIPAddress(xRealIP)) {
-            return xRealIP
-        }
-
-        // 3. CF-Connecting-IP 헤더 확인 (Cloudflare)
-        const cfConnectingIP = request.headers.get('cf-connecting-ip')
-        if (cfConnectingIP && isValidIPAddress(cfConnectingIP)) {
-            return cfConnectingIP
-        }
-
-        // 4. Request 객체의 기본 IP 사용
-        if (request.ip && isValidIPAddress(request.ip)) {
-            return request.ip
-        }
-
-        // 5. 개발 환경에서의 fallback
-        if (process.env.NODE_ENV === 'development') {
-            return '127.0.0.1'
-        }
-
-        return null
-    } catch (error) {
-        console.error('클라이언트 IP 추출 중 오류 발생:', error)
-        return null
-    }
-}
-
-// Alias exports for backward compatibility
-export const normalizeIP = normalizeIPAddress
-export const isValidIP = isValidIPAddress
-export const getIPInfo = extractIPAddress 
+  return request.headers.get('x-vercel-ip-country') || 
+         request.headers.get('cf-ipcountry') || 
+         undefined
+} 

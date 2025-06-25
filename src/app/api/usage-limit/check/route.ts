@@ -8,28 +8,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { usageLimitService } from '@/lib/services/usage-limit-service'
 import { supabaseAdmin } from '@/lib/supabase-client'
-
-function getClientIP(request: NextRequest): string {
-    const forwarded = request.headers.get('x-forwarded-for')
-    const real = request.headers.get('x-real-ip')
-    const connection = request.headers.get('x-vercel-forwarded-for')
-
-    if (forwarded) {
-        return forwarded.split(',')[0].trim()
-    }
-    if (real) {
-        return real
-    }
-    if (connection) {
-        return connection.split(',')[0].trim()
-    }
-
-    return request.ip || '127.0.0.1'
-}
+import { getClientIP, getProductionSafeIP, logIPExtraction } from '@/lib/utils/ip-utils'
 
 export async function GET(request: NextRequest) {
     try {
-        const clientIP = getClientIP(request)
+        // 개선된 IP 추출 로직 사용
+        const ipInfo = getClientIP(request)
+        const clientIP = getProductionSafeIP(ipInfo)
+        
+        // IP 추출 결과 로깅 (개발 환경)
+        logIPExtraction(ipInfo, 'usage-limit-check')
 
         // 1. 서비스 레벨에서 사용 제한 확인
         const limitCheck = await usageLimitService.checkUsageLimit(clientIP)
@@ -68,6 +56,17 @@ export async function GET(request: NextRequest) {
 
             // 실제 데이터베이스 기록
             databaseRecord: dbRecord,
+
+            // IP 추출 정보 (디버깅용)
+            ipInfo: process.env.NODE_ENV === 'development' ? {
+                originalIP: ipInfo.address,
+                productionSafeIP: clientIP,
+                version: ipInfo.version,
+                isLocal: ipInfo.isLocal,
+                isPrivate: ipInfo.isPrivate,
+                source: ipInfo.source,
+                headers: ipInfo.headers
+            } : undefined,
 
             // 디버그 정보
             debug: {

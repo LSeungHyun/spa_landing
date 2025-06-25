@@ -62,11 +62,10 @@ Phase 3: ⏳ 대기 중
   - 파일 경로: `src/components/shared/usage-indicator.tsx`
   - 세부사항: 현재 잘못된 IP 주소가 표시되는 문제 해결
   - 구현 요구사항:
-    - IP 주소 추출 로직 검증 및 수정
-    - 개발 환경에서 localhost IP 처리 개선
-    - 프로덕션 환경에서 실제 클라이언트 IP 정확 표시
-    - IP 주소 마스킹 옵션 추가 (보안 고려)
-    - 디버깅용 IP 정보 개발자 도구에서만 표시
+    - 새로운 IP 추출 유틸리티 개발 (`src/lib/utils/ip-utils.ts`)
+    - 다중 헤더 지원 (x-forwarded-for, x-real-ip, x-vercel-forwarded-for 등)
+    - 개발/프로덕션 환경별 IP 처리 로직 분리
+    - IP 검증 및 정규화 기능 추가
   - 검증 기준: 다양한 환경에서 정확한 IP 표시 확인
   - 우선순위: 높음
 

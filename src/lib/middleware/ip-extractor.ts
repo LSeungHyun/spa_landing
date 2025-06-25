@@ -11,7 +11,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { extractClientIP, normalizeIP, isValidIP, getIPInfo } from '@/lib/utils/ip-utils'
+import { getClientIP, isValidIPv4, getProductionSafeIP, isValidIPv6 } from '@/lib/utils/ip-utils'
 import { createApiError, createErrorResponse, generateRequestId, ERROR_CODES, ErrorCategory, ErrorSeverity } from '@/types/api-errors'
 
 // ============================================================================
@@ -49,7 +49,7 @@ export interface IPExtractionResult {
     ip: string | null
     normalizedIP: string | null
     isValid: boolean
-    source: 'x-forwarded-for' | 'x-real-ip' | 'cf-connecting-ip' | 'x-client-ip' | 'socket' | 'unknown'
+    source: 'x-forwarded-for' | 'x-real-ip' | 'x-vercel-forwarded-for' | 'request-ip' | 'fallback' | 'cf-connecting-ip' | 'x-client-ip' | 'socket' | 'unknown'
     originalHeaders: Record<string, string>
     error?: string
     requestId: string
@@ -148,7 +148,7 @@ function parseCIDR(cidr: string): CIDRNetwork | null {
         return null
     }
 
-    if (!isValidIP(network)) {
+    if (!isValidIPv4(network)) {
         return null
     }
 
@@ -174,7 +174,7 @@ function parseCIDR(cidr: string): CIDRNetwork | null {
  * IP가 CIDR 범위에 포함되는지 확인
  */
 function isIPInCIDR(ip: string, cidr: string): boolean {
-    if (!isValidIP(ip)) {
+    if (!isValidIPv4(ip)) {
         return false
     }
 
@@ -191,7 +191,7 @@ function isIPInCIDR(ip: string, cidr: string): boolean {
  * IP가 사설 네트워크인지 확인
  */
 function isPrivateIP(ip: string): boolean {
-    if (!isValidIP(ip)) {
+    if (!isValidIPv4(ip)) {
         return false
     }
 
@@ -289,9 +289,9 @@ export function extractIPFromRequest(
         })
 
         // IP 추출 시도
-        const extractedIP = extractClientIP(request)
+        const ipInfo = getClientIP(request)
 
-        if (!extractedIP) {
+        if (!ipInfo || !ipInfo.address) {
             logRequest('warn', 'IP extraction failed', {
                 requestId,
                 url: request.url,
@@ -312,27 +312,15 @@ export function extractIPFromRequest(
         }
 
         // IP 정규화 및 검증
-        const normalizedIPInfo = normalizeIP(extractedIP)
-        const normalizedIP = normalizedIPInfo.normalized
-        const isValid = normalizedIPInfo.isValid
+        const normalizedIP = ipInfo.address.trim()
+        const isValid = isValidIPv4(normalizedIP) || isValidIPv6(normalizedIP)
 
         // IP 소스 확인
-        let source: IPExtractionResult['source'] = 'unknown'
-        if (request.headers.get('cf-connecting-ip')) {
-            source = 'cf-connecting-ip'
-        } else if (request.headers.get('x-forwarded-for')) {
-            source = 'x-forwarded-for'
-        } else if (request.headers.get('x-real-ip')) {
-            source = 'x-real-ip'
-        } else if (request.headers.get('x-client-ip')) {
-            source = 'x-client-ip'
-        } else {
-            source = 'socket'
-        }
+        let source: IPExtractionResult['source'] = ipInfo.source
 
         logRequest('debug', 'IP extraction successful', {
             requestId,
-            extractedIP,
+            extractedIP: ipInfo.address,
             normalizedIP,
             isValid,
             source,
@@ -342,7 +330,7 @@ export function extractIPFromRequest(
 
         return {
             success: true,
-            ip: extractedIP,
+            ip: ipInfo.address,
             normalizedIP,
             isValid,
             source,
@@ -390,7 +378,7 @@ export function checkIPAccess(
     }
 
     // IP 유효성 검사
-    if (!isValidIP(ip)) {
+    if (!isValidIPv4(ip)) {
         return {
             allowed: false,
             reason: 'Invalid IP address',
@@ -399,8 +387,7 @@ export function checkIPAccess(
         }
     }
 
-    const normalizedIPInfo = normalizeIP(ip)
-    const normalizedIP = normalizedIPInfo.normalized
+    const normalizedIP = ip.trim()
 
     // 로컬호스트 확인
     if (normalizedIP === '127.0.0.1' || normalizedIP === '::1') {
@@ -705,9 +692,8 @@ export async function getExtendedIPInfo(ip: string): Promise<{
         timezone?: string
     }
 }> {
-    const normalizedIPInfo = normalizeIP(ip)
-    const normalizedIP = normalizedIPInfo.normalized
-    const isValid = isValidIP(normalizedIP)
+    const normalizedIP = ip.trim()
+    const isValid = isValidIPv4(normalizedIP) || isValidIPv6(normalizedIP)
     const isPrivate = isPrivateIP(normalizedIP)
     const isLocalhost = normalizedIP === '127.0.0.1' || normalizedIP === '::1'
 
@@ -755,7 +741,7 @@ export function validateCIDRList(cidrList: string[]): {
                     invalid.push(cidr)
                     errors.push({ cidr, error: 'Invalid CIDR format' })
                 }
-            } else if (isValidIP(cidr)) {
+            } else if (isValidIPv4(cidr)) {
                 valid.push(cidr)
             } else {
                 invalid.push(cidr)

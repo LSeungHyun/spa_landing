@@ -1,20 +1,7 @@
 import type { Metadata } from 'next';
-import { Inter, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import Providers from './providers';
 import { MobileNavBar } from '@/components/layout/mobile-nav-bar';
-
-const inter = Inter({
-  variable: '--font-inter',
-  subsets: ['latin'],
-  display: 'swap',
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  variable: '--font-jetbrains-mono',
-  subsets: ['latin'],
-  display: 'swap',
-});
 
 export const metadata: Metadata = {
   title: 'Smart Prompt Assistant - AI로 더 나은 프롬프트를',
@@ -79,6 +66,14 @@ export default function RootLayout({
   return (
     <html lang="ko" suppressHydrationWarning>
       <head>
+        {/* Google Fonts - SWC 없이 직접 로드 */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link 
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=JetBrains+Mono:wght@100;200;300;400;500;600;700;800&display=swap" 
+          rel="stylesheet" 
+        />
+        
         {/* 구조화된 데이터 */}
         <script
           type="application/ld+json"
@@ -120,8 +115,6 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         
         {/* 성능 최적화 */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://api.openai.com" />
         
         {/* 파비콘 */}
@@ -132,9 +125,7 @@ export default function RootLayout({
         {/* 매니페스트 */}
         <link rel="manifest" href="/manifest.json" />
       </head>
-      <body
-        className={`${inter.variable} ${jetbrainsMono.variable} antialiased`}
-      >
+      <body className="font-inter antialiased">
         <Providers>
           <main className="pb-14 lg:pb-0">
             {children}

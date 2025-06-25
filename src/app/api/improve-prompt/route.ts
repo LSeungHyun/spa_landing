@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GeminiService } from '@/lib/gemini-service';
-import { extractClientIP } from '@/lib/utils/ip-utils';
+import { getClientIP, getProductionSafeIP, logIPExtraction } from '@/lib/utils/ip-utils';
 import { usageLimitService } from '@/lib/services/usage-limit-service';
 import type { UsageLimitError } from '@/types/usage-limit';
 
@@ -46,8 +46,13 @@ export async function POST(req: NextRequest) {
     let usageIncremented = false;
 
     try {
-        // 1. 클라이언트 IP 추출
-        clientIP = extractClientIP(req);
+        // 1. 클라이언트 IP 추출 (개선된 로직)
+        const ipInfo = getClientIP(req);
+        clientIP = getProductionSafeIP(ipInfo);
+        
+        // IP 추출 결과 로깅 (개발 환경)
+        logIPExtraction(ipInfo, 'improve-prompt-api');
+        
         if (!clientIP) {
             console.error('Failed to extract client IP');
             return createErrorResponse(

@@ -7,7 +7,7 @@
 
 'use client'
 
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -20,10 +20,24 @@ import {
     AlertTriangle,
     Info,
     Zap,
-    Shield
+    Shield,
+    Globe,
+    Eye,
+    EyeOff
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useUsageLimitSync } from '@/hooks/use-usage-limit-sync'
+
+// IP 정보 타입
+interface IPDebugInfo {
+    originalIP: string
+    productionSafeIP: string
+    version: number
+    isLocal: boolean
+    isPrivate: boolean
+    source: string
+    headers: Record<string, string | undefined>
+}
 
 // 컴포넌트 변형 타입
 type UsageIndicatorVariant = 'default' | 'compact' | 'detailed'
@@ -34,6 +48,7 @@ interface UsageIndicatorProps {
     className?: string
     showSyncButton?: boolean
     showDevTools?: boolean
+    showIPInfo?: boolean
     onLimitReached?: () => void
 }
 
@@ -45,6 +60,7 @@ export const UsageIndicator: React.FC<UsageIndicatorProps> = ({
     className,
     showSyncButton = true,
     showDevTools = process.env.NODE_ENV === 'development',
+    showIPInfo = process.env.NODE_ENV === 'development',
     onLimitReached
 }) => {
     const {
@@ -58,12 +74,143 @@ export const UsageIndicator: React.FC<UsageIndicatorProps> = ({
         progressPercentage
     } = useUsageLimitSync()
 
+    // IP 정보 상태
+    const [ipInfo, setIPInfo] = useState<{
+        ipAddress: string
+        debugInfo?: IPDebugInfo
+    } | null>(null)
+    const [showIPDetails, setShowIPDetails] = useState(false)
+
+    // IP 정보 가져오기
+    useEffect(() => {
+        const fetchIPInfo = async () => {
+            try {
+                const response = await fetch('/api/usage-limit/check')
+                if (response.ok) {
+                    const data = await response.json()
+                    setIPInfo({
+                        ipAddress: data.ipAddress || 'Unknown',
+                        debugInfo: data.ipInfo
+                    })
+                }
+            } catch (error) {
+                console.error('Failed to fetch IP info:', error)
+            }
+        }
+
+        if (showIPInfo) {
+            fetchIPInfo()
+        }
+    }, [showIPInfo])
+
     // 제한 도달 시 콜백 호출
     React.useEffect(() => {
         if (isLimitReached && onLimitReached) {
             onLimitReached()
         }
     }, [isLimitReached, onLimitReached])
+
+    // IP 주소 마스킹 (보안)
+    const maskIPAddress = (ip: string): string => {
+        if (!ip || ip === 'Unknown') return ip
+        
+        // IPv4 마스킹 (마지막 옥텟만 숨김)
+        if (ip.includes('.')) {
+            const parts = ip.split('.')
+            if (parts.length === 4) {
+                return `${parts[0]}.${parts[1]}.${parts[2]}.***`
+            }
+        }
+        
+        // IPv6 마스킹 (마지막 부분만 숨김)
+        if (ip.includes(':')) {
+            const parts = ip.split(':')
+            if (parts.length > 2) {
+                return `${parts.slice(0, -2).join(':')}:***:***`
+            }
+        }
+        
+        return ip
+    }
+
+    // IP 정보 컴포넌트
+    const IPInfoDisplay: React.FC<{ compact?: boolean }> = ({ compact = false }) => {
+        if (!showIPInfo || !ipInfo) return null
+
+        const maskedIP = maskIPAddress(ipInfo.ipAddress)
+
+        if (compact) {
+            return (
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Globe className="w-3 h-3" />
+                    <span>{maskedIP}</span>
+                    {ipInfo.debugInfo?.isLocal && (
+                        <Badge variant="outline" className="text-xs">로컬</Badge>
+                    )}
+                </div>
+            )
+        }
+
+        return (
+            <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-sm">
+                        <Globe className="w-4 h-4" />
+                        <span className="font-medium">IP 주소</span>
+                    </div>
+                    {ipInfo.debugInfo && (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setShowIPDetails(!showIPDetails)}
+                            className="h-6 px-2 text-xs"
+                        >
+                            {showIPDetails ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                        </Button>
+                    )}
+                </div>
+                
+                <div className="flex items-center gap-2">
+                    <code className="text-sm bg-muted px-2 py-1 rounded">
+                        {maskedIP}
+                    </code>
+                    {ipInfo.debugInfo?.isLocal && (
+                        <Badge variant="outline" className="text-xs">로컬</Badge>
+                    )}
+                    {ipInfo.debugInfo?.isPrivate && !ipInfo.debugInfo.isLocal && (
+                        <Badge variant="outline" className="text-xs">프라이빗</Badge>
+                    )}
+                </div>
+
+                {/* 디버깅 정보 (개발 환경) */}
+                {showIPDetails && ipInfo.debugInfo && (
+                    <div className="mt-3 p-3 bg-muted/50 rounded-md text-xs space-y-2">
+                        <div className="font-medium text-muted-foreground">디버깅 정보</div>
+                        <div className="space-y-1">
+                            <div>원본 IP: <code>{ipInfo.debugInfo.originalIP}</code></div>
+                            <div>프로덕션 IP: <code>{ipInfo.debugInfo.productionSafeIP}</code></div>
+                            <div>IP 버전: IPv{ipInfo.debugInfo.version}</div>
+                            <div>추출 소스: {ipInfo.debugInfo.source}</div>
+                            <div>로컬: {ipInfo.debugInfo.isLocal ? '예' : '아니오'}</div>
+                            <div>프라이빗: {ipInfo.debugInfo.isPrivate ? '예' : '아니오'}</div>
+                        </div>
+                        <details className="mt-2">
+                            <summary className="cursor-pointer text-muted-foreground">
+                                HTTP 헤더
+                            </summary>
+                            <div className="mt-1 space-y-1">
+                                {Object.entries(ipInfo.debugInfo.headers).map(([key, value]) => (
+                                    <div key={key}>
+                                        {key}: <code>{value || 'undefined'}</code>
+                                    </div>
+                                ))}
+                            </div>
+                        </details>
+                    </div>
+                )}
+            </div>
+        )
+    }
 
     // 로딩 상태
     if (!usageInfo && syncState.isLoading) {
@@ -175,6 +322,7 @@ export const UsageIndicator: React.FC<UsageIndicatorProps> = ({
                         불일치
                     </Badge>
                 )}
+                {showIPInfo && <IPInfoDisplay compact />}
             </div>
         )
     }
@@ -193,6 +341,13 @@ export const UsageIndicator: React.FC<UsageIndicatorProps> = ({
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                    {/* IP 정보 */}
+                    {showIPInfo && (
+                        <div className="pb-3 border-b">
+                            <IPInfoDisplay />
+                        </div>
+                    )}
+
                     {/* 진행률 바 */}
                     <div className="space-y-2">
                         <div className="flex justify-between text-sm">
@@ -314,6 +469,11 @@ export const UsageIndicator: React.FC<UsageIndicatorProps> = ({
                     value={progressPercentage}
                     className="h-1.5"
                 />
+                {showIPInfo && (
+                    <div className="pt-1">
+                        <IPInfoDisplay compact />
+                    </div>
+                )}
             </div>
 
             {/* 불일치 표시 */}
