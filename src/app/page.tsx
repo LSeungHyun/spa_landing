@@ -255,10 +255,11 @@ export default function HomePage() {
                             </div>
                             <div className="hidden sm:block">
                                 <span className="font-bold text-xl text-white">Smart Prompt Assistant</span>
-                                <div className="text-xs text-blue-300">AI로 더 스마트한 프롬프트를</div>
+                                <div className="text-xs text-blue-300 font-medium">백지의 압박 해결사</div>
                             </div>
                             <div className="sm:hidden">
                                 <span className="font-bold text-lg text-white">SPA</span>
+                                <div className="text-xs text-blue-300">백지의 압박 해결사</div>
                             </div>
                         </div>
 
@@ -266,15 +267,16 @@ export default function HomePage() {
                         <nav className="hidden md:flex items-center space-x-6">
                             <button
                                 onClick={scrollToDemo}
-                                className="text-blue-200 hover:text-white transition-colors text-sm font-medium"
+                                className="text-blue-200 hover:text-white transition-colors text-sm font-medium hover:underline underline-offset-4"
                             >
-                                체험하기
+                                ⚡ 1분 체험
                             </button>
                             <button
                                 onClick={scrollToPreRegistration}
-                                className="text-blue-200 hover:text-white transition-colors text-sm font-medium"
+                                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105 shadow-lg"
                             >
-                                사전등록
+                                <Sparkles className="w-4 h-4 mr-1 inline" />
+                                무료 사전등록
                             </button>
 
                         </nav>
@@ -298,18 +300,18 @@ export default function HomePage() {
                                         scrollToDemo();
                                         setMobileMenuOpen(false);
                                     }}
-                                    className="text-blue-200 hover:text-white transition-colors text-sm font-medium text-left"
+                                    className="text-blue-200 hover:text-white transition-colors text-sm font-medium text-left px-4 py-2 rounded-lg hover:bg-white/10"
                                 >
-                                    체험하기
+                                    ⚡ 1분 체험하기
                                 </button>
                                 <button
                                     onClick={() => {
                                         scrollToPreRegistration();
                                         setMobileMenuOpen(false);
                                     }}
-                                    className="text-blue-200 hover:text-white transition-colors text-sm font-medium text-left"
+                                    className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 text-left"
                                 >
-                                    사전등록
+                                    🎁 무료 사전등록 (얼리버드 혜택)
                                 </button>
 
                             </nav>
