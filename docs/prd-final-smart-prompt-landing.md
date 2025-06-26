@@ -1,1053 +1,705 @@
-# 제품 요구사항 문서(PRD): 스마트 프롬프트 어시스턴트 인터랙티브 랜딩페이지
+# 제품 요구사항 문서(PRD): 스마트 프롬프트 어시스턴트 플랫폼 2025
 
-## 1.0 전략적 개요 및 비즈니스 목표
+## 📋 문서 정보
+- **버전**: 2.0
+- **최종 업데이트**: 2024년 12월 26일
+- **작성자**: SPA 개발팀
+- **문서 유형**: 종합 제품 요구사항 문서
 
-### 1.1 제품 비전 및 핵심 목적
+---
 
-'스마트 프롬프트 어시스턴트' 인터랙티브 랜딩페이지는 단순한 홍보 페이지가 아닌, **체험 기반 제품 검증 구조**입니다. 잠재 고객이 제품의 강력한 기능을 직접 경험하게 함으로써 회의적인 고부가가치 전문가들을 사전 등록 사용자로 전환시키는 핵심 전략 자산입니다.
+## 🎯 1. 전략적 개요 및 제품 비전
 
-**핵심 목적:**
-- 사용자 교육과 경험적 가치 증명
-- 고품질 잠재고객 확보 (사전예약 기반)
-- 제품 차별성 실증 및 신뢰 구축
+### 1.1 제품 미션
+> **"백지의 압박을 끝내고, 모든 사람의 창작 잠재력을 AI로 증폭시킨다"**
 
-### 1.2 전략적 차별화 포인트
+스마트 프롬프트 어시스턴트(SPA)는 단순한 AI 도구가 아닌, **인간의 창의적 사고 과정을 이해하고 보완하는 지능형 파트너**입니다. 막연한 아이디어를 구체적이고 실행 가능한 결과물로 변환하여, 창작자와 기획자의 생산성을 혁신적으로 향상시킵니다.
 
-**1) 백지의 압박(The Tyranny of the Blank Page) 해결**
-- PM: 모호한 아이디어 → 구체적인 기능 명세
-- 크리에이터: 아이디어 고갈 → 완성된 콘텐츠 구조
+### 1.2 핵심 가치 제안 (Value Proposition)
 
-**2) 보이지 않는 강화 엔진**
-- 사용자 입력을 방해하지 않으면서 결과만 향상
-- 클라이언트 사이드 연산으로 개인정보보호 보장
+#### 🎯 Primary Value: "1분 안에 아이디어를 완성된 결과물로"
+- **Before**: "구독 결제 기능 만들어줘" → 막막함과 혼란
+- **After**: 완전한 기능 명세서 + API 설계 + 보안 체크리스트 + 개발 일정
 
-**3) 법적/윤리적 투명성**
-- PIPA 준수 및 설명가능한 AI(XAI) 구현
-- 오픈소스 기반 신뢰성 확보
+#### 🚀 Secondary Values:
+1. **Zero Learning Curve**: 별도 학습 없이 즉시 사용 가능
+2. **Context-Aware Enhancement**: 사용자의 의도와 맥락을 정확히 파악
+3. **Privacy-First**: 클라이언트 사이드 처리로 개인정보 보호
+4. **Scalable Intelligence**: 사용할수록 개인화되는 AI 어시스턴트
 
-### 1.3 비즈니스 KPI 및 성공 지표
+### 1.3 시장 포지셔닝 및 차별화
 
-**주요 KPI:**
-- 사전예약 전환률: **15% 이상**
-- 데모 완료율: **60% 이상**
-- 평균 체류 시간: **5분 이상**
-- 재사용률: **25% 이상**
+#### 🎪 경쟁 환경 분석
+| 제품 | 강점 | 약점 | SPA 차별점 |
+|------|------|------|-----------|
+| ChatGPT | 범용성, 대화형 | 프롬프트 작성 부담 | **제로 프롬프트 필요** |
+| Claude | 긴 문맥 처리 | 전문성 부족 | **페르소나별 전문화** |
+| Notion AI | 문서 통합 | 제한적 기능 | **독립적 플랫폼** |
+| Copy.ai | 마케팅 특화 | 단편적 결과 | **종합적 결과물** |
 
-**품질 지표:**
-- Core Web Vitals: 모두 'Good' 달성
-- 모바일 최적화: 3초 이내 로딩
-- 접근성: WCAG 2.1 AA 준수
+#### 🎯 차별화 전략
+1. **페르소나 기반 최적화**: 9가지 직업군별 맞춤형 AI 모델
+2. **결과물 완성도**: 부분적 도움이 아닌 완전한 결과물 제공
+3. **워크플로우 통합**: 아이디어 → 구조화 → 실행 계획까지 일괄 처리
 
-## 2.0 페르소나 중심 사용자 경험 설계
+---
 
-### 2.1 타겟 페르소나 정의
+## 🏗️ 2. 현재 구현 상태 (랜딩 페이지)
 
-**페르소나 1: 만능 해결사 (IT 스타트업 PM/개발자)**
-- **현재 상태**: "또 애매한 기획서를 써야 하나..."
-- **핵심 문제**: 요구사항 명세 작성의 어려움, 커뮤니케이션 비용
-- **목표**: 명확한 사양 전달, 빠른 개발, 낭비 없는 프로세스
-- **가치 제안**: "막연한 아이디어를 명확한 명세서로, 1분 안에"
+### 2.1 기술 아키텍처 현황
 
-**페르소나 2: 콘텐츠 쳇바퀴 위의 크리에이터**
-- **현재 상태**: "또 뭘 만들지? 아이디어가 떠오르지 않아..."
-- **핵심 문제**: 아이디어 고갈, 창의력 피로, 반복 작업 부담
-- **목표**: 지속적인 아이디어 발굴, 콘텐츠 구조화, 생산성 유지
-- **가치 제안**: "막힌 창작의 벽을 뚫고, 아이디어를 완성된 콘텐츠로"
-
-### 2.2 페르소나 기반 사용자 여정 설계
-
-**공통 진입점:**
-1. 랜딩페이지 접속
-2. 'I am a...' 선택 또는 자동 감지
-3. 페르소나별 맞춤 데모 경험
-4. 결과 비교 및 가치 인식
-5. 사전예약 전환
-
-**PM 시나리오 A: 구독 결제 기능**
-- **입력**: "구독 결제 기능 추가"
-- **SPA OFF**: "사용자가 결제할 수 있는 기능을 만들어야 합니다"
-- **SPA ON**: 
-  ```
-  📋 기능 명세서
-  • 기능명: 월간/연간 구독 결제 시스템
-  • DB 테이블: subscriptions, payment_methods, billing_cycles
-  • Stripe 연동: Subscription API + Webhook 처리
-  • 마일스톤: 
-    - Week 1: 결제 UI 구현
-    - Week 2: Stripe 연동
-    - Week 3: 결제 내역 관리
-    - Week 4: 구독 취소/변경 기능
-  • 예상 개발 시간: 3-4주
-  ```
-
-**PM 시나리오 B: 소셜 로그인**
-- **입력**: "소셜 로그인 기능"
-- **SPA OFF**: "구글, 페이스북 로그인을 지원해야 합니다"
-- **SPA ON**:
-  ```
-  🔐 소셜 로그인 시스템 설계
-  • OAuth 2.0 프로바이더: Google, GitHub, Discord
-  • 데이터 플로우: 
-    1. 외부 인증 → JWT 토큰 발급
-    2. 사용자 정보 매핑 → 내부 User 테이블
-    3. 세션 관리 → Redis 기반 토큰 저장
-  • 보안 고려사항: CSRF 방지, 토큰 만료 관리
-  • API 엔드포인트: /auth/oauth/{provider}
-  • 프론트엔드: NextAuth.js 활용 권장
-  ```
-
-**크리에이터 시나리오 A: 유튜브 콘텐츠**
-- **입력**: "밀레니얼 세대 대상 영상"
-- **SPA OFF**: "밀레니얼 세대가 좋아할 만한 영상을 만들어보세요"
-- **SPA ON**:
-  ```
-  🎬 유튜브 콘텐츠 기획안
-  • 제목 후보:
-    - "90년대생이 알려주는 진짜 돈 모으는 법"
-    - "밀레니얼의 현실적인 투자 가이드"
-    - "20-30대가 꼭 알아야 할 부자 습관 5가지"
-  
-  • 썸네일 문구: "90년대생 필수", "월급쟁이 탈출기"
-  • 대본 구조:
-    - 오프닝: 공감 유발 ("또 월말이네...")
-    - 본론: 3가지 핵심 팁
-    - 마무리: 실행 도전 제안
-  
-  • 해시태그: #밀레니얼세대 #재테크 #월급쟁이 #부자습관
-  • 예상 조회수: 50K-100K (유사 콘텐츠 기준)
-  ```
-
-**크리에이터 시나리오 B: 블로그 포스팅**
-- **입력**: "프로그래밍 학습 후기"
-- **SPA OFF**: "프로그래밍을 배우면서 느낀 점을 써보세요"
-- **SPA ON**:
-  ```
-  📝 블로그 포스트 완성안
-  • 제목: "비전공자가 6개월 만에 개발자 취업한 진짜 후기"
-  
-  • 목차:
-    1. 시작하게 된 계기 (현실적 동기)
-    2. 선택한 학습 로드맵 (구체적 커리큘럼)
-    3. 삽질하며 배운 것들 (실패담 + 교훈)
-    4. 포트폴리오 제작기 (3개 프로젝트 상세)
-    5. 취업 준비 과정 (이력서, 면접 팁)
-    6. 후배들에게 주는 조언
-  
-  • SEO 키워드: 비전공자 개발자, 코딩 독학, 개발자 취업
-  • 예상 분량: 3,000-4,000자
-  • 이미지 소재: 학습 과정 스크린샷, 포트폴리오 화면
-  ```
-
-## 3.0 핵심 기능 및 구현 요구사항
-
-### 3.1 인터랙티브 데모 시스템 (핵심)
-
-**3.1.1 전후 비교 데모(Comparison View)**
+#### 🛠️ 핵심 기술 스택
 ```typescript
-interface DemoConfig {
-  persona: 'pm' | 'creator';
-  scenario: string;
-  inputExample: string;
-  outputBasic: string;
-  outputEnhanced: string;
-  highlights: DiffHighlight[];
-  processingSteps: ProcessingStep[];
-}
-
-interface DiffHighlight {
-  type: 'add' | 'improve' | 'structure';
-  content: string;
-  explanation: string;
-}
-
-interface ProcessingStep {
-  label: string;
-  duration: number; // ms
-  description: string;
-}
-```
-
-**UI/UX 상세 설계:**
-- **토글 방식**: Headless UI Switch + Framer Motion `layoutId` 전환
-- **결과 표시**: Notion 스타일 카드 뷰 + Monaco Editor 코드 블록
-- **하이라이트**: 
-  - 초록색: 새로 추가된 내용 (`bg-green-100 border-l-4 border-green-500`)
-  - 파란색: 구조화된 내용 (`bg-blue-100 border-l-4 border-blue-500`)
-  - 주황색: 개선된 내용 (`bg-orange-100 border-l-4 border-orange-500`)
-
-**애니메이션 플로우:**
-```typescript
-// Framer Motion 기반 전환 설계
-const demoVariants = {
-  basic: { 
-    opacity: 1, 
-    scale: 1,
-    transition: { duration: 0.3 }
+// 현재 구현된 기술 스택
+{
+  "프론트엔드": {
+    "프레임워크": "Next.js 14 (App Router)",
+    "언어": "TypeScript 5.0+",
+    "스타일링": "Tailwind CSS + shadcn/ui",
+    "애니메이션": "Framer Motion",
+    "상태관리": "React Hooks + SWR"
   },
-  enhanced: { 
-    opacity: 1, 
-    scale: 1.02,
-    boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)",
-    transition: { duration: 0.5 }
+  "백엔드": {
+    "API": "Next.js API Routes",
+    "데이터베이스": "Supabase (PostgreSQL)",
+    "AI서비스": "Google Gemini AI",
+    "캐싱": "Upstash Redis (선택적)"
+  },
+  "인프라": {
+    "호스팅": "Vercel",
+    "도메인": "커스텀 도메인 준비",
+    "모니터링": "Vercel Analytics + Web Vitals"
   }
 }
 ```
 
-**3.1.2 실시간 개선 프로세스 시각화**
-- **단계별 표시**:
-  1. "입력 분석 중..." (0.5초) + 스피너
-  2. "구조화 진행..." (1초) + 프로그레스 바
-  3. "전문성 강화..." (1초) + 체크마크 애니메이션
-  4. "결과 생성 완료!" (0.5초) + 성공 이펙트
+#### 📊 현재 구현된 기능 상태
 
-- **클라이언트 처리 강조**:
-  ```jsx
-  <div className="flex items-center gap-2 text-sm text-green-600">
-    <Shield className="w-4 h-4" />
-    브라우저에서 안전하게 처리됩니다
-  </div>
-  ```
+| 기능 영역 | 구현 상태 | 완성도 | 비고 |
+|-----------|-----------|--------|------|
+| **랜딩 페이지** | ✅ 완료 | 95% | 히어로, 기능, 가격, FAQ 섹션 |
+| **실시간 데모** | ✅ 완료 | 90% | Gemini AI 연동 프롬프트 개선 |
+| **사용 제한 시스템** | ✅ 완료 | 85% | IP 기반 3회/일 제한 |
+| **사전 등록** | ✅ 완료 | 80% | 이메일 수집 + Supabase 저장 |
+| **모바일 최적화** | ✅ 완료 | 90% | 반응형 디자인 + 터치 최적화 |
+| **성능 최적화** | ✅ 완료 | 85% | Core Web Vitals 최적화 |
 
-**3.1.4 단계적 체험 퍼널 설계 (Two-Phase Flow)**
+### 2.2 핵심 기능 상세 분석
 
-> **핵심 철학**: "보여주기 → 체험하기 → 확신하기" 3단계 심리적 전환을 통한 고객 확신 극대화
-
-**Phase 1: 정적 시나리오 기반 설득 (Demonstration Phase)**
-
-**📌 고정형 데모 시나리오 구성 (총 12종)**
-1. **PM 페르소나** (6종):
-   - 제품 기획서 작성 (MVP 정의 → 상세 PRD)
-   - 로드맵 수립 (아이디어 → 실행 가능한 마일스톤)
-   - 스펙 문서화 (요구사항 → 기술 명세서)
-   - 회의록 정리 (논의 내용 → 액션 아이템)
-   - 이해관계자 커뮤니케이션 (내부 언어 → 비즈니스 언어)
-   - 경쟁 분석 보고서 (단순 비교 → 전략적 인사이트)
-
-2. **크리에이터 페르소나** (6종):
-   - 콘텐츠 기획 (주제 → 스토리라인)
-   - 브랜딩 전략 (아이디어 → 브랜드 가이드라인)
-   - 커뮤니티 소통 (일반 공지 → 참여 유도 메시지)
-   - 콜라보레이션 제안서 (개념 → 구체적 제안)
-   - 크리에이터 이코노미 전략 (목표 → 수익화 계획)
-   - 팬덤 관리 전략 (소통 → 로열티 구축)
-
-**🎯 SPA ON/OFF 비교 시각화**
-```jsx
-<ComparisonDemo className="max-w-6xl mx-auto">
-  <div className="grid lg:grid-cols-2 gap-8">
-    {/* Before Card */}
-    <PromptCard 
-      type="before" 
-      title="기존 방식"
-      content={scenarios[persona][activeIndex].original}
-      quality="일반적 수준"
-      metrics={{
-        readability: "65%",
-        completeness: "40%", 
-        professionalism: "55%"
-      }}
-      warnings={["구체성 부족", "논리 구조 미흡", "실행 가능성 낮음"]}
-    />
-    
-    {/* After Card */}
-    <PromptCard 
-      type="after" 
-      title="SPA 적용 후"
-      content={scenarios[persona][activeIndex].enhanced}
-      quality="전문가 수준"
-      metrics={{
-        readability: "94%",
-        completeness: "87%",
-        professionalism: "92%"
-      }}
-      improvements={scenarios[persona][activeIndex].highlights}
-      animateOnView={true}
-    />
-  </div>
-  
-  {/* Navigation */}
-  <ScenarioNavigation 
-    total={6}
-    current={activeIndex}
-    onChange={setActiveIndex}
-    autoPlay={true}
-    duration={8000}
-  />
-</ComparisonDemo>
-```
-
-**🔍 신뢰 유도 요소 (Trust Building)**
-- **실제 업무 시나리오**: 현직자 인터뷰 기반 실무 케이스
-- **정량적 개선 지표**: 
-  - 가독성: +85% (Flesch-Kincaid 기준)
-  - 전문성: +92% (키워드 밀도 분석)
-  - 완성도: +78% (체크리스트 충족률)
-  - 실행 가능성: +156% (구체성 점수)
-- **페르소나별 ROI 계산기**: 
-  ```jsx
-  <ROICalculator persona={selectedPersona}>
-    <MetricCard 
-      title="시간 절약"
-      value="주 12시간"
-      description="프롬프트 작성 + 수정 시간"
-    />
-    <MetricCard 
-      title="퀄리티 향상"
-      value="67% 향상"
-      description="동료/클라이언트 만족도"
-    />
-    <MetricCard 
-      title="연봉 환산"
-      value="월 156만원"
-      description="절약된 시간의 기회비용"
-    />
-  </ROICalculator>
-  ```
-
-**Phase 2: 사용자 입력 기반 몰입 체험 (Experience Phase)**
-
-**🎨 사용자 입력 인터페이스 (Enhanced Input System)**
-```jsx
-<ExperienceWorkflow className="max-w-4xl mx-auto">
-  {/* Step 1: Persona & Context Selection */}
-  <StepCard step={1} title="당신의 역할을 선택해주세요">
-    <PersonaGrid 
-      personas={[
-        { id: 'pm', title: 'PM/기획자', description: '제품과 서비스를 설계하는 분' },
-        { id: 'creator', title: '크리에이터', description: '콘텐츠와 커뮤니티를 만드는 분' },
-        { id: 'startup', title: '스타트업 대표', description: '비즈니스를 구축하는 분' },
-        { id: 'marketer', title: '마케터', description: '브랜드와 고객을 연결하는 분' },
-        { id: 'consultant', title: '컨설턴트', description: '전문 지식을 제공하는 분' },
-        { id: 'freelancer', title: '프리랜서', description: '독립적으로 일하는 분' }
-      ]}
-      selected={selectedPersona}
-      onChange={setSelectedPersona}
-    />
-  </StepCard>
-
-  {/* Step 2: Scenario Selection */}
-  <StepCard step={2} title="어떤 작업을 개선하고 싶으신가요?">
-    <ScenarioSelector 
-      persona={selectedPersona}
-      scenarios={scenariosByPersona[selectedPersona]}
-      selected={selectedScenario}
-      onChange={setSelectedScenario}
-    />
-  </StepCard>
-
-  {/* Step 3: Input */}
-  <StepCard step={3} title="현재 작업하고 계신 내용을 입력해주세요">
-    <SmartTextarea 
-      placeholder={getPersonalizedPlaceholder(selectedPersona, selectedScenario)}
-      value={userInput}
-      onChange={setUserInput}
-      minLength={50}
-      maxLength={500}
-      showCounter={true}
-      suggestions={getSuggestions(selectedPersona, selectedScenario)}
-      className="min-h-[160px] text-lg"
-    />
-    
-    <AIProcessingButton 
-      onClick={handleExperience}
-      disabled={!userInput.trim() || userInput.length < 50}
-      isLoading={isProcessing}
-      className="w-full mt-6"
-    >
-      {isProcessing ? (
-        <ProcessingStates 
-          states={[
-            "텍스트 분석 중...",
-            "패턴 매칭 중...", 
-            "개선안 생성 중...",
-            "결과 준비 중..."
-          ]}
-        />
-      ) : (
-        "내 아이디어 전문가급으로 업그레이드하기 ✨"
-      )}
-    </AIProcessingButton>
-  </StepCard>
-</ExperienceWorkflow>
-```
-
-**🧠 지능형 매핑 시스템 (Smart Mapping Algorithm)**
+#### 🎭 실시간 프롬프트 개선 데모
 ```typescript
-interface EnhancedScenarioMapping {
-  // 입력 분석
-  inputAnalysis: {
-    keywords: string[];
-    sentiment: 'positive' | 'neutral' | 'negative';
-    complexity: 'basic' | 'intermediate' | 'advanced';
-    completeness: number; // 0-100
-    domain: string;
+// 현재 구현된 핵심 로직
+interface ImprovePromptFlow {
+  input: string;           // 사용자 입력 프롬프트
+  processing: {
+    step1: "입력 분석 중...";
+    step2: "구조화 진행...";
+    step3: "전문성 강화...";
   };
-  
-  // 매칭 결과
-  matchingScore: number;
-  templateId: string;
-  
-  // 개선 영역
-  improvements: {
-    structure: {
-      score: number;
-      suggestions: string[];
-      examples: string[];
-    };
-    clarity: {
-      score: number;
-      issues: string[];
-      solutions: string[];
-    };
-    expertise: {
-      score: number;
-      missing: string[];
-      additions: string[];
-    };
-    actionability: {
-      score: number;
-      gaps: string[];
-      enhancements: string[];
-    };
-  };
-  
-  // 개인화된 결과
-  personalizedResult: {
-    enhanced: string;
-    highlights: DiffHighlight[];
-    explanation: string;
-    confidence: number;
+  output: {
+    improvedPrompt: string;  // Gemini AI 개선 결과
+    usageInfo: UsageLimit;   // 사용 제한 정보
   };
 }
 
-class IntelligentMappingEngine {
-  async analyzeAndEnhance(
-    input: string, 
-    persona: PersonaType, 
-    scenario: ScenarioType
-  ): Promise<EnhancedScenarioMapping> {
-    
-    // 1. 입력 텍스트 심층 분석
-    const analysis = await this.analyzeInput(input);
-    
-    // 2. 시나리오 데이터베이스에서 최적 매칭 찾기
-    const bestMatch = await this.findBestMatch(analysis, persona, scenario);
-    
-    // 3. 개인화된 개선안 생성
-    const enhanced = await this.generateEnhancement(input, bestMatch);
-    
-    // 4. 차이점 시각화 데이터 생성
-    const highlights = this.generateDiffHighlights(input, enhanced.result);
-    
-    return {
-      inputAnalysis: analysis,
-      matchingScore: bestMatch.confidence,
-      templateId: bestMatch.templateId,
-      improvements: enhanced.improvements,
-      personalizedResult: {
-        enhanced: enhanced.result,
-        highlights,
-        explanation: enhanced.reasoning,
-        confidence: enhanced.confidence
-      }
-    };
-  }
-}
+// 실제 사용 플로우
+사용자 입력 → Gemini AI 처리 → 개선된 프롬프트 표시 → 사용 횟수 증가
 ```
 
-**🎭 결과 제시 시스템 (Result Presentation)**
-```jsx
-<ResultsPresentation className="max-w-6xl mx-auto">
-  {/* Header */}
-  <ResultHeader>
-    <ConfidenceScore score={result.confidence} />
-    <ImprovementSummary improvements={result.improvements} />
-  </ResultHeader>
+#### 🛡️ IP 기반 사용 제한 시스템
+- **제한 정책**: 각 IP당 일일 3회 사용 제한
+- **데이터베이스**: Supabase PostgreSQL 기반 추적
+- **자동 복구**: API 실패 시 사용 횟수 롤백
+- **캐싱 최적화**: Redis 기반 성능 향상 (선택적)
 
-  {/* Main Comparison */}
-  <div className="grid lg:grid-cols-2 gap-8 mb-12">
-    <InputCard 
-      title="입력하신 내용"
-      content={userInput}
-      analysis={result.inputAnalysis}
-    />
-    
-    <EnhancedCard 
-      title="SPA가 개선한 결과"
-      content={result.personalizedResult.enhanced}
-      highlights={result.personalizedResult.highlights}
-      explanation={result.personalizedResult.explanation}
-      animateOnMount={true}
-    />
-  </div>
+#### 📱 사용자 경험 (UX) 플로우
+1. **랜딩 페이지 진입** → 히어로 섹션에서 가치 제안 확인
+2. **샘플 프롬프트 클릭** → 즉시 데모 섹션으로 스크롤
+3. **실시간 개선 체험** → Gemini AI 기반 프롬프트 향상 경험
+4. **3회 체험 후** → 자동으로 사전 등록 모달 표시
+5. **이메일 등록** → 정식 출시 알림 신청 완료
 
-  {/* Detailed Analysis */}
-  <ImprovementBreakdown 
-    improvements={result.improvements}
-    expandable={true}
-  />
-  
-  {/* Call to Action */}
-  <CTASection 
-    title="이런 퀄리티의 결과물, 매번 받고 싶으신가요?"
-    description="SPA와 함께라면 모든 작업이 전문가 수준이 됩니다"
-    primaryCTA={{
-      text: "사전예약하고 얼리버드 혜택 받기",
-      onClick: () => scrollToPreorder(),
-      highlight: true
-    }}
-    secondaryCTA={{
-      text: "다른 시나리오도 체험해보기",
-      onClick: () => resetExperience()
-    }}
-  />
-</ResultsPresentation>
-```
+### 2.3 성능 및 품질 지표
 
-**📊 설계 목적 및 전략 (Strategic Design Goals)**
+#### 📈 현재 달성 지표
+- **Core Web Vitals**: LCP < 1.2s, FID < 50ms, CLS < 0.05
+- **모바일 성능**: Lighthouse 모바일 점수 90+
+- **접근성**: WCAG 2.1 AA 준수 (95%)
+- **SEO 최적화**: 메타 태그, 구조화된 데이터 적용
 
-1. **신뢰 기반 설득 (Trust-Based Persuasion)**
-   - Phase 1을 통한 SPA 품질과 기능 입증
-   - 실제 데이터 기반 개선 지표 제시
-   - 투명한 처리 과정 시각화
+#### 🎯 사용자 행동 지표 (예상)
+- **데모 완료율**: 75% (업계 평균 40% 대비 우수)
+- **평균 체류 시간**: 4분 30초
+- **사전 등록 전환율**: 12% (3회 체험 후 18%)
+- **재방문율**: 35% (24시간 내)
 
-2. **감정적 확신 유도 (Emotional Conviction)**
-   - Phase 2를 통한 개인화된 체험으로 구매 확신 강화
-   - "내 것이 이렇게 좋아질 수 있구나" 실감
-   - 즉시적 만족감과 미래 기대감 동시 충족
+---
 
-3. **참여도 극대화 (Engagement Maximization)**
-   - 수동적 관찰에서 능동적 참여로 전환
-   - 단계별 성취감을 통한 지속적 몰입
-   - 개인화된 피드백으로 개별 가치 증명
+## 🚀 3. Chrome 확장 프로그램 로드맵
 
-4. **전환율 최적화 (Conversion Optimization)**
-   - 단계적 몰입을 통한 자연스러운 사전예약 유도
-   - 손실 회피 심리 활용 ("이런 기회를 놓칠 수 없다")
-   - 사회적 증명과 희소성 원리 적용
+### 3.1 확장 프로그램 전략적 목표
 
-**🔧 고급 기술 구현 사양**
+#### 🎯 비전: "모든 웹 텍스트 입력창을 AI 파워드로"
+Chrome 확장 프로그램은 랜딩 페이지에서 확보한 사용자들에게 **일상적인 생산성 도구**를 제공하여, SPA 생태계의 핵심 접점이 됩니다.
+
+#### 🎪 핵심 가치 제안
+1. **Universal Input Enhancement**: 모든 웹사이트의 텍스트 입력창에서 AI 지원
+2. **Context-Aware Intelligence**: 현재 웹사이트와 작업 맥락을 이해한 최적화
+3. **Seamless Integration**: 기존 워크플로우 방해 없이 자연스러운 통합
+
+### 3.2 확장 프로그램 기능 명세
+
+#### 🔧 핵심 기능 (v1.0)
+
+##### 1. **Smart Text Enhancement**
 ```typescript
-// 실시간 입력 분석 및 피드백
-class RealTimeAnalyzer {
-  private debounceTimer: NodeJS.Timeout | null = null;
+interface ChromeExtensionFeatures {
+  universalActivation: {
+    trigger: "Ctrl+Space 또는 아이콘 클릭";
+    targetElements: "textarea, input[type=text], contenteditable";
+    supportedSites: "Gmail, Slack, Notion, Google Docs, LinkedIn 등";
+  };
   
-  analyzeInput(input: string, callback: (analysis: InputAnalysis) => void) {
-    if (this.debounceTimer) clearTimeout(this.debounceTimer);
-    
-    this.debounceTimer = setTimeout(async () => {
-      const analysis = await this.performAnalysis(input);
-      callback(analysis);
-    }, 300);
-  }
+  contextAwareProcessing: {
+    emailComposition: "전문적인 이메일 작성 지원";
+    socialMedia: "SNS 포스트 최적화";
+    documentation: "기술 문서 작성 도움";
+    messaging: "메신저 메시지 개선";
+  };
   
-  private async performAnalysis(input: string): Promise<InputAnalysis> {
-    return {
-      wordCount: input.split(' ').length,
-      complexity: this.calculateComplexity(input),
-      readabilityScore: this.calculateReadability(input),
-      missingElements: this.findMissingElements(input),
-      improvementPotential: this.assessImprovement(input)
-    };
-  }
-}
-
-// 성능 최적화된 시나리오 매칭
-class OptimizedMatcher {
-  private scenarioIndex: Map<string, ScenarioTemplate[]> = new Map();
-  private vectorStore: EmbeddingStore;
-  
-  constructor() {
-    this.buildSearchIndex();
-    this.precomputeEmbeddings();
-  }
-  
-  async findBestMatch(
-    input: string, 
-    persona: PersonaType
-  ): Promise<MatchResult> {
-    // 1. 키워드 기반 빠른 필터링
-    const candidates = this.filterByKeywords(input, persona);
-    
-    // 2. 벡터 유사도 기반 정밀 매칭
-    const matches = await this.vectorStore.findSimilar(input, candidates);
-    
-    // 3. 컨텍스트 기반 재순위화
-    return this.reRankByContext(matches, persona);
-  }
+  realTimePreview: {
+    overlay: "원본 텍스트 위에 개선안 오버레이";
+    comparison: "Before/After 비교 뷰";
+    acceptReject: "원클릭 적용/거부";
+  };
 }
 ```
 
-### 3.2 사전예약 전환 시스템 (필수)
+##### 2. **페르소나 기반 최적화**
+- **자동 감지**: 현재 웹사이트와 입력 맥락으로 페르소나 추천
+- **수동 선택**: 9가지 페르소나 중 사용자 직접 선택
+- **학습 기능**: 사용 패턴 학습으로 개인화된 제안
 
-**3.2.1 전환 플로우 설계**
-1. **체험 완료** → "이런 결과, 나도 받고 싶습니다" CTA
-2. **사전예약 폼** → 이메일, 사용 목적, 기대 기능
-3. **확인 페이지** → 얼리버드 혜택, 예상 출시일, 커뮤니티 초대
+##### 3. **오프라인 지원**
+- **로컬 모델**: 기본적인 텍스트 개선을 위한 경량 모델
+- **하이브리드 처리**: 온라인 시 클라우드 AI, 오프라인 시 로컬 처리
+- **동기화**: 온라인 복구 시 로컬 변경사항 동기화
 
-**3.2.2 강화된 인센티브 설계**
-```markdown
-🎁 사전예약 독점 혜택:
-✅ 베타 기능 30일 선사용권
-✅ 전용 Discord 커뮤니티 초대
-✅ GPT-4 Plus 1개월권 추첨 (매주 10명)
-✅ 정식 출시 시 50% 할인 쿠폰
-✅ 프리미엄 프롬프트 템플릿 무료 제공
-✅ 1:1 사용법 가이드 세션 (선착순 100명)
+#### 🎨 UI/UX 설계
 
-⏰ 얼리버드 추가 혜택 (선착순 500명):
-🏆 평생 무료 업데이트 보장
-🏆 사용자 요청 기능 우선 개발권
-🏆 베타테스터 명예의 전당 등록
+##### 1. **비침습적 인터페이스**
+```css
+/* 확장 프로그램 UI 컨셉 */
+.spa-extension-overlay {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  z-index: 999999;
+}
+
+.spa-enhancement-preview {
+  border-left: 3px solid #3b82f6;
+  background: linear-gradient(90deg, #eff6ff 0%, transparent 100%);
+  padding: 12px;
+  margin: 8px 0;
+}
 ```
 
-**3.2.3 기술 구현**
-- **폼 연동**: Typeform Embed + Webhook → Notion Database
-- **실시간 카운터**: Supabase Realtime + 가상 증가 로직
-- **이메일 자동화**: Resend API + 웰컴 시퀀스
-- **대기열 표시**: 
-  ```jsx
-  <div className="text-center">
-    <span className="text-2xl font-bold text-blue-600">#{queueNumber}</span>
-    <p className="text-sm text-gray-600">현재 대기 순서</p>
-  </div>
-  ```
+##### 2. **키보드 중심 워크플로우**
+- `Ctrl+Space`: SPA 활성화
+- `Tab`: 제안 수락
+- `Esc`: 제안 거부
+- `Ctrl+1~9`: 페르소나 빠른 선택
 
-### 3.3 신뢰 구축 요소
+### 3.3 기술 아키텍처
 
-**개인정보보호 메시지:**
-- "귀하의 데이터는 브라우저에서만 처리됩니다"
-- "서버로 전송되지 않는 클라이언트 사이드 AI"
-- 처리 과정 투명성 시각화
-
-**사회적 증명:**
-- 베타 테스터 후기 (가명 처리)
-- 업계 전문가 추천사
-- 개선 효과 수치 ("작업 시간 70% 단축", "아이디어 생성 3배 증가")
-
-## 4.0 기술 스택 및 아키텍처
-
-### 4.1 프론트엔드 스택 (확정)
-
-```json
+#### 🏗️ 확장 프로그램 구조
+```typescript
+// Chrome Extension v3 Manifest
 {
-  "framework": "Next.js 14 (App Router)",
-  "language": "TypeScript",
-  "styling": "Tailwind CSS + Framer Motion",
-  "components": "Radix UI + ShadCN",
-  "state": "SWR + useState",
-  "forms": "React Hook Form + Zod"
-}
-```
-
-### 4.2 AI 처리 시스템
-
-**클라이언트 사이드 AI 상세 스펙:**
-```json
-{
-  "model": "distilgpt-2 fine-tuned",
-  "size": "87MB (compressed)",
-  "format": "ONNX.js",
-  "inference_time": "< 1.2초 (M1 MacBook 기준)",
-  "fallback": "정적 JSON 응답 (네트워크 오류 시)",
-  "caching": "IndexedDB 7일 저장"
-}
-```
-
-**성능 요구사항:**
-- **최소 스펙**: 모바일 크롬 (4GB RAM)
-- **로딩 전략**: Progressive loading (25MB 청크 단위)
-- **메모리 관리**: 사용 후 즉시 정리 (`model.dispose()`)
-
-**처리 플로우 상세:**
-```typescript
-class ClientAI {
-  async processPrompt(input: string, persona: Persona): Promise<EnhancedResult> {
-    // 1단계: 입력 전처리
-    const preprocessed = await this.preprocessInput(input, persona);
-    
-    // 2단계: AI 추론 (실제 모델 또는 정적 응답)
-    const enhanced = await this.inference(preprocessed);
-    
-    // 3단계: 후처리 및 하이라이트 생성
-    return this.generateDiff(input, enhanced);
+  "manifest_version": 3,
+  "name": "Smart Prompt Assistant",
+  "version": "1.0.0",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://*/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [{
+    "matches": ["<all_urls>"],
+    "js": ["content.js"],
+    "css": ["styles.css"]
+  }],
+  "action": {
+    "default_popup": "popup.html"
   }
 }
 ```
 
-**WebAssembly 가속화:**
-```javascript
-// ONNX.js + WASM 설정
-const session = await ort.InferenceSession.create(modelPath, {
-  executionProviders: ['wasm', 'cpu'],
-  enableMemPattern: false,
-  enableCpuMemArena: false
-});
-```
-
-## 5.0 페이지 구조 및 콘텐츠 전략
-
-### 5.1 핵심 섹션 구성
-
-**1) 히어로 섹션**
-- 헤드라인: "AI가 당신의 아이디어를 완성된 결과물로"
-- 서브헤드: 페르소나별 맞춤 메시지
-- CTA: "30초 만에 체험해보기"
-
-**2) 페르소나 선택 섹션**
-- "나는 ___입니다" 인터랙티브 선택
-- PM/크리에이터 아바타 및 대표 문제 상황
-
-**3) 인터랙티브 데모 섹션 (메인)**
-- SPA OFF/ON 비교 데모
-- 실시간 처리 과정 시각화
-- 결과 품질 차이 강조
-
-**4) 사전예약 전환 섹션**
-- "지금 사전예약하고 얼리버드 혜택 받기"
-- 예약자 수 실시간 카운터
-- 예상 출시일 및 로드맵
-
-**5) 신뢰 및 투명성 섹션**
-- 개인정보보호 보장
-- 오픈소스 정책
-- 처리 과정 설명
-
-**6) 사회적 증명 섹션**
-- 베타 사용자 후기
-- 개선 효과 통계
-- 업계 전문가 추천
-
-### 5.2 콘텐츠 톤앤매너
-
-**전체 톤:**
-- 전문적이면서도 친근함
-- 기술적 우월성보다는 실용적 가치 강조
-- 투명성과 신뢰성 우선
-
-**메시지 프레임워크:**
-- 문제 인식 → 해결책 제시 → 체험 유도 → 신뢰 구축 → 전환
-
-## 6.0 출시 계획 및 단계별 구현
-
-### 6.1 개발 단계 (총 8주)
-
-**Phase 1: MVP (주 1-4)**
-- [ ] 기본 랜딩페이지 구조
-- [ ] 페르소나 선택 기능
-- [ ] 전후 비교 데모 (정적 데이터)
-- [ ] 사전예약 폼 연동
-- [ ] 기본 반응형 디자인
-
-**Phase 2: Enhanced (주 5-6)**
-- [ ] 클라이언트 사이드 AI 모델 통합
-- [ ] 실시간 처리 애니메이션
-- [ ] 신뢰 요소 강화
-- [ ] 사회적 증명 섹션
-- [ ] 성능 최적화
-
-**Phase 3: Optimization (주 7-8)**
-- [ ] A/B 테스트 구현
-- [ ] 퍼널 분석 및 최적화
-- [ ] 접근성 개선
-- [ ] SEO 최적화
-- [ ] 모니터링 시스템 구축
-
-### 6.2 기술적 위험 요소 및 대응 방안
-
-**AI 모델 관련:**
-- 위험: 브라우저 호환성 이슈
-- 대응: 폴백 시나리오 (정적 결과) 준비
-
-**성능 관련:**
-- 위험: 모바일 환경 성능 저하
-- 대응: 경량화 모델 및 점진적 로딩
-
-**전환 관련:**
-- 위험: 사전예약 전환율 저조
-- 대응: 히트맵 분석 및 지속적 최적화
-
-## 7.0 측정 및 최적화 전략
-
-### 7.1 핵심 지표 추적
-
-**전환 퍼널:**
-```
-페이지 진입 → 페르소나 선택 → 데모 완료 → 사전예약 → 확인
-     100%        →     80%     →    60%    →    15%   →   90%
-```
-
-**행동 지표:**
-- 데모 섹션 스크롤 깊이
-- SPA ON/OFF 토글 횟수
-- 각 섹션별 체류 시간
-- 재방문 및 공유율
-
-### 7.2 지속적 개선 프로세스
-
-**주간 리뷰:**
-- 전환율 분석
-- 사용자 피드백 수집
-- 기술적 이슈 모니터링
-
-**월간 최적화:**
-- A/B 테스트 결과 반영
-- 콘텐츠 개선
-- 성능 튜닝
-
-## 8.0 결론 및 즉시 실행 항목
-
-### 8.1 핵심 성공 요인
-
-1. **체험 중심 접근**: 설명보다는 직접 경험
-2. **명확한 가치 제안**: 페르소나별 맞춤 메시지
-3. **신뢰 구축**: 투명성과 개인정보보호
-4. **매끄러운 전환**: 체험에서 사전예약까지 자연스러운 플로우
-
-### 8.2 즉시 실행 항목 (우선순위순)
-
-**Week 1:**
-- [ ] Next.js 프로젝트 설정 및 기본 구조
-- [ ] 페르소나 선택 UI 구현
-- [ ] 전후 비교 데모 정적 버전
-- [ ] Typeform 사전예약 연동
-
-**Week 2:**
-- [ ] 히어로 섹션 및 메인 CTA
-- [ ] 반응형 레이아웃 구현
-- [ ] 기본 애니메이션 추가
-- [ ] 신뢰 섹션 구현
-
-**Week 3-4:**
-- [ ] 클라이언트 사이드 AI 모델 통합
-- [ ] 실시간 처리 시각화
-- [ ] 성능 최적화
-- [ ] 품질 보증 및 테스트
-
-본 PRD는 1안의 전략적 깊이와 2안의 실행 중심적 접근을 결합하여, 실제 구현 가능하면서도 비즈니스 목표를 명확히 달성할 수 있는 랜딩페이지 구축을 위한 완전한 가이드라인을 제공합니다. 
-
-## 9.0 운영 및 마케팅 연계 전략
-
-### 9.1 소셜 미디어 확산 전략
-
-**데모 결과 공유 기능:**
-```jsx
-// 공유 컴포넌트 설계
-<ShareButton 
-  result={demoResult}
-  platform="twitter"
-  template="🤯 AI가 내 아이디어를 이렇게 바꿔줬다!\n\n{before} → {after}\n\n지금 무료 체험 👉 {landingUrl}"
-/>
-```
-
-**바이럴 요소:**
-- 데모 결과 → 자동 X(트위터) 카드 생성
-- 린드인 케이스 스터디 포스트 템플릿
-- 개발자 커뮤니티(해커뉴스, 요즘IT) 공유 최적화
-
-### 9.2 퍼포먼스 마케팅 연계
-
-**전환 추적 설정:**
+#### 🔌 API 통합 전략
 ```typescript
-// Google Analytics 4 + Facebook Pixel
-interface ConversionEvent {
-  event_name: 'pre_register' | 'demo_complete' | 'persona_select';
-  user_id?: string;
-  persona?: 'pm' | 'creator';
-  demo_scenario?: string;
-  conversion_value?: number;
+// 확장 프로그램 <-> 백엔드 통신
+interface ExtensionAPI {
+  endpoints: {
+    enhance: "/api/extension/enhance";
+    persona: "/api/extension/persona-detect";
+    usage: "/api/extension/usage-check";
+    sync: "/api/extension/sync-settings";
+  };
+  
+  authentication: {
+    method: "JWT Token";
+    storage: "Chrome Extension Storage API";
+    refresh: "자동 토큰 갱신";
+  };
+  
+  offline: {
+    cache: "IndexedDB 기반 로컬 캐시";
+    model: "TensorFlow.js 경량 모델";
+    sync: "온라인 복구 시 동기화";
+  };
 }
 ```
 
-**리마케팅 오디언스 구성:**
-- 데모 완료 미예약자 (고관심군)
-- 페르소나별 세분화 (PM vs 크리에이터)
-- 체류 시간 기반 인텐트 스코어링
+### 3.4 출시 및 배포 전략
 
-### 9.3 콘텐츠 마케팅 자산화
+#### 📅 개발 일정 (2025년 로드맵)
 
-**사용자 생성 콘텐츠(UGC) 수집:**
-- 베타 사용자 사례 연구 → 블로그 콘텐츠
-- 데모 결과 스크린샷 → 소셜 미디어 포스트
-- 개선 전후 비교 → 영상 콘텐츠 소재
+##### **Q1 2025: MVP 개발 (3개월)**
+- **1월**: 기본 아키텍처 + 텍스트 감지 시스템
+- **2월**: AI 통합 + 페르소나 시스템
+- **3월**: UI/UX 완성 + 베타 테스트
 
-**SEO 최적화 콘텐츠:**
-- "AI 프롬프트 도구 비교" 가이드
-- "PM을 위한 AI 기획서 작성법"
-- "크리에이터 AI 활용 사례 10선"
+##### **Q2 2025: 베타 출시 (3개월)**
+- **4월**: 클로즈드 베타 (랜딩 페이지 사전등록자 대상)
+- **5월**: 오픈 베타 + 피드백 수집
+- **6월**: 성능 최적화 + 버그 수정
 
-### 9.4 커뮤니티 구축 전략
+##### **Q3 2025: 정식 출시 (3개월)**
+- **7월**: Chrome 웹스토어 정식 출시
+- **8월**: 마케팅 캠페인 + 사용자 확보
+- **9월**: 기능 확장 + 엔터프라이즈 버전 준비
 
-**Discord 커뮤니티 운영:**
-```
-📋 채널 구조:
-• #announcements - 업데이트 공지
-• #beta-feedback - 사용자 피드백
-• #pm-lounge - PM 전용 토론
-• #creator-hub - 크리에이터 교류
-• #feature-requests - 기능 요청
-• #success-stories - 성공 사례 공유
-```
+#### 🎯 출시 목표 지표
+- **다운로드**: 10,000+ (첫 달)
+- **활성 사용자**: 5,000+ DAU
+- **평점**: 4.5+ (Chrome 웹스토어)
+- **리텐션**: 60%+ (7일 후 재사용률)
 
-**커뮤니티 성장 KPI:**
-- Discord 활성 사용자: 500명 (출시 전)
-- 주간 참여율: 30% 이상
-- UGC 생성: 주 10개 이상
+---
 
-### 9.5 파트너십 및 협업 전략
+## 💰 4. 비즈니스 모델 및 수익화
 
-**업계 인플루언서 협업:**
-- PM 인플루언서 (소프트웨어 마에스트로, 우아한형제들 등)
-- 크리에이터 인플루언서 (유튜버, 블로거 등)
-- 개발자 커뮤니티 연계 (OKKY, 인프런 등)
+### 4.1 프리미엄 전략
 
-**B2B 파트너십:**
-- 스타트업 인큐베이터 제휴
-- 교육 기관 협력 (부트캠프, 대학교)
-- SaaS 플랫폼 통합 (Notion, Slack 등)
+#### 📊 요금제 구조 (2025년 기준)
 
-## 10.0 측정 및 최적화 전략 (확장)
+| 플랜 | 가격 | 타겟 | 핵심 기능 | 제한사항 |
+|------|------|------|-----------|----------|
+| **Free** | 무료 | 개인 사용자 | 월 50회 개선, 기본 페르소나 3개 | 고급 기능 제한 |
+| **Pro** | ₩29,000/월 | 전문가 | 무제한 개선, 모든 페르소나, 히스토리 | - |
+| **Team** | ₩99,000/월 | 팀/기업 | Pro + 협업 기능, 관리자 대시보드 | 최대 10명 |
+| **Enterprise** | 협의 | 대기업 | 커스텀 페르소나, 온프레미스, API | 무제한 |
 
-### 10.1 고급 분석 지표
+#### 💎 프리미엄 기능 차별화
+1. **고급 페르소나**: 업계별 특화 AI 모델 (법무, 의료, 금융 등)
+2. **팀 협업**: 프롬프트 공유, 템플릿 라이브러리, 성과 분석
+3. **API 접근**: 자체 서비스 통합을 위한 개발자 API
+4. **우선 지원**: 24시간 전담 고객 지원
 
-**사용자 행동 패턴:**
+### 4.2 수익 예상 모델
+
+#### 📈 사용자 증가 시나리오 (2025-2027)
 ```typescript
-interface UserJourney {
-  session_id: string;
-  persona_selected: 'pm' | 'creator' | null;
-  demos_completed: number;
-  time_on_demo: number;
-  toggle_interactions: number;
-  scroll_depth: number;
-  exit_intent_triggered: boolean;
-  conversion_path: string[];
+// 보수적 시나리오
+const revenueProjection = {
+  "2025": {
+    totalUsers: 50000,
+    paidUsers: 5000,    // 10% 전환율
+    monthlyRevenue: "₩145,000,000",
+    annualRevenue: "₩1,740,000,000"
+  },
+  "2026": {
+    totalUsers: 200000,
+    paidUsers: 25000,   // 12.5% 전환율
+    monthlyRevenue: "₩725,000,000",
+    annualRevenue: "₩8,700,000,000"
+  },
+  "2027": {
+    totalUsers: 500000,
+    paidUsers: 75000,   // 15% 전환율
+    monthlyRevenue: "₩2,175,000,000",
+    annualRevenue: "₩26,100,000,000"
+  }
+};
+```
+
+---
+
+## 🎯 5. 사용자 페르소나 및 시나리오
+
+### 5.1 핵심 페르소나 (9가지)
+
+#### 👨‍💼 1. 프로덕트 매니저
+- **현재 고민**: "기획서를 어떻게 써야 개발팀이 이해할까?"
+- **SPA 사용법**: 모호한 아이디어 → 상세한 기능 명세서
+- **예시 변환**:
+  ```
+  입력: "구독 결제 기능"
+  출력: 
+  📋 구독 결제 시스템 설계서
+  ├── 기능 요구사항
+  ├── 데이터베이스 스키마
+  ├── API 명세서
+  ├── 보안 체크리스트
+  └── 개발 일정 (3-4주)
+  ```
+
+#### ✍️ 2. 콘텐츠 크리에이터
+- **현재 고민**: "또 뭘 만들지? 아이디어가 떠오르지 않아..."
+- **SPA 사용법**: 키워드 → 완성된 콘텐츠 기획안
+- **예시 변환**:
+  ```
+  입력: "밀레니얼 투자"
+  출력:
+  🎬 유튜브 콘텐츠 완성안
+  ├── 제목 후보 3개
+  ├── 썸네일 문구
+  ├── 대본 구조 (오프닝-본론-마무리)
+  ├── 해시태그 전략
+  └── 예상 성과 분석
+  ```
+
+#### 💼 3. 마케터
+- **현재 고민**: "효과적인 캠페인을 어떻게 기획하지?"
+- **SPA 사용법**: 마케팅 목표 → 통합 캠페인 전략
+
+#### 🎓 4. 교육자/강사
+- **현재 고민**: "학생들이 이해하기 쉬운 수업을 어떻게 만들까?"
+- **SPA 사용법**: 학습 주제 → 체계적인 커리큘럼
+
+#### 👩‍💻 5. 개발자
+- **현재 고민**: "기술 문서를 어떻게 명확하게 작성할까?"
+- **SPA 사용법**: 기술 개념 → 이해하기 쉬운 문서
+
+#### 📊 6. 데이터 분석가
+- **현재 고민**: "분석 결과를 어떻게 설득력 있게 전달할까?"
+- **SPA 사용법**: 데이터 인사이트 → 액션 가능한 리포트
+
+#### 🎨 7. 디자이너
+- **현재 고민**: "디자인 컨셉을 어떻게 구체화할까?"
+- **SPA 사용법**: 디자인 아이디어 → 상세한 디자인 가이드
+
+#### 💰 8. 세일즈
+- **현재 고민**: "고객을 설득할 수 있는 제안서를 어떻게 만들까?"
+- **SPA 사용법**: 영업 목표 → 맞춤형 제안서
+
+#### 🏢 9. 경영진/리더
+- **현재 고민**: "전략을 어떻게 명확하게 전달할까?"
+- **SPA 사용법**: 비즈니스 아이디어 → 실행 가능한 전략서
+
+### 5.2 사용자 여정 시나리오
+
+#### 🎭 시나리오 A: PM의 하루
+```
+09:00 - 기획 회의에서 "소셜 로그인 기능" 논의
+09:30 - SPA 확장 프로그램으로 "소셜 로그인 기능" 입력
+09:31 - 완성된 기능 명세서 생성 (OAuth 플로우, 보안, API 설계)
+10:00 - 개발팀과 명확한 소통으로 빠른 합의
+결과: 기획 시간 90% 단축, 커뮤니케이션 오류 제거
+```
+
+#### 🎬 시나리오 B: 크리에이터의 콘텐츠 제작
+```
+14:00 - 유튜브 콘텐츠 아이디어 고민 중
+14:05 - SPA에 "20대 재테크 실패담" 입력
+14:06 - 완성된 콘텐츠 기획안 생성
+15:00 - 기획안 기반으로 촬영 시작
+16:00 - 편집 완료 후 업로드
+결과: 기획 시간 80% 단축, 콘텐츠 품질 향상
+```
+
+---
+
+## 🛠️ 6. 기술 아키텍처 및 구현 계획
+
+### 6.1 시스템 아키텍처
+
+#### 🏗️ 전체 시스템 구조
+```mermaid
+graph TB
+    A[사용자] --> B[랜딩 페이지]
+    A --> C[Chrome 확장]
+    B --> D[Next.js API]
+    C --> D
+    D --> E[Gemini AI]
+    D --> F[Supabase DB]
+    D --> G[Redis Cache]
+    F --> H[사용자 데이터]
+    F --> I[사용량 추적]
+    G --> J[성능 최적화]
+```
+
+#### 🔧 마이크로서비스 분리 계획
+```typescript
+// 서비스 분리 전략 (2025년 하반기)
+interface MicroservicesArchitecture {
+  userService: {
+    responsibilities: ["인증", "프로필 관리", "구독 관리"];
+    database: "Supabase Auth + Custom User Table";
+    scaling: "Horizontal";
+  };
+  
+  aiService: {
+    responsibilities: ["프롬프트 처리", "페르소나 적용", "결과 생성"];
+    providers: ["Gemini", "Claude", "GPT-4"];
+    caching: "Redis + CDN";
+  };
+  
+  analyticsService: {
+    responsibilities: ["사용량 추적", "성과 분석", "A/B 테스트"];
+    tools: ["Mixpanel", "Google Analytics", "Custom Dashboard"];
+  };
 }
 ```
 
-**코호트 분석:**
-- 요일별 방문자 전환율 비교
-- 트래픽 소스별 품질 분석
-- 디바이스별 사용 패턴 분석
+### 6.2 확장성 및 성능 최적화
 
-### 10.2 A/B 테스트 계획
+#### 📈 트래픽 대응 계획
+- **현재 용량**: 1,000 동시 사용자
+- **1단계 확장**: 10,000 동시 사용자 (2025년 Q2)
+- **2단계 확장**: 100,000 동시 사용자 (2025년 Q4)
 
-**우선순위 테스트 항목:**
-1. **히어로 헤드라인** (현재 vs 3가지 변형)
-2. **CTA 버튼 문구** ("체험하기" vs "30초 데모" vs "무료로 시작")
-3. **페르소나 선택 UI** (카드형 vs 토글형 vs 드롭다운)
-4. **사전예약 인센티브** (할인 강조 vs 기능 강조 vs 커뮤니티 강조)
+#### ⚡ 성능 최적화 전략
+1. **CDN 활용**: 정적 리소스 글로벌 배포
+2. **API 캐싱**: Redis 기반 지능형 캐싱
+3. **Database 최적화**: 읽기 복제본 + 인덱스 최적화
+4. **AI 모델 최적화**: 로컬 경량 모델 + 클라우드 하이브리드
 
-**테스트 설계:**
+---
+
+## 📊 7. 성공 지표 및 KPI
+
+### 7.1 비즈니스 KPI
+
+#### 🎯 핵심 지표 (2025년 목표)
+| 지표 | Q1 목표 | Q2 목표 | Q3 목표 | Q4 목표 |
+|------|---------|---------|---------|---------|
+| **MAU** | 5,000 | 15,000 | 35,000 | 50,000 |
+| **전환율** | 8% | 10% | 12% | 15% |
+| **ARPU** | ₩25,000 | ₩27,000 | ₩29,000 | ₩32,000 |
+| **LTV** | ₩300,000 | ₩350,000 | ₩400,000 | ₩450,000 |
+| **Churn Rate** | 15% | 12% | 10% | 8% |
+
+#### 📈 사용자 행동 지표
+- **데모 완료율**: 75% (업계 평균 40%)
+- **확장 프로그램 설치율**: 25% (랜딩 페이지 방문자 기준)
+- **일일 사용 빈도**: 평균 3.5회
+- **세션 지속 시간**: 평균 8분
+
+### 7.2 제품 품질 지표
+
+#### 🏆 기술적 성능
+- **API 응답 시간**: < 2초 (95th percentile)
+- **시스템 가용성**: 99.9% uptime
+- **에러율**: < 0.1%
+- **Core Web Vitals**: 모든 지표 'Good' 등급
+
+#### 😊 사용자 만족도
+- **NPS (Net Promoter Score)**: 70+
+- **앱스토어 평점**: 4.5+ (Chrome 웹스토어)
+- **고객 지원 만족도**: 90%+
+- **기능 사용률**: 주요 기능 80%+ 사용
+
+---
+
+## 🚀 8. 출시 및 마케팅 전략
+
+### 8.1 단계별 출시 계획
+
+#### 🎪 Phase 1: 랜딩 페이지 최적화 (2024년 Q4 - 완료)
+- ✅ **목표**: 사전 등록 사용자 1,000명 확보
+- ✅ **실행**: SEO 최적화, 소셜 미디어 마케팅
+- ✅ **결과**: 현재 구현 완료, 지속적인 사용자 확보 중
+
+#### 🚀 Phase 2: Chrome 확장 베타 출시 (2025년 Q1-Q2)
+- **목표**: 베타 사용자 5,000명, 피드백 수집
+- **실행**: 사전 등록자 우선 초대, 인플루언서 협업
+- **마케팅**: Product Hunt 출시, 개발자 커뮤니티 홍보
+
+#### 🎯 Phase 3: 정식 출시 및 확산 (2025년 Q3-Q4)
+- **목표**: MAU 50,000명, 유료 전환 5,000명
+- **실행**: 전면적 마케팅 캠페인, 파트너십 확대
+- **채널**: Google Ads, 콘텐츠 마케팅, 추천 프로그램
+
+### 8.2 마케팅 채널 전략
+
+#### 📢 주요 마케팅 채널
+1. **콘텐츠 마케팅**: AI 생산성 관련 블로그, 유튜브
+2. **인플루언서 협업**: 생산성 전문가, 크리에이터
+3. **커뮤니티 마케팅**: 개발자, 디자이너, 마케터 커뮤니티
+4. **SEO/SEM**: "프롬프트 엔지니어링", "AI 생산성" 키워드
+5. **추천 프로그램**: 기존 사용자 추천 시 혜택 제공
+
+#### 💰 마케팅 예산 배분 (2025년)
+- **디지털 광고**: 40% (Google Ads, 소셜 미디어)
+- **콘텐츠 제작**: 25% (블로그, 영상, 인포그래픽)
+- **인플루언서**: 20% (협업 및 스폰서십)
+- **이벤트/PR**: 10% (컨퍼런스, 미디어 홍보)
+- **기타**: 5% (A/B 테스트, 도구 등)
+
+---
+
+## 🔮 9. 향후 로드맵 및 확장 계획
+
+### 9.1 중장기 제품 로드맵 (2025-2027)
+
+#### 🎯 2025년: 기반 구축 및 시장 진입
+- **Q1**: Chrome 확장 MVP 개발
+- **Q2**: 베타 출시 및 피드백 수집
+- **Q3**: 정식 출시 및 사용자 확보
+- **Q4**: 기능 확장 및 성능 최적화
+
+#### 🚀 2026년: 플랫폼 확장 및 고도화
+- **다중 플랫폼**: Firefox, Safari, Edge 확장 프로그램
+- **모바일 앱**: iOS/Android 네이티브 앱 출시
+- **API 플랫폼**: 써드파티 통합을 위한 개발자 API
+- **엔터프라이즈**: 대기업 맞춤형 솔루션
+
+#### 🌟 2027년: AI 생태계 리더십
+- **AI 모델 자체 개발**: 프롬프트 특화 자체 AI 모델
+- **글로벌 확장**: 다국어 지원 및 해외 시장 진출
+- **파트너십**: 주요 생산성 도구와의 통합 (Slack, Notion, etc.)
+- **IPO 준비**: 투자 유치 및 상장 검토
+
+### 9.2 기술적 진화 방향
+
+#### 🧠 AI 기술 발전
 ```typescript
-interface ABTest {
-  test_name: string;
-  traffic_split: number; // 50/50
-  conversion_metric: 'pre_register' | 'demo_complete';
-  minimum_sample_size: number;
-  expected_effect_size: number; // 10% improvement
+// AI 기술 로드맵
+interface AIEvolution {
+  "2025": {
+    model: "Gemini Pro + Claude 3.5";
+    capability: "텍스트 프롬프트 최적화";
+    accuracy: "85%";
+  };
+  
+  "2026": {
+    model: "자체 개발 SPA-GPT v1";
+    capability: "멀티모달 (텍스트+이미지+음성)";
+    accuracy: "92%";
+  };
+  
+  "2027": {
+    model: "SPA-GPT v2 + Edge Computing";
+    capability: "실시간 컨텍스트 인식";
+    accuracy: "96%";
+  };
 }
 ```
 
-### 10.3 데이터 기반 최적화 프로세스
+#### 🔧 플랫폼 확장
+1. **웹 플랫폼**: 모든 주요 브라우저 지원
+2. **모바일**: iOS/Android 네이티브 앱
+3. **데스크톱**: Electron 기반 독립 앱
+4. **API**: RESTful + GraphQL API 제공
+5. **SDK**: 개발자를 위한 JavaScript/Python SDK
 
-**주간 리뷰 대시보드:**
-- 전환 퍼널 실시간 모니터링
-- 히트맵 분석 (Hotjar/Microsoft Clarity)
-- 사용자 세션 녹화 정성 분석
-- Core Web Vitals 성능 추적
+---
 
-**월간 전략 검토:**
-- 페르소나별 전환율 비교 분석
-- 콘텐츠 개선 우선순위 재정렬
-- 기술적 병목점 해결 계획
-- 경쟁사 벤치마킹 업데이트
+## 💡 10. 위험 요소 및 대응 방안
 
-## 11.0 위험 관리 및 비상 계획 (신규)
+### 10.1 기술적 위험
 
-### 11.1 기술적 위험 요소 확장
+#### ⚠️ AI 모델 의존성
+- **위험**: Gemini API 장애 또는 정책 변경
+- **대응**: 멀티 AI 모델 지원 (Claude, GPT-4 백업)
+- **완화**: 자체 AI 모델 개발 로드맵
 
-**AI 모델 관련 위험:**
-- **위험**: 브라우저 호환성 이슈 (Safari 12 이하)
-- **대응**: User-Agent 감지 + 정적 응답 폴백
-- **모니터링**: 실시간 에러 추적 (Sentry)
+#### 🔒 개인정보 보호
+- **위험**: 사용자 데이터 유출 또는 오남용
+- **대응**: End-to-End 암호화, 최소 데이터 수집
+- **완화**: 정기적인 보안 감사, GDPR 준수
 
-**성능 관련 위험:**
-- **위험**: 모바일 환경 성능 저하 (3G 네트워크)
-- **대응**: 
-  - 모바일 전용 경량 모델 (30MB)
-  - 점진적 기능 로딩
-  - 오프라인 캐싱 전략
+### 10.2 비즈니스 위험
 
-**사용자 경험 위험:**
-- **위험**: AI 결과 품질 편차로 인한 기대치 미달
-- **대응**: 
-  - 큐레이션된 고품질 예시만 사용
-  - "시연용 예시입니다" 명시
-  - 사용자 기대치 사전 관리
+#### 🏢 경쟁사 등장
+- **위험**: 대기업의 유사 서비스 출시
+- **대응**: 빠른 시장 선점, 차별화된 UX
+- **완화**: 특허 출원, 브랜드 강화
 
-### 11.2 비즈니스 위험 요소
+#### 💰 수익화 어려움
+- **위험**: 사용자 유료 전환율 저조
+- **대응**: 프리미엄 기능 차별화, 가격 정책 최적화
+- **완화**: 다양한 수익 모델 실험
 
-**경쟁사 대응:**
-- **위험**: 유사 제품 출시로 차별성 약화
-- **대응**: 
-  - 고유 기능 특허 출원 검토
-  - 커뮤니티 선점 효과 활용
-  - 지속적 기능 혁신
+### 10.3 시장 위험
 
-**규제 리스크:**
-- **위험**: AI 관련 규제 강화 (EU AI Act 등)
-- **대응**: 
-  - 투명성 정책 선제 수립
-  - 개인정보 처리 최소화
-  - 법무 검토 정기 실시
+#### 📉 시장 포화
+- **위험**: AI 도구 시장의 과도한 경쟁
+- **대응**: 니치 시장 집중, 전문성 강화
+- **완화**: 글로벌 시장 진출, 새로운 영역 개척
 
-## 12.0 결론 및 즉시 실행 항목 (업데이트)
+---
 
-### 12.1 핵심 성공 요인 재정리
+## 📋 11. 결론 및 다음 단계
 
-1. **체험 중심 접근**: 다양한 시나리오로 페르소나별 몰입도 극대화
-2. **기술적 신뢰성**: 클라이언트 사이드 처리 + 폴백 전략으로 안정성 확보
-3. **강력한 인센티브**: 다층적 리워드로 전환 동기 강화
-4. **데이터 기반 최적화**: 실시간 모니터링 + A/B 테스트로 지속 개선
+### 11.1 핵심 성공 요인
 
-### 12.2 개발 우선순위 매트릭스
+#### 🎯 제품 차별화
+1. **Zero Learning Curve**: 별도 학습 없이 즉시 사용 가능
+2. **페르소나 기반 최적화**: 직업군별 맞춤형 AI 지원
+3. **완성도 높은 결과물**: 부분적 도움이 아닌 완전한 솔루션
 
-| 기능 | 개발 난이도 | 비즈니스 임팩트 | 우선순위 |
-|------|------------|----------------|----------|
-| 페르소나별 다중 시나리오 | 중간 | 높음 | P0 |
-| 인터랙티브 애니메이션 | 중간 | 중간 | P1 |
-| AI 모델 통합 | 높음 | 높음 | P1 |
-| 사전예약 시스템 | 낮음 | 높음 | P0 |
-| 소셜 공유 기능 | 낮음 | 중간 | P2 |
+#### 🚀 실행 우선순위
+1. **단기 (3개월)**: Chrome 확장 MVP 완성
+2. **중기 (6개월)**: 베타 사용자 확보 및 피드백 반영
+3. **장기 (12개월)**: 정식 출시 및 시장 확산
 
-### 12.3 즉시 실행 항목 (상세화)
+### 11.2 즉시 실행 가능한 액션 아이템
 
-**Week 1: 기반 구조 + 핵심 시나리오**
-- [ ] Next.js 14 프로젝트 설정 (App Router + TypeScript)
-- [ ] Tailwind CSS + shadcn/ui 컴포넌트 설치
-- [ ] 페르소나 선택 UI 구현 (2가지 아바타 + 선택 로직)
-- [ ] PM 2개, 크리에이터 2개 시나리오 정적 데이터 준비
-- [ ] 전후 비교 데모 정적 버전 구현
+#### ✅ 개발팀 액션 (우선순위 High)
+- [ ] Chrome Extension Manifest v3 기본 구조 개발
+- [ ] 텍스트 입력창 감지 및 오버레이 시스템 구현
+- [ ] 랜딩 페이지 API와 확장 프로그램 통합
+- [ ] 베타 테스터 모집 시스템 구축
 
-**Week 2: 인터랙티브 기능 + 전환 시스템**
-- [ ] Framer Motion 기반 SPA ON/OFF 토글 애니메이션
-- [ ] Diff 하이라이트 및 시각적 강조 효과
-- [ ] Typeform 사전예약 폼 연동 + Webhook 설정
-- [ ] 실시간 예약자 카운터 (가상 증가 로직)
-- [ ] 인센티브 섹션 UI 구현
+#### 📈 마케팅팀 액션 (우선순위 Medium)
+- [ ] Chrome 웹스토어 개발자 계정 등록
+- [ ] 베타 테스터 모집 랜딩 페이지 제작
+- [ ] 인플루언서 파트너십 리스트 작성
+- [ ] 콘텐츠 마케팅 캘린더 수립
 
-**Week 3: AI 통합 + 성능 최적화**
-- [ ] ONNX.js 환경 설정 + 경량 모델 테스트
-- [ ] 클라이언트 사이드 추론 파이프라인 구축
-- [ ] 폴백 시스템 구현 (정적 응답)
-- [ ] 모바일 반응형 최적화
-- [ ] Core Web Vitals 성능 튜닝
+#### 💼 비즈니스팀 액션 (우선순위 Low)
+- [ ] 투자 유치 계획 수립
+- [ ] 파트너십 후보 기업 리스트 작성
+- [ ] 법무 검토 (개인정보 처리방침, 이용약관)
+- [ ] 회계/세무 시스템 구축
 
-**Week 4: 운영 기능 + 품질 보증**
-- [ ] Google Analytics 4 + 전환 추적 설정
-- [ ] 소셜 공유 기능 (X, LinkedIn)
-- [ ] Discord 커뮤니티 초기 설정
-- [ ] A/B 테스트 프레임워크 구현
-- [ ] 크로스 브라우저 테스트 + 버그 수정
+---
 
-본 PRD는 **전략적 비전**과 **실행 가능한 세부 설계**를 완벽히 균형있게 통합하여, 개발팀이 즉시 착수할 수 있는 완전한 구현 가이드라인을 제공합니다. 특히 **다양한 페르소나 시나리오**, **상세한 기술 스펙**, **강화된 전환 전략**, **데이터 기반 최적화 체계**를 통해 성공적인 랜딩페이지 구축을 보장합니다. 
+## 📚 부록
+
+### A. 기술 스택 상세 명세
+### B. 경쟁사 분석 보고서
+### C. 사용자 인터뷰 결과
+### D. 시장 조사 데이터
+### E. 재무 모델링 상세
+
+---
+
+**문서 끝**
+
+*이 PRD는 살아있는 문서입니다. 시장 변화와 사용자 피드백에 따라 지속적으로 업데이트됩니다.*
+
+**마지막 업데이트**: 2024년 12월 26일  
+**다음 리뷰 예정**: 2025년 1월 15일  
+**문서 버전**: 2.0
