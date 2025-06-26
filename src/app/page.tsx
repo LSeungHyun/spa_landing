@@ -6,16 +6,18 @@ import { Container } from '@/components/ui/container';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Send, Wand2, Loader2, Sparkles, Users, Star, ArrowRight, CheckCircle, Menu, X, Mail, Gift, Zap, Clock, type LucideProps } from 'lucide-react';
+import { Send, Wand2, Loader2, Sparkles, Users, Star, ArrowRight, CheckCircle, Menu, X, Mail, Gift, Zap, Clock, Copy, Check, type LucideProps } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { MobileNavBar } from '@/components/layout/mobile-nav-bar';
 import { EnhancedPreRegistrationForm } from '@/components/shared/enhanced-pre-registration-form';
+import { TypingAnimation } from '@/components/shared/typing-animation';
 
 interface ChatMessage {
     id: string;
     type: 'user' | 'ai';
     content: string;
     timestamp: Date;
+    isTyping?: boolean;
 }
 
 // API 응답 타입 정의
@@ -40,6 +42,7 @@ export default function HomePage() {
     const [isRegistering, setIsRegistering] = useState(false);
     const [hasTriedDemo, setHasTriedDemo] = useState(false);
     const [improveCount, setImproveCount] = useState(0);
+    const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
     const demoRef = useRef<HTMLDivElement>(null);
     const preRegRef = useRef<HTMLDivElement>(null);
 
@@ -266,16 +269,17 @@ export default function HomePage() {
         // AI 응답 시뮬레이션
         setTimeout(() => {
             const responses = [
-                '네, 이해했습니다. 더 구체적인 요구사항이 있으시면 말씀해주세요!',
-                '좋은 프롬프트네요! 이런 식으로 작성하면 AI가 더 정확한 답변을 드릴 수 있어요.',
-                '프롬프트가 훨씬 명확해졌어요. 실제로 사용해보시면 차이를 느끼실 거예요!'
+                '네, 이해했습니다. 더 구체적인 요구사항이 있으시면 말씀해주세요! 타이핑 애니메이션을 통해 더욱 생동감 있는 대화 경험을 제공합니다.',
+                '좋은 프롬프트네요! 이런 식으로 작성하면 AI가 더 정확한 답변을 드릴 수 있어요. 실시간 타이핑 효과로 마치 실제 대화하는 것 같은 느낌을 받으실 수 있습니다.',
+                '프롬프트가 훨씬 명확해졌어요. 실제로 사용해보시면 차이를 느끼실 거예요! GPT 스타일의 타이핑 애니메이션이 적용되어 더욱 몰입감 있는 경험을 제공합니다.'
             ];
 
             const aiMessage: ChatMessage = {
                 id: (Date.now() + 1).toString(),
                 type: 'ai',
                 content: responses[Math.floor(Math.random() * responses.length)],
-                timestamp: new Date()
+                timestamp: new Date(),
+                isTyping: true
             };
             setChatMessages(prev => [...prev, aiMessage]);
         }, 1000);
@@ -345,6 +349,25 @@ export default function HomePage() {
         setTimeout(() => {
             preRegRef.current?.scrollIntoView({ behavior: 'smooth' });
         }, 100);
+    };
+
+    // 메시지 복사 기능
+    const handleCopyMessage = async (messageId: string, content: string) => {
+        try {
+            await navigator.clipboard.writeText(content);
+            setCopiedMessageId(messageId);
+            toast.success('메시지가 복사되었습니다', {
+                duration: 2000,
+            });
+            
+            // 2초 후 복사 상태 초기화
+            setTimeout(() => {
+                setCopiedMessageId(null);
+            }, 2000);
+        } catch (error) {
+            toast.error('복사에 실패했습니다');
+            console.error('Copy failed:', error);
+        }
     };
 
     return (
@@ -519,26 +542,59 @@ export default function HomePage() {
                                     <div
                                         key={message.id}
                                         className={cn(
-                                            "flex",
+                                            "flex group",
                                             message.type === 'user' ? 'justify-end' : 'justify-start'
                                         )}
                                     >
                                         <div
                                             className={cn(
-                                                "max-w-[85%] px-4 py-3 rounded-2xl text-white",
+                                                "max-w-[80%] px-3 pt-2 rounded-2xl text-white relative",
                                                 message.type === 'user'
                                                     ? 'bg-[#303030] ml-auto'
                                                     : 'bg-[#171717] mr-auto'
                                             )}
                                         >
-                                            <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                                                {message.content}
-                                            </p>
-                                            <div className="text-xs text-gray-400 mt-2">
-                                                {message.timestamp.toLocaleTimeString([], { 
-                                                    hour: '2-digit', 
-                                                    minute: '2-digit' 
-                                                })}
+                                            <div className="text-sm leading-relaxed whitespace-pre-wrap pr-8">
+                                                {message.type === 'ai' && message.isTyping ? (
+                                                    <TypingAnimation
+                                                        text={message.content}
+                                                        speed={30}
+                                                        showCursor={true}
+                                                        startDelay={500}
+                                                        className="text-white"
+                                                    />
+                                                ) : (
+                                                    message.content
+                                                )}
+                                            </div>
+                                            <div className="flex items-center justify-between mt-1">
+                                                <div className="text-xs text-gray-400">
+                                                    {message.timestamp.toLocaleTimeString([], { 
+                                                        hour: '2-digit', 
+                                                        minute: '2-digit' 
+                                                    })}
+                                                </div>
+                                                {/* 복사 버튼 - 모바일 최적화 */}
+                                                <button
+                                                    onClick={() => handleCopyMessage(message.id, message.content)}
+                                                    className={cn(
+                                                        // 모바일에서는 항상 표시, 데스크톱에서는 호버 시 표시
+                                                        "opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all duration-200",
+                                                        "p-2 md:p-1 rounded hover:bg-gray-600/50 text-gray-400 hover:text-white",
+                                                        "focus:opacity-100 focus:outline-none focus:ring-1 focus:ring-gray-500",
+                                                        // 터치 타겟 크기 최적화 (44px 최소)
+                                                        "min-w-[44px] min-h-[44px] md:min-w-auto md:min-h-auto",
+                                                        "flex items-center justify-center"
+                                                    )}
+                                                    title="메시지 복사"
+                                                    aria-label="메시지 복사하기"
+                                                >
+                                                    {copiedMessageId === message.id ? (
+                                                        <Check size={16} className="text-green-400" />
+                                                    ) : (
+                                                        <Copy size={16} />
+                                                    )}
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
@@ -562,11 +618,11 @@ export default function HomePage() {
                             </div>
 
                             {/* GPT 스타일 입력 영역 */}
-                            <div className="p-4">
+                            <div className="p-4 pb-6">
                                 <div className="relative">
                                     <textarea
                                         id="prompt-input"
-                                        className="w-full resize-none bg-[#2f2f2f] border border-gray-600 rounded-xl px-4 py-3 pr-32 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[60px] max-h-[120px]"
+                                        className="w-full resize-none bg-[#2f2f2f] border border-gray-600 rounded-xl px-4 py-3 pr-40 md:pr-32 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[60px] max-h-[120px]"
                                         rows={2}
                                         value={inputText}
                                         onChange={(e) => setInputText(e.target.value)}
@@ -591,27 +647,22 @@ export default function HomePage() {
                                         maxLength={500}
                                     />
                                     
-                                    {/* 문자 수 카운터 - 좌측 위치 */}
-                                    <div className="absolute left-3 bottom-3">
-                                        <div className="text-xs text-gray-400">
-                                            {inputText.length}/500
-                                        </div>
-                                    </div>
-                                    
-                                    {/* 입력 필드 내부 버튼 그룹 */}
-                                    <div className="absolute right-3 bottom-3 flex items-center space-x-1">
+                                    {/* 입력 필드 내부 버튼 그룹 - 모바일 최적화 */}
+                                    <div className="absolute right-2 md:right-3 bottom-3 flex items-center space-x-2 md:space-x-1">
                                         
-                                        {/* 테스트 버튼 */}
+                                        {/* 테스트 버튼 - 모바일 최적화 */}
                                         <button
                                             type="button"
                                             onClick={handleTestImprovePrompt}
                                             disabled={isLoading || !inputText.trim() || inputText.length > 500}
                                             className={cn(
-                                                "rounded-lg p-2 text-white transition-all duration-200",
+                                                "rounded-lg p-2 md:p-2 text-white transition-all duration-200",
                                                 "bg-gray-600 hover:bg-gray-500",
                                                 "disabled:opacity-50 disabled:cursor-not-allowed",
                                                 "flex items-center justify-center",
-                                                "focus:outline-none focus:ring-2 focus:ring-gray-400"
+                                                "focus:outline-none focus:ring-2 focus:ring-gray-400",
+                                                // 모바일 터치 타겟 최적화
+                                                "min-w-[44px] min-h-[44px] md:min-w-auto md:min-h-auto"
                                             )}
                                             title="테스트 개선 (Shift+Ctrl+Enter)"
                                             aria-label="테스트 개선하기"
@@ -625,17 +676,19 @@ export default function HomePage() {
                                             )}
                                         </button>
 
-                                        {/* 마법봉 버튼 (프롬프트 개선) */}
+                                        {/* 마법봉 버튼 (프롬프트 개선) - 모바일 최적화 */}
                                         <button
                                             type="button"
                                             onClick={handleImprovePrompt}
                                             disabled={isLoading || !inputText.trim() || inputText.length > 500}
                                             className={cn(
-                                                "rounded-lg p-2 text-white transition-all duration-200",
+                                                "rounded-lg p-2 md:p-2 text-white transition-all duration-200",
                                                 "bg-purple-600 hover:bg-purple-700",
                                                 "disabled:opacity-50 disabled:cursor-not-allowed",
                                                 "flex items-center justify-center",
-                                                "focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                                "focus:outline-none focus:ring-2 focus:ring-purple-500",
+                                                // 모바일 터치 타겟 최적화
+                                                "min-w-[44px] min-h-[44px] md:min-w-auto md:min-h-auto"
                                             )}
                                             title="프롬프트 개선 (Ctrl+Enter)"
                                             aria-label="프롬프트 개선하기"
@@ -643,23 +696,35 @@ export default function HomePage() {
                                             <Wand2 size={16} />
                                         </button>
 
-                                        {/* 전송 버튼 */}
+                                        {/* 전송 버튼 - 모바일 최적화 */}
                                         <button
                                             type="button"
                                             onClick={handleSendMessage}
                                             disabled={isLoading || !inputText.trim() || inputText.length > 500}
                                             className={cn(
-                                                "rounded-lg p-2 text-white transition-all duration-200",
+                                                "rounded-lg p-2 md:p-2 text-white transition-all duration-200",
                                                 "bg-blue-600 hover:bg-blue-700",
                                                 "disabled:opacity-50 disabled:cursor-not-allowed",
                                                 "flex items-center justify-center",
-                                                "focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                "focus:outline-none focus:ring-2 focus:ring-blue-500",
+                                                // 모바일 터치 타겟 최적화
+                                                "min-w-[44px] min-h-[44px] md:min-w-auto md:min-h-auto"
                                             )}
                                             title="메시지 전송 (Enter)"
                                             aria-label="메시지 전송하기"
                                         >
                                             <Send size={16} />
                                         </button>
+                                    </div>
+                                </div>
+                                
+                                {/* 문자 수 카운터 - 입력 필드 외부 하단에 배치 */}
+                                <div className="flex justify-between items-center mt-2">
+                                    <div className="text-xs text-gray-400">
+                                        {inputText.length}/500
+                                    </div>
+                                    <div className="text-xs text-gray-500">
+                                        Enter: 전송 | Ctrl+Enter: 개선 | Shift+Ctrl+Enter: 테스트
                                     </div>
                                 </div>
                             </div>
