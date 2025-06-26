@@ -497,10 +497,10 @@ export default function HomePage() {
                             </p>
                         </div>
 
-                        {/* 입력 섹션 - ChatGPT 스타일 */}
-                        <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/50 animate-slide-up overflow-hidden">
+                        {/* 입력 섹션 - ChatUI 스타일 */}
+                        <div className="bg-[#f7f7f8] rounded-2xl shadow-xl border border-gray-200/50 animate-slide-up overflow-hidden">
                             {/* 입력 영역 헤더 */}
-                            <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-3 border-b border-gray-200/50">
+                            <div className="bg-white px-6 py-3 border-b border-gray-300">
                                 <div className="flex items-center justify-between">
                                     <h4 className="font-medium text-gray-900">프롬프트 입력</h4>
                                     <div className="flex items-center space-x-2 text-sm text-gray-600">
@@ -510,126 +510,139 @@ export default function HomePage() {
                                 </div>
                             </div>
 
-                            {/* 입력 필드 */}
-                            <div className="p-6">
-                                <div className="relative">
+                            {/* 메시지 영역 */}
+                            <div className="p-4 space-y-2 min-h-[200px] max-h-[400px] overflow-y-auto">
+                                {/* AI 인사 메시지 */}
+                                <div className="mr-auto max-w-xl px-4 py-2 rounded-xl bg-white text-gray-900 shadow-sm text-sm leading-relaxed">
+                                    안녕하세요! 프롬프트 개선을 도와드리겠습니다. 아래에 개선하고 싶은 프롬프트를 입력해주세요.
+                                </div>
+                                
+                                {/* 사용자 입력이 있을 때 표시 */}
+                                {inputText.trim() && (
+                                    <div className="ml-auto max-w-xl px-4 py-2 rounded-xl bg-[#10A37F] text-white shadow-sm text-sm leading-relaxed whitespace-pre-wrap">
+                                        {inputText}
+                                    </div>
+                                )}
+                                
+                                {/* 로딩 상태 */}
+                                {isLoading && (
+                                    <div className="mr-auto max-w-xl px-4 py-2 rounded-xl bg-white text-gray-500 shadow-sm animate-pulse text-sm">
+                                        프롬프트를 개선하고 있습니다...
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* 입력 폼 */}
+                            <form 
+                                onSubmit={(e) => {
+                                    e.preventDefault();
+                                    if (inputText.trim() && inputText.length <= 500) {
+                                        handleImprovePrompt();
+                                    }
+                                }}
+                                className="w-full border-t border-gray-300 bg-white p-4 flex items-end space-x-3"
+                            >
+                                <div className="flex-1">
                                     <label htmlFor="prompt-input" className="sr-only">
                                         프롬프트 입력
                                     </label>
-                                    <div className={cn(
-                                        "relative bg-white border border-gray-300 rounded-3xl shadow-sm transition-all duration-200",
-                                        "hover:shadow-md focus-within:shadow-md",
-                                        inputText.length > 0 && "shadow-md"
-                                    )}>
-                                        <textarea
-                                            id="prompt-input"
-                                            value={inputText}
-                                            onChange={(e) => setInputText(e.target.value)}
-                                            placeholder="무엇을 도와드릴까요?"
-                                            className={cn(
-                                                "w-full min-h-[120px] max-h-[300px] px-6 py-4 bg-transparent border-none",
-                                                "text-gray-900 placeholder:text-gray-500 text-base leading-6",
-                                                "focus:outline-none resize-none",
-                                                "scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent"
-                                            )}
-                                            disabled={isLoading}
-                                            onKeyDown={(e) => {
-                                                if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
-                                                    if (inputText.trim() && inputText.length >= 10 && inputText.length <= 500) {
-                                                        e.preventDefault();
-                                                        handleImprovePrompt();
-                                                    }
-                                                }
-                                                if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                                    <textarea
+                                        id="prompt-input"
+                                        className="flex-1 resize-none rounded-md border border-gray-300 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#10A37F] w-full min-h-[60px] max-h-[120px]"
+                                        rows={1}
+                                        value={inputText}
+                                        onChange={(e) => setInputText(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter' && !e.shiftKey) {
+                                                if (inputText.trim() && inputText.length <= 500) {
                                                     e.preventDefault();
-                                                    if (e.shiftKey) {
-                                                        handleTestImprovePrompt();
-                                                    } else {
-                                                        handleImprovePrompt();
-                                                    }
+                                                    handleImprovePrompt();
                                                 }
-                                            }}
-                                        />
-
-                                        {/* ChatGPT 스타일 하단 액션 바 */}
-                                        <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200">
-                                            {/* 왼쪽: 문자 수 카운터 */}
-                                            <div className="flex items-center space-x-3 text-xs text-gray-500">
-                                                <div className="flex items-center space-x-1">
-                                                    <span>{inputText.length}/500</span>
-                                                </div>
-                                                {inputText.length > 0 && inputText.length < 10 && (
-                                                    <div className="flex items-center space-x-1 text-amber-600">
-                                                        <span>⚠️</span>
-                                                        <span className="hidden sm:inline">최소 10자 이상 입력해주세요</span>
-                                                    </div>
-                                                )}
-                                                {inputText.length > 500 && (
-                                                    <div className="flex items-center space-x-1 text-red-600">
-                                                        <span>⚠️</span>
-                                                        <span className="hidden sm:inline">500자를 초과했습니다</span>
-                                                    </div>
-                                                )}
-                                            </div>
-                                            
-                                            {/* 오른쪽: 액션 버튼들 */}
-                                            <div className="flex items-center space-x-2">
-                                                {/* 테스트 개선 버튼 */}
-                                                <button
-                                                    onClick={handleTestImprovePrompt}
-                                                    disabled={isLoading || !inputText.trim() || inputText.length < 10 || inputText.length > 500}
-                                                    className={cn(
-                                                        "px-3 py-2 rounded-lg transition-all duration-200",
-                                                        "bg-gray-100 hover:bg-gray-200 text-gray-700",
-                                                        "disabled:opacity-50 disabled:cursor-not-allowed",
-                                                        "flex items-center space-x-1.5",
-                                                        "focus:outline-none focus:ring-2 focus:ring-gray-300"
-                                                    )}
-                                                    title="API 비용 없이 테스트해보기"
-                                                    aria-label="테스트 개선하기"
-                                                >
-                                                    {isLoading ? (
-                                                        <span className="animate-spin"><Loader2 size={16} /></span>
-                                                    ) : (
-                                                        <>
-                                                            <span>🧪</span>
-                                                            <span className="hidden sm:inline text-sm">테스트</span>
-                                                        </>
-                                                    )}
-                                                </button>
-
-                                                {/* 실제 개선 버튼 */}
-                                                <button
-                                                    onClick={handleImprovePrompt}
-                                                    disabled={isLoading || !inputText.trim() || inputText.length < 10 || inputText.length > 500}
-                                                    className={cn(
-                                                        "px-4 py-2 rounded-lg transition-all duration-200",
-                                                        "bg-black hover:bg-gray-800 text-white",
-                                                        "disabled:opacity-50 disabled:cursor-not-allowed",
-                                                        "flex items-center space-x-2",
-                                                        "focus:outline-none focus:ring-2 focus:ring-gray-500"
-                                                    )}
-                                                    title="Enter 키 또는 Ctrl/Cmd + Enter로도 실행 가능"
-                                                    aria-label="프롬프트 개선하기"
-                                                >
-                                                    {isLoading ? (
-                                                        <>
-                                                            <span className="animate-spin"><Loader2 size={16} /></span>
-                                                            <span className="hidden sm:inline">개선 중</span>
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <Send size={16} />
-                                                            <span className="hidden sm:inline">개선하기</span>
-                                                        </>
-                                                    )}
-                                                </button>
-                                            </div>
+                                            }
+                                            if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                                                e.preventDefault();
+                                                if (e.shiftKey) {
+                                                    handleTestImprovePrompt();
+                                                } else {
+                                                    handleImprovePrompt();
+                                                }
+                                            }
+                                        }}
+                                        placeholder="프롬프트를 입력하세요"
+                                        disabled={isLoading}
+                                    />
+                                    
+                                    {/* 문자 수 카운터 */}
+                                    <div className="flex items-center justify-between mt-2 text-xs">
+                                        <div className="flex items-center space-x-3 text-gray-500">
+                                            <span>{inputText.length}/500</span>
+                                            {inputText.length > 500 && (
+                                                <span className="text-red-600">⚠️ 500자 초과</span>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
+                                
+                                {/* 버튼 그룹 */}
+                                <div className="flex flex-col space-y-2">
+                                    {/* 테스트 개선 버튼 */}
+                                    <button
+                                        type="button"
+                                        onClick={handleTestImprovePrompt}
+                                        disabled={isLoading || !inputText.trim() || inputText.length > 500}
+                                        className={cn(
+                                            "rounded-full p-2 text-white transition-all duration-200",
+                                            "bg-gray-500 hover:bg-gray-600",
+                                            "disabled:opacity-50 disabled:cursor-not-allowed",
+                                            "flex items-center justify-center",
+                                            "focus:outline-none focus:ring-2 focus:ring-gray-400"
+                                        )}
+                                        title="API 비용 없이 테스트해보기"
+                                        aria-label="테스트 개선하기"
+                                    >
+                                        {isLoading ? (
+                                            <span className="animate-spin"><Loader2 size={16} /></span>
+                                        ) : (
+                                            <span className="text-sm">🧪</span>
+                                        )}
+                                    </button>
 
-                                {/* 작성 팁 섹션 */}
+                                    {/* 실제 개선 버튼 */}
+                                    <button
+                                        type="submit"
+                                        disabled={isLoading || !inputText.trim() || inputText.length > 500}
+                                        className={cn(
+                                            "rounded-full p-2 text-white transition-all duration-200",
+                                            "bg-[#10A37F] hover:bg-[#0e8d6f]",
+                                            "disabled:opacity-50 disabled:cursor-not-allowed",
+                                            "flex items-center justify-center",
+                                            "focus:outline-none focus:ring-2 focus:ring-[#10A37F]"
+                                        )}
+                                        title="Enter 키로도 실행 가능"
+                                        aria-label="프롬프트 개선하기"
+                                    >
+                                        {isLoading ? (
+                                            <span className="animate-spin"><Loader2 size={16} /></span>
+                                        ) : (
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                strokeWidth={2}
+                                                className="h-5 w-5"
+                                            >
+                                                <path d="M22 2 11 13" />
+                                                <path d="m22 2-7 20-4-9-9-4Z" />
+                                            </svg>
+                                        )}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        {/* 작성 팁 섹션 */}
+                        <div className="mt-6">
                                 {inputText.length === 0 && (
                                     <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200/50">
                                         <h5 className="text-sm font-semibold text-blue-800 mb-2 flex items-center">
@@ -700,7 +713,6 @@ export default function HomePage() {
                                         )}
                                     </div>
                                 )}
-                            </div>
                         </div>
                     </div>
                 </Container>
