@@ -497,217 +497,238 @@ export default function HomePage() {
                             </p>
                         </div>
 
-                        {/* 입력 섹션 - ChatUI 스타일 */}
-                        <div className="bg-[#f7f7f8] rounded-2xl shadow-xl border border-gray-200/50 animate-slide-up overflow-hidden">
-                            {/* 입력 영역 헤더 */}
-                            <div className="bg-white px-6 py-3 border-b border-gray-300">
+                        {/* GPT 스타일 입력 섹션 */}
+                        <div className="bg-[#212121] rounded-2xl shadow-xl border border-gray-700/50 animate-slide-up overflow-hidden">
+                            {/* 헤더 */}
+                            <div className="bg-[#171717] px-6 py-3 border-b border-gray-600/50">
                                 <div className="flex items-center justify-between">
-                                    <h4 className="font-medium text-gray-900">프롬프트 입력</h4>
-                                    <div className="flex items-center space-x-2 text-sm text-gray-600">
-                                        <Wand2 size={16} />
-                                        <span>AI 개선 준비됨</span>
+                                    <h4 className="font-medium">
+                                        <span className="text-white">ChatGPT</span>
+                                        <span className="text-gray-400 ml-1">(with Smart Prompt Assistant)</span>
+                                    </h4>
+                                    <div className="flex items-center space-x-2 text-sm text-gray-400">
+                                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                                        <span>온라인</span>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* 메시지 영역 */}
-                            <div className="p-4 space-y-2 min-h-[200px] max-h-[400px] overflow-y-auto">
-                                {/* AI 인사 메시지 */}
-                                <div className="mr-auto max-w-xl px-4 py-2 rounded-xl bg-white text-gray-900 shadow-sm text-sm leading-relaxed">
-                                    안녕하세요! 프롬프트 개선을 도와드리겠습니다. 아래에 개선하고 싶은 프롬프트를 입력해주세요.
-                                </div>
-                                
-                                {/* 사용자 입력이 있을 때 표시 */}
-                                {inputText.trim() && (
-                                    <div className="ml-auto max-w-xl px-4 py-2 rounded-xl bg-[#10A37F] text-white shadow-sm text-sm leading-relaxed whitespace-pre-wrap">
-                                        {inputText}
+                            {/* 대화 메시지 영역 */}
+                            <div className="p-4 space-y-4 min-h-[200px] max-h-[400px] overflow-y-auto">
+                                {chatMessages.map((message) => (
+                                    <div
+                                        key={message.id}
+                                        className={cn(
+                                            "flex",
+                                            message.type === 'user' ? 'justify-end' : 'justify-start'
+                                        )}
+                                    >
+                                        <div
+                                            className={cn(
+                                                "max-w-[85%] px-4 py-3 rounded-2xl text-white",
+                                                message.type === 'user'
+                                                    ? 'bg-[#303030] ml-auto'
+                                                    : 'bg-[#171717] mr-auto'
+                                            )}
+                                        >
+                                            <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                                                {message.content}
+                                            </p>
+                                            <div className="text-xs text-gray-400 mt-2">
+                                                {message.timestamp.toLocaleTimeString([], { 
+                                                    hour: '2-digit', 
+                                                    minute: '2-digit' 
+                                                })}
+                                            </div>
+                                        </div>
                                     </div>
-                                )}
+                                ))}
                                 
                                 {/* 로딩 상태 */}
                                 {isLoading && (
-                                    <div className="mr-auto max-w-xl px-4 py-2 rounded-xl bg-white text-gray-500 shadow-sm animate-pulse text-sm">
-                                        프롬프트를 개선하고 있습니다...
+                                    <div className="flex justify-start">
+                                        <div className="bg-[#171717] px-4 py-3 rounded-2xl">
+                                            <div className="flex items-center space-x-2">
+                                                <div className="flex space-x-1">
+                                                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                                                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                                                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                                                </div>
+                                                <span className="text-xs text-gray-400">AI가 생각하고 있어요...</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 )}
                             </div>
 
-                            {/* 입력 폼 */}
-                            <form 
-                                onSubmit={(e) => {
-                                    e.preventDefault();
-                                    if (inputText.trim() && inputText.length <= 500) {
-                                        handleImprovePrompt();
-                                    }
-                                }}
-                                className="w-full border-t border-gray-300 bg-white p-4 flex items-end space-x-3"
-                            >
-                                <div className="flex-1">
-                                    <label htmlFor="prompt-input" className="sr-only">
-                                        프롬프트 입력
-                                    </label>
+                            {/* GPT 스타일 입력 영역 */}
+                            <div className="p-4">
+                                <div className="relative">
                                     <textarea
                                         id="prompt-input"
-                                        className="flex-1 resize-none rounded-md border border-gray-300 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#10A37F] w-full min-h-[60px] max-h-[120px]"
-                                        rows={1}
+                                        className="w-full resize-none bg-[#2f2f2f] border border-gray-600 rounded-xl px-4 py-3 pr-32 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[60px] max-h-[120px]"
+                                        rows={2}
                                         value={inputText}
                                         onChange={(e) => setInputText(e.target.value)}
                                         onKeyDown={(e) => {
                                             if (e.key === 'Enter' && !e.shiftKey) {
                                                 if (inputText.trim() && inputText.length <= 500) {
                                                     e.preventDefault();
-                                                    handleImprovePrompt();
+                                                    handleSendMessage();
                                                 }
                                             }
                                             if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
                                                 e.preventDefault();
-                                                if (e.shiftKey) {
-                                                    handleTestImprovePrompt();
-                                                } else {
-                                                    handleImprovePrompt();
-                                                }
+                                                handleImprovePrompt();
+                                            }
+                                            if (e.key === 'Enter' && e.shiftKey && (e.ctrlKey || e.metaKey)) {
+                                                e.preventDefault();
+                                                handleTestImprovePrompt();
                                             }
                                         }}
-                                        placeholder="프롬프트를 입력하세요"
+                                        placeholder="메시지를 입력하세요..."
                                         disabled={isLoading}
+                                        maxLength={500}
                                     />
                                     
-                                    {/* 문자 수 카운터 */}
-                                    <div className="flex items-center justify-between mt-2 text-xs">
-                                        <div className="flex items-center space-x-3 text-gray-500">
-                                            <span>{inputText.length}/500</span>
-                                            {inputText.length > 500 && (
-                                                <span className="text-red-600">⚠️ 500자 초과</span>
-                                            )}
+                                    {/* 입력 필드 내부 버튼 그룹 */}
+                                    <div className="absolute right-2 bottom-2 flex items-center space-x-1">
+                                        {/* 문자 수 카운터 */}
+                                        <div className="text-xs text-gray-400 mr-2">
+                                            {inputText.length}/500
                                         </div>
+                                        
+                                        {/* 테스트 버튼 */}
+                                        <button
+                                            type="button"
+                                            onClick={handleTestImprovePrompt}
+                                            disabled={isLoading || !inputText.trim() || inputText.length > 500}
+                                            className={cn(
+                                                "rounded-lg p-2 text-white transition-all duration-200",
+                                                "bg-gray-600 hover:bg-gray-500",
+                                                "disabled:opacity-50 disabled:cursor-not-allowed",
+                                                "flex items-center justify-center",
+                                                "focus:outline-none focus:ring-2 focus:ring-gray-400"
+                                            )}
+                                            title="테스트 개선 (Shift+Ctrl+Enter)"
+                                            aria-label="테스트 개선하기"
+                                        >
+                                            {isLoading ? (
+                                                <div className="animate-spin">
+                                                    <Loader2 size={16} />
+                                                </div>
+                                            ) : (
+                                                <span className="text-sm">🧪</span>
+                                            )}
+                                        </button>
+
+                                        {/* 마법봉 버튼 (프롬프트 개선) */}
+                                        <button
+                                            type="button"
+                                            onClick={handleImprovePrompt}
+                                            disabled={isLoading || !inputText.trim() || inputText.length > 500}
+                                            className={cn(
+                                                "rounded-lg p-2 text-white transition-all duration-200",
+                                                "bg-purple-600 hover:bg-purple-700",
+                                                "disabled:opacity-50 disabled:cursor-not-allowed",
+                                                "flex items-center justify-center",
+                                                "focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                            )}
+                                            title="프롬프트 개선 (Ctrl+Enter)"
+                                            aria-label="프롬프트 개선하기"
+                                        >
+                                            <Wand2 size={16} />
+                                        </button>
+
+                                        {/* 전송 버튼 */}
+                                        <button
+                                            type="button"
+                                            onClick={handleSendMessage}
+                                            disabled={isLoading || !inputText.trim() || inputText.length > 500}
+                                            className={cn(
+                                                "rounded-lg p-2 text-white transition-all duration-200",
+                                                "bg-blue-600 hover:bg-blue-700",
+                                                "disabled:opacity-50 disabled:cursor-not-allowed",
+                                                "flex items-center justify-center",
+                                                "focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            )}
+                                            title="메시지 전송 (Enter)"
+                                            aria-label="메시지 전송하기"
+                                        >
+                                            <Send size={16} />
+                                        </button>
                                     </div>
                                 </div>
-                                
-                                {/* 버튼 그룹 */}
-                                <div className="flex flex-col space-y-2">
-                                    {/* 테스트 개선 버튼 */}
-                                    <button
-                                        type="button"
-                                        onClick={handleTestImprovePrompt}
-                                        disabled={isLoading || !inputText.trim() || inputText.length > 500}
-                                        className={cn(
-                                            "rounded-full p-2 text-white transition-all duration-200",
-                                            "bg-gray-500 hover:bg-gray-600",
-                                            "disabled:opacity-50 disabled:cursor-not-allowed",
-                                            "flex items-center justify-center",
-                                            "focus:outline-none focus:ring-2 focus:ring-gray-400"
-                                        )}
-                                        title="API 비용 없이 테스트해보기"
-                                        aria-label="테스트 개선하기"
-                                    >
-                                        {isLoading ? (
-                                            <span className="animate-spin"><Loader2 size={16} /></span>
-                                        ) : (
-                                            <span className="text-sm">🧪</span>
-                                        )}
-                                    </button>
-
-                                    {/* 실제 개선 버튼 */}
-                                    <button
-                                        type="submit"
-                                        disabled={isLoading || !inputText.trim() || inputText.length > 500}
-                                        className={cn(
-                                            "rounded-full p-2 text-white transition-all duration-200",
-                                            "bg-[#10A37F] hover:bg-[#0e8d6f]",
-                                            "disabled:opacity-50 disabled:cursor-not-allowed",
-                                            "flex items-center justify-center",
-                                            "focus:outline-none focus:ring-2 focus:ring-[#10A37F]"
-                                        )}
-                                        title="Enter 키로도 실행 가능"
-                                        aria-label="프롬프트 개선하기"
-                                    >
-                                        {isLoading ? (
-                                            <span className="animate-spin"><Loader2 size={16} /></span>
-                                        ) : (
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                viewBox="0 0 24 24"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                strokeWidth={2}
-                                                className="h-5 w-5"
-                                            >
-                                                <path d="M22 2 11 13" />
-                                                <path d="m22 2-7 20-4-9-9-4Z" />
-                                            </svg>
-                                        )}
-                                    </button>
-                                </div>
-                            </form>
+                            </div>
                         </div>
 
-                        {/* 작성 팁 섹션 */}
+                        {/* 작성 팁 섹션 - 다크 테마 */}
                         <div className="mt-6">
                                 {inputText.length === 0 && (
-                                    <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200/50">
-                                        <h5 className="text-sm font-semibold text-blue-800 mb-2 flex items-center">
+                                    <div className="mt-6 p-4 bg-gradient-to-r from-gray-800 to-gray-700 rounded-xl border border-gray-600/50">
+                                        <h5 className="text-sm font-semibold text-blue-300 mb-2 flex items-center">
                                             <span className="mr-2">💡</span>
                                             효과적인 프롬프트 작성 팁
                                         </h5>
-                                        <div className="grid sm:grid-cols-2 gap-3 text-xs text-blue-700">
+                                        <div className="grid sm:grid-cols-2 gap-3 text-xs text-gray-300">
                                             <div className="flex items-start space-x-2">
-                                                <span className="text-blue-500 font-bold">1.</span>
+                                                <span className="text-blue-400 font-bold">1.</span>
                                                 <span>구체적인 목적과 상황을 명시하세요</span>
                                             </div>
                                             <div className="flex items-start space-x-2">
-                                                <span className="text-blue-500 font-bold">2.</span>
+                                                <span className="text-blue-400 font-bold">2.</span>
                                                 <span>원하는 결과물의 형식을 설명하세요</span>
                                             </div>
                                             <div className="flex items-start space-x-2">
-                                                <span className="text-blue-500 font-bold">3.</span>
+                                                <span className="text-blue-400 font-bold">3.</span>
                                                 <span>대상 독자나 사용자를 고려하세요</span>
                                             </div>
                                             <div className="flex items-start space-x-2">
-                                                <span className="text-blue-500 font-bold">4.</span>
+                                                <span className="text-blue-400 font-bold">4.</span>
                                                 <span>톤앤매너나 스타일을 지정하세요</span>
                                             </div>
                                         </div>
                                     </div>
                                 )}
 
-                                {/* 샘플 프롬프트 섹션 - 개선된 스타일 */}
+                                {/* 샘플 프롬프트 섹션 - 다크 테마 */}
                                 <div className="mt-6">
                                     <div className="flex items-center justify-between mb-3">
-                                        <h5 className="text-sm font-medium text-gray-700">빠른 시작 샘플</h5>
-                                        <span className="text-xs text-gray-500">클릭하여 사용</span>
+                                        <h5 className="text-sm font-medium text-gray-300">빠른 시작 샘플</h5>
+                                        <span className="text-xs text-gray-400">클릭하여 사용</span>
                                     </div>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                         {samplePrompts.map((prompt, index) => (
                                             <button
                                                 key={index}
                                                 onClick={() => handleSampleClick(prompt)}
-                                                className="text-left p-4 bg-gradient-to-r from-blue-50 to-purple-50 hover:from-blue-100 hover:to-purple-100 rounded-xl border border-blue-200/50 hover:border-blue-300/50 transition-all duration-200 text-sm text-gray-700 hover:text-gray-900 touch-friendly group shadow-sm hover:shadow-md sample-prompt-card"
+                                                className="text-left p-4 bg-gradient-to-r from-gray-800 to-gray-700 hover:from-gray-700 hover:to-gray-600 rounded-xl border border-gray-600/50 hover:border-gray-500/50 transition-all duration-200 text-sm text-gray-300 hover:text-white touch-friendly group shadow-sm hover:shadow-md sample-prompt-card"
                                                 aria-label={`샘플 프롬프트: ${prompt}`}
                                             >
                                                 <div className="flex items-center justify-between">
                                                     <span className="leading-relaxed">{prompt}</span>
-                                                    <span className="opacity-0 group-hover:opacity-100 transition-opacity text-blue-600 flex-shrink-0 ml-2"><ArrowRight size={16} /></span>
+                                                    <span className="opacity-0 group-hover:opacity-100 transition-opacity text-blue-400 flex-shrink-0 ml-2"><ArrowRight size={16} /></span>
                                                 </div>
                                             </button>
                                         ))}
                                     </div>
                                 </div>
 
-                                {/* 체험 후 혜택 안내 - 개선된 스타일 */}
+                                {/* 체험 후 혜택 안내 - 다크 테마 */}
                                 {hasTriedDemo && (
-                                    <div className="mt-6 p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl border border-green-200/50 animate-fade-in">
-                                        <div className="flex items-center space-x-2 text-green-700 mb-2">
+                                    <div className="mt-6 p-4 bg-gradient-to-r from-green-900/50 to-blue-900/50 rounded-xl border border-green-600/50 animate-fade-in">
+                                        <div className="flex items-center space-x-2 text-green-400 mb-2">
                                             <CheckCircle size={20} />
                                             <span className="font-medium">프롬프트 개선 완료!</span>
                                         </div>
-                                        <p className="text-sm text-gray-700 leading-relaxed">
+                                        <p className="text-sm text-gray-300 leading-relaxed">
                                             {improveCount < 2
                                                 ? `🚀 프롬프트가 ${(improveCount + 1) * 10}배 향상되었습니다! ${2 - improveCount}번 더 체험해보세요.`
                                                 : '⚡ 프롬프트 성능이 극적으로 개선되었습니다!'
                                             }
                                         </p>
                                         {improveCount >= 2 && (
-                                            <div className="mt-2 text-xs text-green-600">
+                                            <div className="mt-2 text-xs text-green-300">
                                                 🎯 사전 등록하고 더 강력한 AI 기능을 경험해보세요!
                                             </div>
                                         )}
