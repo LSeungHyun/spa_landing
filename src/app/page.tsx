@@ -147,6 +147,108 @@ export default function HomePage() {
         }
     };
 
+    // 테스트용 개선 함수 (API 호출 없이 임시 개선안 제공)
+    const handleTestImprovePrompt = async () => {
+        if (!inputText.trim()) {
+            toast.error('프롬프트를 입력해주세요');
+            return;
+        }
+
+        setIsLoading(true);
+        setHasTriedDemo(true);
+
+        // 로딩 시뮬레이션
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        try {
+            // 임시 개선안 생성 로직
+            const generateTestImprovement = (original: string): string => {
+                // 다양한 개선 패턴들
+                const wordImprovements = [
+                    { pattern: /이메일/gi, replacement: '전문적이고 매력적인 이메일' },
+                    { pattern: /작성/gi, replacement: '세심하게 작성' },
+                    { pattern: /소개/gi, replacement: '상세하고 매력적인 소개' },
+                    { pattern: /글/gi, replacement: '고품질 콘텐츠' },
+                    { pattern: /만들어/gi, replacement: '전문적으로 제작해' },
+                    { pattern: /설명/gi, replacement: '구체적으로 설명' },
+                    { pattern: /도움/gi, replacement: '전문적인 도움' },
+                    { pattern: /내용/gi, replacement: '핵심 내용' },
+                    { pattern: /방법/gi, replacement: '효과적인 방법' },
+                    { pattern: /계획/gi, replacement: '체계적인 계획' }
+                ];
+
+                let improved = original;
+                
+                // 기본 단어 개선사항 적용
+                wordImprovements.forEach(({ pattern, replacement }) => {
+                    improved = improved.replace(pattern, replacement);
+                });
+
+                // 문장 구조 개선
+                if (improved.length > 20) {
+                    // 더 구체적인 맥락 추가
+                    const contextEnhancements = [
+                        '\n\n구체적인 요구사항:',
+                        '- 타겟 오디언스: [구체적인 대상 독자 명시]',
+                        '- 목적: [달성하고자 하는 명확한 목표]',
+                        '- 톤앤매너: [전문적/친근한/공식적 등 적절한 톤 선택]',
+                        '- 길이: [적절한 분량 가이드라인]',
+                        '- 핵심 메시지: [전달하고자 하는 주요 포인트]'
+                    ];
+
+                    // 원문 길이에 따른 차별화
+                    if (original.length < 50) {
+                        improved += contextEnhancements.join('\n');
+                        improved += '\n\n참고: 위 요구사항을 모두 반영하여 완성도 높은 결과물을 만들어주세요.';
+                    } else if (original.length < 100) {
+                        improved += contextEnhancements.slice(0, 4).join('\n');
+                        improved += '\n\n[위 내용을 바탕으로 더욱 구체적이고 전문적으로 작성해주세요]';
+                    } else {
+                        improved += '\n\n추가 개선사항: 위 내용을 더욱 구체적이고 체계적으로 구성하되, 핵심 메시지가 명확히 전달되도록 작성해주세요.';
+                    }
+                } else {
+                    // 매우 짧은 프롬프트의 경우 기본 구조 제공
+                    improved += '\n\n[이 요청을 더 구체적으로 설명해주세요. 예: 목적, 대상, 원하는 결과 등]';
+                }
+
+                // 랜덤 개선 요소 추가 (실제 AI처럼 다양성 제공)
+                const randomEnhancements = [
+                    '\n\n💡 추천: 예시나 구체적인 사례를 포함하여 요청하면 더 좋은 결과를 얻을 수 있습니다.',
+                    '\n\n🎯 팁: 원하는 결과물의 형식(예: 불렛 포인트, 단락 형태 등)을 명시해주세요.',
+                    '\n\n📝 가이드: 특정 키워드나 피해야 할 표현이 있다면 함께 알려주세요.',
+                    '\n\n⚡ 개선: 분량 제한이나 특별한 요구사항이 있다면 명시해주세요.'
+                ];
+
+                // 30% 확률로 랜덤 팁 추가
+                if (Math.random() < 0.3) {
+                    const randomTip = randomEnhancements[Math.floor(Math.random() * randomEnhancements.length)];
+                    improved += randomTip;
+                }
+
+                return improved;
+            };
+
+            const improvedPrompt = generateTestImprovement(inputText);
+            setInputText(improvedPrompt);
+            setImproveCount(prev => prev + 1);
+
+            // 개선 횟수에 따른 차별화된 메시지 (테스트 버전)
+            if (improveCount === 0) {
+                toast.success('🧪 테스트: AI가 프롬프트를 10배 향상시켰습니다!');
+            } else if (improveCount === 1) {
+                toast.success('🧪 테스트: AI 프롬프트 성능이 극적으로 개선되었습니다!');
+            } else {
+                toast.success('🧪 테스트: AI가 완벽한 프롬프트로 변환했습니다!');
+            }
+
+        } catch (error) {
+            toast.error('테스트 개선에 실패했습니다. 다시 시도해주세요.');
+            console.error(error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const handleSendMessage = () => {
         if (!inputText.trim()) return;
 
@@ -435,46 +537,83 @@ export default function HomePage() {
                                             onKeyDown={(e) => {
                                                 if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
                                                     e.preventDefault();
-                                                    handleImprovePrompt();
+                                                    if (e.shiftKey) {
+                                                        handleTestImprovePrompt();
+                                                    } else {
+                                                        handleImprovePrompt();
+                                                    }
                                                 }
                                             }}
                                         />
 
-                                        {/* 마법의 지팡이 버튼 - 개선된 스타일 */}
-                                        <button
-                                            onClick={handleImprovePrompt}
-                                            disabled={isLoading || !inputText.trim() || inputText.length < 10 || inputText.length > 500}
-                                            className={cn(
-                                                "absolute right-3 bottom-3 px-4 py-2.5 rounded-lg transition-all duration-200",
-                                                "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700",
-                                                "text-white font-medium text-sm",
-                                                "disabled:opacity-50 disabled:cursor-not-allowed",
-                                                "flex items-center space-x-2 shadow-lg touch-friendly",
-                                                "hover:scale-105 transform hover:shadow-xl",
-                                                "focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2"
-                                            )}
-                                            title="Ctrl/Cmd + Enter로도 실행 가능"
-                                            aria-label="프롬프트 개선하기"
-                                        >
-                                            {isLoading ? (
-                                                <>
-                                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                                    <span className="hidden sm:inline">개선 중</span>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <Wand2 className="w-4 h-4" />
-                                                    <span className="hidden sm:inline">개선하기</span>
-                                                </>
-                                            )}
-                                        </button>
+                                        {/* 버튼 그룹 */}
+                                        <div className="absolute right-3 bottom-3 flex items-center space-x-2">
+                                            {/* 테스트 개선 버튼 */}
+                                            <button
+                                                onClick={handleTestImprovePrompt}
+                                                disabled={isLoading || !inputText.trim() || inputText.length < 10 || inputText.length > 500}
+                                                className={cn(
+                                                    "px-3 py-2.5 rounded-lg transition-all duration-200",
+                                                    "bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800",
+                                                    "text-white font-medium text-sm",
+                                                    "disabled:opacity-50 disabled:cursor-not-allowed",
+                                                    "flex items-center space-x-1.5 shadow-lg touch-friendly",
+                                                    "hover:scale-105 transform hover:shadow-xl",
+                                                    "focus:outline-none focus:ring-2 focus:ring-gray-500/50 focus:ring-offset-2"
+                                                )}
+                                                title="API 비용 없이 테스트해보기 (Shift+Ctrl+Enter)"
+                                                aria-label="테스트 개선하기"
+                                            >
+                                                {isLoading ? (
+                                                    <>
+                                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                                        <span className="hidden sm:inline text-xs">테스트 중</span>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <span className="text-xs">🧪</span>
+                                                        <span className="hidden sm:inline text-xs">테스트</span>
+                                                    </>
+                                                )}
+                                            </button>
+
+                                            {/* 실제 개선 버튼 */}
+                                            <button
+                                                onClick={handleImprovePrompt}
+                                                disabled={isLoading || !inputText.trim() || inputText.length < 10 || inputText.length > 500}
+                                                className={cn(
+                                                    "px-4 py-2.5 rounded-lg transition-all duration-200",
+                                                    "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700",
+                                                    "text-white font-medium text-sm",
+                                                    "disabled:opacity-50 disabled:cursor-not-allowed",
+                                                    "flex items-center space-x-2 shadow-lg touch-friendly",
+                                                    "hover:scale-105 transform hover:shadow-xl",
+                                                    "focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2"
+                                                )}
+                                                title="Ctrl/Cmd + Enter로도 실행 가능"
+                                                aria-label="프롬프트 개선하기"
+                                            >
+                                                {isLoading ? (
+                                                    <>
+                                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                                        <span className="hidden sm:inline">개선 중</span>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Wand2 className="w-4 h-4" />
+                                                        <span className="hidden sm:inline">개선하기</span>
+                                                    </>
+                                                )}
+                                            </button>
+                                        </div>
                                     </div>
 
                                     {/* 문자 수 카운터 및 입력 가이드 */}
                                     <div className="flex items-center justify-between mt-3 text-xs">
-                                        <div className="flex items-center space-x-4">
-                                            <span className="text-gray-500">💡 샘플을 클릭하여 빠르게 시작해보세요</span>
-                                        </div>
+                                                                            <div className="flex items-center space-x-4">
+                                        <span className="text-gray-500">💡 샘플을 클릭하여 빠르게 시작해보세요</span>
+                                        <span className="text-gray-400 text-xs">🧪 테스트 버튼: API 비용 없이 체험</span>
+                                    </div>
                                         <div className="flex items-center space-x-3">
                                             {/* 문자 수 카운터 */}
                                             <div className={cn(
@@ -492,11 +631,21 @@ export default function HomePage() {
                                                 <span>500</span>
                                             </div>
                                             {/* 키보드 단축키 힌트 */}
-                                            <div className="hidden sm:flex items-center space-x-1 text-gray-500">
-                                                <kbd className="px-2 py-1 bg-gray-200 rounded text-xs font-mono">Ctrl</kbd>
-                                                <span>+</span>
-                                                <kbd className="px-2 py-1 bg-gray-200 rounded text-xs font-mono">Enter</kbd>
-                                                <span>로 실행</span>
+                                            <div className="hidden sm:flex flex-col items-end space-y-1 text-gray-500 text-xs">
+                                                <div className="flex items-center space-x-1">
+                                                    <kbd className="px-2 py-1 bg-gray-200 rounded text-xs font-mono">Ctrl</kbd>
+                                                    <span>+</span>
+                                                    <kbd className="px-2 py-1 bg-gray-200 rounded text-xs font-mono">Enter</kbd>
+                                                    <span>실제 개선</span>
+                                                </div>
+                                                <div className="flex items-center space-x-1">
+                                                    <kbd className="px-1.5 py-1 bg-gray-200 rounded text-xs font-mono">Shift</kbd>
+                                                    <span>+</span>
+                                                    <kbd className="px-1.5 py-1 bg-gray-200 rounded text-xs font-mono">Ctrl</kbd>
+                                                    <span>+</span>
+                                                    <kbd className="px-1.5 py-1 bg-gray-200 rounded text-xs font-mono">Enter</kbd>
+                                                    <span>테스트</span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
