@@ -1,29 +1,29 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import { Toaster } from 'sonner';
 import Providers from './providers';
-import { MobileNavBar } from '@/components/layout/mobile-nav-bar';
 
 export const metadata: Metadata = {
-  title: 'Smart Prompt Assistant - AI로 더 나은 프롬프트를',
-  description: '프롬프트 작성의 새로운 기준. AI가 당신의 요구사항을 정확히 이해하고 최적화된 프롬프트를 제안합니다. 3초 만에 전문가 수준의 결과를 얻어보세요.',
-  keywords: ['AI', '프롬프트', 'prompt', 'assistant', '인공지능', '프롬프트 최적화', 'ChatGPT', 'AI 도구'],
-  authors: [{ name: 'Smart Prompt Assistant Team' }],
-  creator: 'Smart Prompt Assistant',
-  publisher: 'Smart Prompt Assistant',
+  title: 'SPA - Smart Prompt Assistant | 백지의 압박 해결사',
+  description: 'AI가 당신의 프롬프트를 10배 향상시킵니다. 블랭크 페이지 신드롬을 즉시 해결하고 창의적인 아이디어를 얻으세요.',
+  keywords: 'AI, 프롬프트, 생산성, 창의성, 백지의 압박, 블랭크 페이지',
+  authors: [{ name: 'SPA Team' }],
+  creator: 'SPA - Smart Prompt Assistant',
+  publisher: 'SPA',
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
   },
-  metadataBase: new URL('https://smart-prompt-assistant.com'),
+  metadataBase: new URL('https://spa-landing.vercel.app'),
   alternates: {
     canonical: '/',
   },
   openGraph: {
-    title: 'Smart Prompt Assistant - AI로 더 나은 프롬프트를',
-    description: '프롬프트 작성의 새로운 기준. AI가 당신의 요구사항을 정확히 이해하고 최적화된 프롬프트를 제안합니다.',
-    url: 'https://smart-prompt-assistant.com',
-    siteName: 'Smart Prompt Assistant',
+    title: 'SPA - Smart Prompt Assistant | 백지의 압박 해결사',
+    description: 'AI가 당신의 프롬프트를 10배 향상시킵니다. 블랭크 페이지 신드롬을 즉시 해결하고 창의적인 아이디어를 얻으세요.',
+    url: 'https://spa-landing.vercel.app',
+    siteName: 'SPA - Smart Prompt Assistant',
     locale: 'ko_KR',
     type: 'website',
     images: [
@@ -31,16 +31,16 @@ export const metadata: Metadata = {
         url: '/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'Smart Prompt Assistant - AI로 더 나은 프롬프트를',
+        alt: 'SPA - Smart Prompt Assistant | 백지의 압박 해결사',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Smart Prompt Assistant - AI로 더 나은 프롬프트를',
-    description: '프롬프트 작성의 새로운 기준. AI가 당신의 요구사항을 정확히 이해하고 최적화된 프롬프트를 제안합니다.',
+    title: 'SPA - Smart Prompt Assistant | 백지의 압박 해결사',
+    description: 'AI가 당신의 프롬프트를 10배 향상시킵니다.',
     images: ['/og-image.jpg'],
-    creator: '@smartpromptai',
+    creator: '@spa_assistant',
   },
   robots: {
     index: true,
@@ -54,23 +54,25 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    google: 'your-google-verification-code',
+    google: 'google-site-verification-code',
   },
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: {
+  children: React.ReactNode
+}) {
   return (
-    <html lang="ko" suppressHydrationWarning>
+    <html lang="ko" className="scroll-smooth" suppressHydrationWarning>
       <head>
-        {/* Google Fonts - SWC 없이 직접 로드 */}
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        <meta name="theme-color" content="#0f172a" />
+        <meta name="color-scheme" content="dark light" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link 
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=JetBrains+Mono:wght@100;200;300;400;500;600;700;800&display=swap" 
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" 
           rel="stylesheet" 
         />
         
@@ -81,9 +83,9 @@ export default function RootLayout({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "WebApplication",
-              "name": "Smart Prompt Assistant",
-              "description": "AI가 당신의 요구사항을 정확히 이해하고 최적화된 프롬프트를 제안하는 도구",
-              "url": "https://smart-prompt-assistant.com",
+              "name": "SPA - Smart Prompt Assistant",
+              "description": "AI가 당신의 프롬프트를 10배 향상시킵니다. 블랭크 페이지 신드롬을 즉시 해결하고 창의적인 아이디어를 얻으세요.",
+              "url": "https://spa-landing.vercel.app",
               "applicationCategory": "Productivity",
               "operatingSystem": "Web",
               "offers": {
@@ -101,14 +103,13 @@ export default function RootLayout({
               },
               "author": {
                 "@type": "Organization",
-                "name": "Smart Prompt Assistant Team"
+                "name": "SPA Team"
               }
             })
           }}
         />
         
         {/* 추가 메타 태그 */}
-        <meta name="theme-color" content="#1e40af" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="SPA" />
@@ -126,11 +127,34 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
       </head>
       <body className="font-inter antialiased">
+        {/* Skip Link for Accessibility */}
+        <a 
+          href="#main-content" 
+          className="skip-link"
+          aria-label="메인 콘텐츠로 건너뛰기"
+        >
+          메인 콘텐츠로 건너뛰기
+        </a>
+        
         <Providers>
-          <main className="pb-14 lg:pb-0">
-            {children}
-          </main>
-          <MobileNavBar />
+          <div className="min-h-screen bg-background text-foreground">
+            <main id="main-content" role="main" tabIndex={-1}>
+              {children}
+            </main>
+          </div>
+          <Toaster 
+            position="top-right" 
+            richColors 
+            closeButton
+            toastOptions={{
+              duration: 4000,
+              style: {
+                background: 'hsl(var(--background))',
+                color: 'hsl(var(--foreground))',
+                border: '1px solid hsl(var(--border))',
+              },
+            }}
+          />
         </Providers>
       </body>
     </html>

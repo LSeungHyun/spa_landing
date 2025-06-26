@@ -6,7 +6,7 @@ import { Container } from '@/components/ui/container';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Send, Wand2, Loader2, Sparkles, Users, Star, ArrowRight, CheckCircle, Menu, X, Mail, Gift, Zap, Clock } from 'lucide-react';
+import { Send, Wand2, Loader2, Sparkles, Users, Star, ArrowRight, CheckCircle, Menu, X, Mail, Gift, Zap, Clock, type LucideProps } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { MobileNavBar } from '@/components/layout/mobile-nav-bar';
 import { EnhancedPreRegistrationForm } from '@/components/shared/enhanced-pre-registration-form';
@@ -129,14 +129,15 @@ export default function HomePage() {
                 setInputText(data.improvedPrompt);
                 setImproveCount(prev => prev + 1);
 
-                // 개선 횟수에 따른 차별화된 메시지
-                if (improveCount === 0) {
-                    toast.success('🚀 AI가 프롬프트를 10배 향상시켰습니다!');
-                } else if (improveCount === 1) {
-                    toast.success('⚡ AI 프롬프트 성능이 극적으로 개선되었습니다!');
-                } else {
-                    toast.success('🎯 AI가 완벽한 프롬프트로 변환했습니다!');
-                }
+                // 토스트 알림 제거 - UI에서 "프롬프트 개선 완료!" 메시지가 이미 표시되므로 중복 방지
+                // 기존 토스트 알림 코드 주석 처리:
+                // if (improveCount === 0) {
+                //     toast.success('🚀 AI가 프롬프트를 10배 향상시켰습니다!');
+                // } else if (improveCount === 1) {
+                //     toast.success('⚡ AI 프롬프트 성능이 극적으로 개선되었습니다!');
+                // } else {
+                //     toast.success('🎯 AI가 완벽한 프롬프트로 변환했습니다!');
+                // }
             }
 
         } catch (error) {
@@ -232,14 +233,15 @@ export default function HomePage() {
             setInputText(improvedPrompt);
             setImproveCount(prev => prev + 1);
 
-            // 개선 횟수에 따른 차별화된 메시지 (테스트 버전)
-            if (improveCount === 0) {
-                toast.success('🧪 테스트: AI가 프롬프트를 10배 향상시켰습니다!');
-            } else if (improveCount === 1) {
-                toast.success('🧪 테스트: AI 프롬프트 성능이 극적으로 개선되었습니다!');
-            } else {
-                toast.success('🧪 테스트: AI가 완벽한 프롬프트로 변환했습니다!');
-            }
+            // 토스트 알림 제거 - UI에서 "프롬프트 개선 완료!" 메시지가 이미 표시되므로 중복 방지
+            // 기존 토스트 알림 코드 주석 처리:
+            // if (improveCount === 0) {
+            //     toast.success('🧪 테스트: AI가 프롬프트를 10배 향상시켰습니다!');
+            // } else if (improveCount === 1) {
+            //     toast.success('🧪 테스트: AI 프롬프트 성능이 극적으로 개선되었습니다!');
+            // } else {
+            //     toast.success('🧪 테스트: AI가 완벽한 프롬프트로 변환했습니다!');
+            // }
 
         } catch (error) {
             toast.error('테스트 개선에 실패했습니다. 다시 시도해주세요.');
@@ -353,7 +355,9 @@ export default function HomePage() {
                     <div className="flex items-center justify-between h-16">
                         <div className="flex items-center space-x-3">
                             <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                                <Sparkles className="w-6 h-6 text-white" />
+                                <span className="text-white">
+                                    <Sparkles size={24} />
+                                </span>
                             </div>
                             <div className="hidden sm:block">
                                 <span className="font-bold text-xl text-white">Smart Prompt Assistant</span>
@@ -377,7 +381,7 @@ export default function HomePage() {
                                 onClick={scrollToPreRegistration}
                                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105 shadow-lg"
                             >
-                                <Sparkles className="w-4 h-4 mr-1 inline" />
+                                <Sparkles size={16} />
                                 무료 사전등록
                             </button>
 
@@ -389,7 +393,7 @@ export default function HomePage() {
                             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                             aria-label="메뉴 열기"
                         >
-                            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
                         </button>
                     </div>
 
@@ -430,7 +434,7 @@ export default function HomePage() {
                             {/* 메인 헤드라인 */}
                             <div className="space-y-4 animate-fade-in">
                                 <div className="inline-flex items-center space-x-2 bg-blue-500/20 text-blue-300 px-4 py-2 rounded-full text-sm font-medium">
-                                    <Zap className="w-4 h-4" />
+                                    <Zap size={16} />
                                     <span>AI 프롬프트 최적화 도구</span>
                                 </div>
                                 <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white leading-tight">
@@ -449,7 +453,7 @@ export default function HomePage() {
                                     size="lg"
                                     className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold px-8 py-4 rounded-xl shadow-xl transform hover:scale-105 transition-all duration-200 focus-visible-enhanced"
                                 >
-                                    <Wand2 className="w-5 h-5 mr-2" />
+                                    <span className="mr-2"><Wand2 size={20} /></span>
                                     지금 바로 체험하기
                                 </Button>
                                 <Button
@@ -458,7 +462,7 @@ export default function HomePage() {
                                     size="lg"
                                     className="w-full sm:w-auto border-2 border-blue-400 text-blue-400 hover:bg-blue-400 hover:text-white px-8 py-4 rounded-xl font-semibold transition-all duration-200"
                                 >
-                                    <Gift className="w-5 h-5 mr-2" />
+                                    <span className="mr-2"><Gift size={20} /></span>
                                     무료 사전 등록
                                 </Button>
                             </div>
