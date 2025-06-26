@@ -28,6 +28,54 @@ Before creating ANY work log page:
 3. **VALIDATE** the parent page ID matches the SPA project page
 4. **CHECK** existing work log structure for naming consistency
 
+### **DATE HANDLING PROTOCOL**
+
+#### 🗓️ CRITICAL DATE RESOLUTION RULES
+**MANDATORY SEQUENCE** for all work log date handling:
+
+1. **ALWAYS** execute system date command first before creating work logs
+2. **NEVER** assume or guess the current date from context
+3. **MUST** use terminal date command to get accurate system date
+4. **VALIDATE** date format and confirm with user if needed
+
+#### 📅 Date Resolution Methods (Priority Order)
+```bash
+# Method 1: PowerShell date command (PREFERRED for Windows)
+Get-Date -Format "yyyy.MM.dd"
+
+# Method 2: Standard date command (Linux/macOS)
+date "+%Y.%m.%d"
+
+# Method 3: Explicit user confirmation (FALLBACK)
+"Please confirm today's date in YYYY.MM.DD format"
+```
+
+#### ⚠️ Date Validation Requirements
+- **Format**: YYYY.MM.DD (Korean style with dots)
+- **Timezone**: Use system local timezone
+- **Confirmation**: Always show resolved date to user before proceeding
+- **Error Handling**: Request re-input if date parsing fails
+
+#### 🚨 FORBIDDEN Date Behaviors
+- **NEVER** use hardcoded or assumed dates (e.g., 2024.xx.xx when it's 2025)
+- **NEVER** proceed without executing date command first
+- **NEVER** rely on training data cutoff dates or context clues
+- **NEVER** ignore timezone or system date differences
+
+#### 🔄 Mandatory Pre-Creation Workflow
+```bash
+# STEP 1: Get system date
+run_terminal_cmd("Get-Date -Format 'yyyy.MM.dd'")
+
+# STEP 2: Parse and validate result
+current_date = parse_date_output()
+
+# STEP 3: Confirm with user
+"Creating work log for {current_date}. Is this correct?"
+
+# STEP 4: Proceed with Notion page creation using validated date
+```
+
 ### **EXECUTION PROTOCOL**
 
 #### ✅ CORRECT Implementation Pattern
