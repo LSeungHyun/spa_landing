@@ -69,10 +69,10 @@ export default function HomePage() {
 
     // 샘플 프롬프트 - 즉시 체험 유도
     const samplePrompts = [
-        "고객에게 제품 소개 이메일을 작성해주세요",
-        "마케팅 캠페인 아이디어를 브레인스토밍해주세요",
-        "회의록을 정리하고 액션 아이템을 추출해주세요",
-        "블로그 포스트 개요를 작성해주세요"
+        "고객에게 제품 소개 이메일을 작성해주세요.",
+        "마케팅 캠페인 아이디어를 브레인스토밍해주세요.",
+        "회의록을 정리하고 액션 아이템을 추출해주세요.",
+        "블로그 포스트 개요를 작성해주세요."
     ];
 
     const handleSampleClick = (sample: string) => {
@@ -586,17 +586,20 @@ export default function HomePage() {
                                                 handleTestImprovePrompt();
                                             }
                                         }}
-                                        placeholder="메시지를 입력하세요..."
+                                        placeholder="프롬프트를 입력하세요"
                                         disabled={isLoading}
                                         maxLength={500}
                                     />
                                     
-                                    {/* 입력 필드 내부 버튼 그룹 */}
-                                    <div className="absolute right-2 bottom-2 flex items-center space-x-1">
-                                        {/* 문자 수 카운터 */}
-                                        <div className="text-xs text-gray-400 mr-2">
+                                    {/* 문자 수 카운터 - 좌측 위치 */}
+                                    <div className="absolute left-3 bottom-3">
+                                        <div className="text-xs text-gray-400">
                                             {inputText.length}/500
                                         </div>
+                                    </div>
+                                    
+                                    {/* 입력 필드 내부 버튼 그룹 */}
+                                    <div className="absolute right-3 bottom-3 flex items-center space-x-1">
                                         
                                         {/* 테스트 버튼 */}
                                         <button
@@ -691,18 +694,18 @@ export default function HomePage() {
                                     </div>
                                 )}
 
-                                {/* 샘플 프롬프트 섹션 - 다크 테마 */}
-                                <div className="mt-6">
-                                    <div className="flex items-center justify-between mb-3">
-                                        <h5 className="text-sm font-medium text-gray-300">빠른 시작 샘플</h5>
-                                        <span className="text-xs text-gray-400">클릭하여 사용</span>
-                                    </div>
+                                {/* 샘플 프롬프트 섹션 - 작성 팁과 동일한 색상 테마 */}
+                                <div className="mt-6 p-4 bg-gradient-to-r from-gray-800 to-gray-700 rounded-xl border border-gray-600/50">
+                                    <h5 className="text-sm font-semibold text-blue-300 mb-3 flex items-center">
+                                        <span className="mr-2">🚀</span>
+                                        빠른 시작 샘플
+                                    </h5>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                         {samplePrompts.map((prompt, index) => (
                                             <button
                                                 key={index}
                                                 onClick={() => handleSampleClick(prompt)}
-                                                className="text-left p-4 bg-gradient-to-r from-gray-800 to-gray-700 hover:from-gray-700 hover:to-gray-600 rounded-xl border border-gray-600/50 hover:border-gray-500/50 transition-all duration-200 text-sm text-gray-300 hover:text-white touch-friendly group shadow-sm hover:shadow-md sample-prompt-card"
+                                                className="text-left p-3 bg-gray-700/50 hover:bg-gray-600/50 rounded-lg border border-gray-600/30 hover:border-gray-500/50 transition-all duration-200 text-xs text-gray-300 hover:text-white touch-friendly group"
                                                 aria-label={`샘플 프롬프트: ${prompt}`}
                                             >
                                                 <div className="flex items-center justify-between">
