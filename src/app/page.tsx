@@ -449,7 +449,7 @@ export default function HomePage() {
                             {/* CTA 버튼들 */}
                             <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4 animate-slide-up">
                                 <Button
-                                    onClick={scrollToDemo}
+                                    {...({ onClick: scrollToDemo } as any)}
                                     size="lg"
                                     className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold px-8 py-4 rounded-xl shadow-xl transform hover:scale-105 transition-all duration-200 focus-visible-enhanced"
                                 >
@@ -457,7 +457,7 @@ export default function HomePage() {
                                     지금 바로 체험하기
                                 </Button>
                                 <Button
-                                    onClick={scrollToPreRegistration}
+                                    {...({ onClick: scrollToPreRegistration } as any)}
                                     variant="outline"
                                     size="lg"
                                     className="w-full sm:w-auto border-2 border-blue-400 text-blue-400 hover:bg-blue-400 hover:text-white px-8 py-4 rounded-xl font-semibold transition-all duration-200"
@@ -470,11 +470,11 @@ export default function HomePage() {
                             {/* 사회적 증거 */}
                             <div className="flex items-center justify-center space-x-8 text-blue-200 text-sm animate-fade-in-delayed">
                                 <div className="flex items-center space-x-2">
-                                    <Users className="w-4 h-4" />
+                                    <Users size={16} />
                                     <span>1,247명 사전 등록</span>
                                 </div>
                                 <div className="flex items-center space-x-2">
-                                    <Star className="w-4 h-4 text-yellow-400" />
+                                    <span className="text-yellow-400"><Star size={16} /></span>
                                     <span>4.9/5 만족도</span>
                                 </div>
                             </div>
@@ -504,7 +504,7 @@ export default function HomePage() {
                                 <div className="flex items-center justify-between">
                                     <h4 className="font-medium text-gray-900">프롬프트 입력</h4>
                                     <div className="flex items-center space-x-2 text-sm text-gray-600">
-                                        <Wand2 className="w-4 h-4" />
+                                        <Wand2 size={16} />
                                         <span>AI 개선 준비됨</span>
                                     </div>
                                 </div>
@@ -570,7 +570,7 @@ export default function HomePage() {
                                             >
                                                 {isLoading ? (
                                                     <>
-                                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                                        <span className="animate-spin"><Loader2 size={16} /></span>
                                                         <span className="hidden sm:inline text-xs">테스트 중</span>
                                                     </>
                                                 ) : (
@@ -599,12 +599,12 @@ export default function HomePage() {
                                             >
                                                 {isLoading ? (
                                                     <>
-                                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                                        <span className="animate-spin"><Loader2 size={16} /></span>
                                                         <span className="hidden sm:inline">개선 중</span>
                                                     </>
                                                 ) : (
                                                     <>
-                                                        <Wand2 className="w-4 h-4" />
+                                                        <Wand2 size={16} />
                                                         <span className="hidden sm:inline">개선하기</span>
                                                     </>
                                                 )}
@@ -728,7 +728,7 @@ export default function HomePage() {
                                             >
                                                 <div className="flex items-center justify-between">
                                                     <span className="leading-relaxed">{prompt}</span>
-                                                    <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity text-blue-600 flex-shrink-0 ml-2" />
+                                                    <span className="opacity-0 group-hover:opacity-100 transition-opacity text-blue-600 flex-shrink-0 ml-2"><ArrowRight size={16} /></span>
                                                 </div>
                                             </button>
                                         ))}
@@ -739,7 +739,7 @@ export default function HomePage() {
                                 {hasTriedDemo && (
                                     <div className="mt-6 p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl border border-green-200/50 animate-fade-in">
                                         <div className="flex items-center space-x-2 text-green-700 mb-2">
-                                            <CheckCircle className="w-5 h-5" />
+                                            <CheckCircle size={20} />
                                             <span className="font-medium">프롬프트 개선 완료!</span>
                                         </div>
                                         <p className="text-sm text-gray-700 leading-relaxed">
@@ -768,7 +768,7 @@ export default function HomePage() {
                         <div className="max-w-4xl mx-auto">
                             <div className="text-center mb-8">
                                 <div className="inline-flex items-center space-x-2 bg-yellow-500/20 text-yellow-300 px-4 py-2 rounded-full text-sm font-medium mb-4">
-                                    <Gift className="w-4 h-4" />
+                                    <Gift size={16} />
                                     <span>얼리버드 특별 혜택</span>
                                 </div>
                                 <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
@@ -819,11 +819,11 @@ export default function HomePage() {
                                     </p>
                                     <div className="flex items-center justify-center space-x-4 text-sm text-yellow-200">
                                         <div className="flex items-center space-x-1">
-                                            <Users className="w-4 h-4" />
+                                            <Users size={16} />
                                             <span>현재 73명 등록</span>
                                         </div>
                                         <div className="flex items-center space-x-1">
-                                            <Clock className="w-4 h-4" />
+                                            <Clock size={16} />
                                             <span>27자리 남음</span>
                                         </div>
                                     </div>
@@ -841,11 +841,11 @@ export default function HomePage() {
                             <div className="mt-8 text-center">
                                 <div className="flex items-center justify-center space-x-6 text-blue-200 text-sm">
                                     <div className="flex items-center space-x-1">
-                                        <Users className="w-4 h-4" />
+                                        <Users size={16} />
                                         <span>1,247명 사전 등록</span>
                                     </div>
                                     <div className="flex items-center space-x-1">
-                                        <Star className="w-4 h-4 text-yellow-400" />
+                                        <span className="text-yellow-400"><Star size={16} /></span>
                                         <span>4.9/5 만족도</span>
                                     </div>
                                 </div>
