@@ -6,7 +6,7 @@ import { Container } from '@/components/ui/container';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Send, Wand2, Loader2, Sparkles, Users, Star, ArrowRight, CheckCircle, Menu, X, Mail, Gift, Zap } from 'lucide-react';
+import { Send, Wand2, Loader2, Sparkles, Users, Star, ArrowRight, CheckCircle, Menu, X, Mail, Gift, Zap, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { MobileNavBar } from '@/components/layout/mobile-nav-bar';
 import { EnhancedPreRegistrationForm } from '@/components/shared/enhanced-pre-registration-form';
@@ -777,20 +777,52 @@ export default function HomePage() {
 
                             {/* 혜택 리스트 */}
                             <div className="grid md:grid-cols-3 gap-4 mb-8">
-                                <div className="bg-white/10 backdrop-blur-lg rounded-xl p-4 border border-white/20">
-                                    <div className="text-2xl mb-2">🚀</div>
-                                    <h3 className="font-semibold text-white mb-1">우선 액세스</h3>
-                                    <p className="text-sm text-blue-200">정식 출시 전 우선 액세스 기회</p>
+                                <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20 hover:bg-white/15 transition-all duration-300 group">
+                                    <div className="text-3xl mb-3 group-hover:scale-110 transition-transform duration-300">🚀</div>
+                                    <h3 className="font-bold text-white mb-2 text-lg">우선 액세스</h3>
+                                    <p className="text-sm text-blue-200 mb-3">정식 출시 전 7일 먼저 체험</p>
+                                    <div className="text-xs text-yellow-300 font-medium bg-yellow-500/20 px-2 py-1 rounded-full inline-block">
+                                        ₩49,000 상당 가치
+                                    </div>
                                 </div>
-                                <div className="bg-white/10 backdrop-blur-lg rounded-xl p-4 border border-white/20">
-                                    <div className="text-2xl mb-2">👑</div>
-                                    <h3 className="font-semibold text-white mb-1">프리미엄 체험</h3>
-                                    <p className="text-sm text-blue-200">프리미엄 기능 1개월 무료 체험</p>
+                                <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20 hover:bg-white/15 transition-all duration-300 group">
+                                    <div className="text-3xl mb-3 group-hover:scale-110 transition-transform duration-300">💎</div>
+                                    <h3 className="font-bold text-white mb-2 text-lg">프리미엄 무료</h3>
+                                    <p className="text-sm text-blue-200 mb-3">프리미엄 기능 3개월 무료 + 무제한 프롬프트</p>
+                                    <div className="text-xs text-yellow-300 font-medium bg-yellow-500/20 px-2 py-1 rounded-full inline-block">
+                                        ₩87,000 상당 가치
+                                    </div>
                                 </div>
-                                <div className="bg-white/10 backdrop-blur-lg rounded-xl p-4 border border-white/20">
-                                    <div className="text-2xl mb-2">🏆</div>
-                                    <h3 className="font-semibold text-white mb-1">창립 멤버 뱃지</h3>
-                                    <p className="text-sm text-blue-200">등록자 전용 창립 멤버 뱃지</p>
+                                <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20 hover:bg-white/15 transition-all duration-300 group">
+                                    <div className="text-3xl mb-3 group-hover:scale-110 transition-transform duration-300">🏆</div>
+                                    <h3 className="font-bold text-white mb-2 text-lg">창립 멤버 특전</h3>
+                                    <p className="text-sm text-blue-200 mb-3">평생 50% 할인 + 전용 뱃지 + VIP 지원</p>
+                                    <div className="text-xs text-yellow-300 font-medium bg-yellow-500/20 px-2 py-1 rounded-full inline-block">
+                                        ₩500,000+ 평생 가치
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* 추가 혜택 및 긴급감 조성 */}
+                            <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 rounded-xl p-6 mb-8 border border-yellow-400/30">
+                                <div className="text-center">
+                                    <div className="flex items-center justify-center space-x-2 mb-3">
+                                        <span className="text-2xl">⏰</span>
+                                        <span className="text-yellow-300 font-bold text-lg">한정 혜택</span>
+                                    </div>
+                                    <p className="text-white font-semibold mb-2">
+                                        첫 100명만! 총 ₩636,000 상당 혜택
+                                    </p>
+                                    <div className="flex items-center justify-center space-x-4 text-sm text-yellow-200">
+                                        <div className="flex items-center space-x-1">
+                                            <Users className="w-4 h-4" />
+                                            <span>현재 73명 등록</span>
+                                        </div>
+                                        <div className="flex items-center space-x-1">
+                                            <Clock className="w-4 h-4" />
+                                            <span>27자리 남음</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 

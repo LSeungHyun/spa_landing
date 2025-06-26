@@ -12,7 +12,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, User, Building, Target, Users, Zap, Mail } from 'lucide-react';
+import { Loader2, User, Building, Target, Users, Zap, Mail, Crown, Trophy, Gift as GiftIcon } from 'lucide-react';
+import { CompactBenefitCard } from './benefit-card';
 
 // 폼 유효성 검사 스키마
 const preRegistrationSchema = z.object({
@@ -276,14 +277,52 @@ export function EnhancedPreRegistrationForm({
           </div>
 
           {/* 얼리버드 혜택 카드 */}
-          <div className="bg-blue-50 p-4 rounded-lg">
-            <h4 className="font-medium text-sm mb-2">🎁 얼리버드 혜택</h4>
-            <ul className="text-xs text-gray-700 space-y-1">
-              <li>• 출시 시 30% 할인 쿠폰</li>
-              <li>• 프리미엄 기능 1개월 무료</li>
-              <li>• 베타 테스터 전용 커뮤니티 초대</li>
-              <li>• 개발진과의 직접 소통 기회</li>
-            </ul>
+          <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-6 border border-blue-200">
+            <div className="flex items-center space-x-2 mb-6">
+              <GiftIcon className="w-6 h-6 text-blue-600" />
+              <h4 className="font-bold text-blue-900 text-lg">얼리버드 특별 혜택</h4>
+            </div>
+            
+            <div className="space-y-3 mb-6">
+              <CompactBenefitCard
+                icon={Zap}
+                title="우선 액세스"
+                value="₩49,000 상당 • 7일 먼저 체험"
+                color="blue"
+              />
+              <CompactBenefitCard
+                icon={Crown}
+                title="프리미엄 무료"
+                value="₩87,000 상당 • 3개월 무료"
+                color="purple"
+              />
+              <CompactBenefitCard
+                icon={Trophy}
+                title="창립 멤버 특전"
+                value="₩500,000+ 상당 • 평생 50% 할인"
+                color="yellow"
+              />
+              <CompactBenefitCard
+                icon={Users}
+                title="전용 커뮤니티"
+                value="개발진과 직접 소통"
+                color="green"
+              />
+            </div>
+            
+            <div className="bg-gradient-to-r from-yellow-100 to-orange-100 rounded-lg p-4 border border-yellow-300">
+              <div className="flex items-center justify-center space-x-2 mb-2">
+                <span className="text-lg">⚡</span>
+                <span className="font-bold text-yellow-800">총 ₩636,000 상당 혜택</span>
+              </div>
+              <div className="flex items-center justify-center space-x-4 text-xs text-yellow-700">
+                <span>첫 100명 한정</span>
+                <span>•</span>
+                <span>현재 73명 등록</span>
+                <span>•</span>
+                <span className="font-semibold text-red-600">27자리 남음</span>
+              </div>
+            </div>
           </div>
 
           <div className="pt-6">

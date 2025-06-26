@@ -5,6 +5,7 @@ export { PersonaCard } from './persona-card';
 export { FeatureCard } from './feature-card';
 export { PricingCard } from './pricing-card';
 export { TestimonialCard } from './testimonial-card';
+export { BenefitCard, CompactBenefitCard } from './benefit-card';
 
 // Demo components
 export { DemoInterface } from './demo-interface';
