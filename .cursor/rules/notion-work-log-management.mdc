@@ -38,6 +38,75 @@ Before creating ANY work log page:
 3. **MUST** use terminal date command to get accurate system date
 4. **VALIDATE** date format and confirm with user if needed
 
+#### 🚨 DUPLICATE PREVENTION PROTOCOL
+**CRITICAL RULE**: Before creating any work log, MUST check for existing work logs with same date.
+
+##### 📋 Pre-Creation Duplicate Check Sequence
+```bash
+# STEP 1: Get current system date
+current_date = run_terminal_cmd("Get-Date -Format 'yyyy.MM.dd'")
+
+# STEP 2: Search for existing work log with same date
+search_query = f"📋 업무일지 - {current_date}"
+existing_logs = mcp_notion_search(query=search_query, filter_object_type="page")
+
+# STEP 3: Decision logic
+if existing_logs.found:
+    # UPDATE existing work log
+    existing_page_id = existing_logs.results[0].id
+    action = "UPDATE_EXISTING"
+    message = f"Found existing work log for {current_date}. Adding content to existing log."
+else:
+    # CREATE new work log
+    action = "CREATE_NEW"
+    message = f"No existing work log found for {current_date}. Creating new work log."
+
+# STEP 4: Inform user and proceed accordingly
+print(message)
+```
+
+##### ⚖️ Update vs Create Decision Matrix
+| Scenario | Action | Method |
+|---|---|---|
+| **Same date work log exists** | ✅ **UPDATE** existing log | `mcp_notion_append-blocks` |
+| **No work log for date exists** | ✅ **CREATE** new log | `mcp_notion_create-page` |
+| **User explicitly requests new log** | ⚠️ **CONFIRM** with user first | Ask for confirmation |
+| **Multiple logs for same date found** | 🚨 **ERROR** - investigate | Manual intervention needed |
+
+##### 🔄 Mandatory Duplicate Check Implementation
+```typescript
+// REQUIRED function before any work log creation
+async function checkExistingWorkLog(date: string): Promise<{
+  exists: boolean;
+  pageId?: string;
+  action: 'UPDATE_EXISTING' | 'CREATE_NEW';
+  message: string;
+}> {
+  const searchQuery = `📋 업무일지 - ${date}`;
+  const searchResults = await mcp_notion_search({
+    query: searchQuery,
+    filter_object_type: "page"
+  });
+  
+  if (searchResults.results && searchResults.results.length > 0) {
+    // Found existing work log
+    return {
+      exists: true,
+      pageId: searchResults.results[0].id,
+      action: 'UPDATE_EXISTING',
+      message: `✅ Found existing work log for ${date}. Will add content to existing log.`
+    };
+  } else {
+    // No existing work log found
+    return {
+      exists: false,
+      action: 'CREATE_NEW',
+      message: `📝 No existing work log found for ${date}. Will create new work log.`
+    };
+  }
+}
+```
+
 #### 📅 Date Resolution Methods (Priority Order)
 ```bash
 # Method 1: PowerShell date command (PREFERRED for Windows)
@@ -70,10 +139,24 @@ run_terminal_cmd("Get-Date -Format 'yyyy.MM.dd'")
 # STEP 2: Parse and validate result
 current_date = parse_date_output()
 
-# STEP 3: Confirm with user
-"Creating work log for {current_date}. Is this correct?"
+# STEP 3: CHECK FOR EXISTING WORK LOG (NEW MANDATORY STEP)
+existing_check = checkExistingWorkLog(current_date)
 
-# STEP 4: Proceed with Notion page creation using validated date
+# STEP 4: Decision based on existing work log check
+if existing_check.action == "UPDATE_EXISTING":
+    print(f"✅ {existing_check.message}")
+    # Proceed with updating existing work log
+    target_page_id = existing_check.pageId
+    use_append_blocks = true
+else:
+    print(f"📝 {existing_check.message}")
+    # Proceed with creating new work log
+    use_create_page = true
+
+# STEP 5: Confirm with user
+"Work log action for {current_date}: {existing_check.action}. Proceed?"
+
+# STEP 6: Execute appropriate Notion operation
 ```
 
 ### **EXECUTION PROTOCOL**
@@ -104,11 +187,14 @@ current_date = parse_date_output()
 ### **ERROR PREVENTION MECHANISMS**
 
 #### 🛡️ Pre-Creation Validation Checklist
-Before executing `mcp_notion_create-pages`:
-- [ ] Parent page ID is explicitly set to SPA project
-- [ ] Title follows exact naming convention: `📋 업무일지 - YYYY.MM.DD`
+Before executing any Notion work log operation:
+- [ ] **DUPLICATE CHECK**: Existing work log search completed for target date
+- [ ] **ACTION DECISION**: UPDATE_EXISTING vs CREATE_NEW determined
+- [ ] Parent page ID is explicitly set to SPA project (for new logs)
+- [ ] Title follows exact naming convention: `📋 업무일지 - YYYY.MM.DD` (for new logs)
 - [ ] Content structure matches existing work log format
 - [ ] User context confirms SPA project work log intent
+- [ ] **PREVENTION**: No duplicate work logs will be created for same date
 
 #### 🔍 Context Analysis Requirements
 When user mentions "업무일지" or "work log":
@@ -120,21 +206,33 @@ When user mentions "업무일지" or "work log":
 ### **PROMPT ENGINEERING SAFEGUARDS**
 
 #### 🎯 Chain-of-Thought Validation
-Before any Notion page creation:
+Before any Notion work log operation:
 ```
 1. IDENTIFY: What type of page is being requested?
-2. LOCATE: Where should this page be created in the hierarchy?
-3. VERIFY: Is the parent page correctly identified?
-4. CONFIRM: Does this match user's intended workspace structure?
-5. EXECUTE: Only proceed if all validations pass
+2. DATE CHECK: What is the target date for this work log?
+3. DUPLICATE SEARCH: Does a work log already exist for this date?
+4. ACTION DECISION: Should I UPDATE existing or CREATE new?
+5. LOCATE: Where should this page be created/updated in the hierarchy?
+6. VERIFY: Is the parent page correctly identified (for new logs)?
+7. CONFIRM: Does this match user's intended workspace structure?
+8. EXECUTE: Only proceed if all validations pass and no duplicates will be created
 ```
 
 #### 🔄 Self-Correction Protocol
 If error occurs:
 1. **ACKNOWLEDGE** the specific mistake made
-2. **ANALYZE** root cause (missing parent, wrong hierarchy, etc.)
+2. **ANALYZE** root cause (missing parent, wrong hierarchy, duplicate creation, etc.)
 3. **CORRECT** by following proper protocol
 4. **DOCUMENT** the error pattern for future prevention
+
+#### 🚨 Duplicate Creation Error Recovery
+If duplicate work log was accidentally created:
+1. **IMMEDIATELY** acknowledge the duplicate creation error
+2. **IDENTIFY** which work log should be kept (usually the first/original one)
+3. **MIGRATE** content from duplicate to original work log using `mcp_notion_append-blocks`
+4. **DELETE** the duplicate work log to clean up workspace
+5. **APOLOGIZE** and explain the correction process
+6. **VERIFY** final result shows only one work log per date
 
 ### **WORKSPACE STRUCTURE REFERENCE**
 
@@ -325,11 +423,15 @@ mcp_notion_move-pages({
 ## 🎯 SUMMARY IMPERATIVE
 
 **NEVER FORGET**: 
-1. Always use parent page ID `214ce2a8-927c-80-44-9484-e51c04af048e` for SPA 프로젝트(승현)
-2. Organize work by PURPOSE, not TIME
-3. Use standard section categories for consistency and searchability
+1. **DUPLICATE CHECK FIRST**: Always search for existing work logs before creating new ones
+2. Always use parent page ID `214ce2a8-927c-80-44-9484-e51c04af048e` for SPA 프로젝트(승현)
+3. Organize work by PURPOSE, not TIME
+4. Use standard section categories for consistency and searchability
+5. **ONE LOG PER DATE**: Never create multiple work logs for the same date
 
-**VERIFICATION MANTRA**: "Parent first, purpose-based sections, validation always."
+**VERIFICATION MANTRA**: "Search first, parent second, purpose-based sections, validation always."
 
-**ORGANIZATION PRINCIPLE**: "Intent over time, purpose over chronology."
+**ORGANIZATION PRINCIPLE**: "Intent over time, purpose over chronology, uniqueness over duplication."
+
+**DUPLICATE PREVENTION MANTRA**: "Before I create, I must search. Before I search, I must get the date. One date, one log, always."
 
