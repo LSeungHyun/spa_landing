@@ -1,9 +1,6 @@
-import * as tf from '@tensorflow/tfjs';
-
 // 간단한 텍스트 개선 규칙 기반 AI 시뮬레이션
 export class SmartPromptAI {
     private isInitialized = false;
-    private model: tf.LayersModel | null = null;
 
     constructor() {
         // 브라우저 환경에서만 초기화
@@ -16,17 +13,10 @@ export class SmartPromptAI {
         if (this.isInitialized || typeof window === 'undefined') return;
 
         try {
-            // 간단한 더미 모델 생성 (실제 프로덕션에서는 훈련된 모델 로드)
-            this.model = tf.sequential({
-                layers: [
-                    tf.layers.dense({ inputShape: [1], units: 10, activation: 'relu' }),
-                    tf.layers.dense({ units: 1, activation: 'sigmoid' })
-                ]
-            });
-
+            // 간단한 초기화 (TensorFlow 제거)
             this.isInitialized = true;
         } catch (error) {
-            console.warn('TensorFlow 모델 초기화 실패:', error);
+            console.warn('AI 서비스 초기화 실패:', error);
             // 모델 없이도 기본 기능은 동작하도록 함
             this.isInitialized = true;
         }
@@ -198,65 +188,77 @@ export class SmartPromptAI {
         const professionalismScore = this.calculateProfessionalismScore(improved);
 
         return {
-            wordChange: `+${wordIncrease}%`,
-            charChange: `+${charIncrease}%`,
-            structureScore: `${structureScore}%`,
-            professionalismScore: `${professionalismScore}%`,
-            improvementLevel: this.getImprovementLevel(Number(wordIncrease), structureScore, professionalismScore)
+            wordCount: {
+                original: originalWords,
+                improved: improvedWords,
+                increase: `+${wordIncrease}%`
+            },
+            characterCount: {
+                original: originalChars,
+                improved: improvedChars,
+                increase: `+${charIncrease}%`
+            },
+            qualityScores: {
+                structure: structureScore,
+                professionalism: professionalismScore,
+                overall: Math.round((structureScore + professionalismScore) / 2)
+            },
+            improvementLevel: this.getImprovementLevel(
+                parseFloat(wordIncrease), 
+                structureScore, 
+                professionalismScore
+            )
         };
     }
 
     private calculateStructureScore(text: string): number {
-        let score = 50; // 기본 점수
-
-        // 마크다운 헤딩
-        if (text.includes('#')) score += 15;
-
-        // 리스트 구조
-        if (text.includes('-') || text.includes('*') || text.includes('1.')) score += 10;
-
-        // 테이블 구조
-        if (text.includes('|')) score += 10;
-
-        // 코드 블록
-        if (text.includes('```')) score += 10;
-
-        // 섹션 구분
-        if (text.includes('##')) score += 5;
-
+        let score = 0;
+        
+        // 헤딩 구조 점수
+        if (text.includes('#')) score += 20;
+        if (text.includes('##')) score += 15;
+        if (text.includes('###')) score += 10;
+        
+        // 리스트 구조 점수
+        if (text.includes('- ') || text.includes('* ')) score += 15;
+        if (text.includes('1. ') || text.includes('2. ')) score += 15;
+        
+        // 표 구조 점수
+        if (text.includes('|')) score += 20;
+        
+        // 코드 블록 점수
+        if (text.includes('```') || text.includes('`')) score += 10;
+        
         return Math.min(score, 100);
     }
 
     private calculateProfessionalismScore(text: string): number {
-        let score = 40; // 기본 점수
-
-        // 전문 용어 사용
-        const technicalTerms = ['API', '파라미터', '엔드포인트', '인증', '보안', '최적화'];
-        const creativeterms = ['스토리텔링', '브랜딩', '타겟팅', '콘텐츠', '마케팅'];
-
-        const foundTerms = [...technicalTerms, ...creativeterms].filter(term =>
-            text.includes(term)
-        ).length;
-
-        score += foundTerms * 5;
-
-        // 체계적 구성
-        if (text.includes('개요') || text.includes('목적')) score += 10;
-        if (text.includes('요구사항') || text.includes('조건')) score += 10;
-        if (text.includes('예시') || text.includes('사례')) score += 5;
-
+        let score = 0;
+        
+        // 기술 용어 점수
+        const techTerms = ['API', 'HTTP', 'JSON', 'REST', '개발', '구현', '최적화', '성능'];
+        const foundTerms = techTerms.filter(term => text.includes(term));
+        score += foundTerms.length * 10;
+        
+        // 체계적 구성 점수
+        if (text.includes('개요') || text.includes('목적')) score += 15;
+        if (text.includes('상세') || text.includes('설명')) score += 10;
+        if (text.includes('고려사항') || text.includes('주의점')) score += 15;
+        
+        // 문서 길이 점수
+        if (text.length > 500) score += 10;
+        if (text.length > 1000) score += 10;
+        
         return Math.min(score, 100);
     }
 
     private getImprovementLevel(wordIncrease: number, structureScore: number, professionalismScore: number): string {
-        const averageScore = (structureScore + professionalismScore) / 2;
-
-        if (averageScore >= 80 && wordIncrease >= 200) return '탁월한 개선';
-        if (averageScore >= 70 && wordIncrease >= 150) return '우수한 개선';
-        if (averageScore >= 60 && wordIncrease >= 100) return '양호한 개선';
-        if (averageScore >= 50 && wordIncrease >= 50) return '적절한 개선';
-
-        return '기본 개선';
+        const totalScore = (wordIncrease / 10) + structureScore + professionalismScore;
+        
+        if (totalScore >= 150) return '탁월한 개선';
+        if (totalScore >= 100) return '상당한 개선';
+        if (totalScore >= 50) return '적절한 개선';
+        return '기본적 개선';
     }
 }
 
