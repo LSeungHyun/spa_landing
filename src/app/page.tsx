@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { toast } from 'sonner';
 import { Container } from '@/components/ui/container';
 import { Button } from '@/components/ui/button';
@@ -45,6 +45,11 @@ export default function HomePage() {
     const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
     const demoRef = useRef<HTMLDivElement>(null);
     const preRegRef = useRef<HTMLDivElement>(null);
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const chatContainerRef = useRef<HTMLDivElement>(null);
+    const [isUserScrolling, setIsUserScrolling] = useState(false);
+    const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
+    const lastScrollTopRef = useRef<number>(0);
 
     const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
         {
@@ -59,6 +64,76 @@ export default function HomePage() {
     useEffect(() => {
         setIsMounted(true);
     }, []);
+
+    // 스마트 자동 스크롤 함수
+    const scrollToBottom = useCallback((force = false) => {
+        if (!chatContainerRef.current) return;
+        
+        const container = chatContainerRef.current;
+        const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 50;
+        
+        // 강제 스크롤이거나 사용자가 하단 근처에 있을 때만 자동 스크롤
+        if (force || (shouldAutoScroll && (isAtBottom || !isUserScrolling))) {
+            container.scrollTo({
+                top: container.scrollHeight,
+                behavior: 'smooth'
+            });
+        }
+    }, [shouldAutoScroll, isUserScrolling]);
+
+    // 사용자 스크롤 감지
+    useEffect(() => {
+        const container = chatContainerRef.current;
+        if (!container) return;
+
+        let scrollTimeout: NodeJS.Timeout;
+
+        const handleScroll = () => {
+            const currentScrollTop = container.scrollTop;
+            const maxScrollTop = container.scrollHeight - container.clientHeight;
+            const isAtBottom = currentScrollTop >= maxScrollTop - 10;
+
+            // 사용자가 위로 스크롤했는지 감지
+            if (currentScrollTop < lastScrollTopRef.current && !isAtBottom) {
+                setIsUserScrolling(true);
+                setShouldAutoScroll(false);
+            } else if (isAtBottom) {
+                setIsUserScrolling(false);
+                setShouldAutoScroll(true);
+            }
+
+            lastScrollTopRef.current = currentScrollTop;
+
+            // 스크롤 중 상태 관리
+            setIsUserScrolling(true);
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                setIsUserScrolling(false);
+            }, 150);
+        };
+
+        container.addEventListener('scroll', handleScroll, { passive: true });
+
+        return () => {
+            container.removeEventListener('scroll', handleScroll);
+            clearTimeout(scrollTimeout);
+        };
+    }, []);
+
+    // 채팅 메시지 변경 시 자동 스크롤
+    useEffect(() => {
+        if (chatMessages.length > 1) {
+            // 새 메시지 추가 시 강제 스크롤
+            setTimeout(() => scrollToBottom(true), 100);
+        }
+    }, [chatMessages, scrollToBottom]);
+
+    // 타이핑 진행 중 점진적 스크롤
+    const handleTypingProgress = useCallback((progress: number) => {
+        if (progress > 0.1 && shouldAutoScroll) { // 10% 이상 타이핑 진행 시
+            setTimeout(() => scrollToBottom(false), 50);
+        }
+    }, [scrollToBottom, shouldAutoScroll]);
 
     // 3회 체험 후 자동으로 사전 등록 유도
     useEffect(() => {
@@ -254,6 +329,14 @@ export default function HomePage() {
         }
     };
 
+    // Textarea 높이 리셋 함수
+    const resetTextareaHeight = () => {
+        if (textareaRef.current) {
+            textareaRef.current.style.height = '60px'; // 초기 높이로 리셋
+            textareaRef.current.style.overflowY = 'hidden';
+        }
+    };
+
     const handleSendMessage = () => {
         if (!inputText.trim()) return;
 
@@ -285,6 +368,7 @@ export default function HomePage() {
         }, 1000);
 
         setInputText('');
+        resetTextareaHeight(); // 텍스트 클리어와 함께 높이도 리셋
     };
 
     // 실제 API를 사용하는 사전 등록 함수
@@ -537,7 +621,7 @@ export default function HomePage() {
                             </div>
 
                             {/* 대화 메시지 영역 */}
-                            <div className="p-4 space-y-4 min-h-[200px] max-h-[400px] overflow-y-auto">
+                            <div ref={chatContainerRef} className="p-4 space-y-4 min-h-[200px] max-h-[400px] overflow-y-auto scroll-smooth relative">
                                 {chatMessages.map((message) => (
                                     <div
                                         key={message.id}
@@ -562,6 +646,7 @@ export default function HomePage() {
                                                         showCursor={true}
                                                         startDelay={500}
                                                         className="text-white"
+                                                        onProgress={handleTypingProgress}
                                                     />
                                                 ) : (
                                                     message.content
@@ -621,6 +706,7 @@ export default function HomePage() {
                             <div className="p-4 pb-6">
                                 <div className="relative">
                                     <textarea
+                                        ref={textareaRef}
                                         id="prompt-input"
                                         className="w-full bg-[#2f2f2f] border border-gray-600 rounded-xl px-4 py-3 pr-48 md:pr-40 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[60px] transition-all duration-150 ease-out"
                                         value={inputText}

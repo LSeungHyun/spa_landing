@@ -5,6 +5,7 @@ interface TypingAnimationProps {
   speed?: number; // 타이핑 속도 (ms)
   onComplete?: () => void;
   onCancel?: () => void;
+  onProgress?: (progress: number) => void; // 타이핑 진행률 콜백 (0-1)
   className?: string;
   showCursor?: boolean;
   startDelay?: number;
@@ -15,6 +16,7 @@ const TypingAnimation: React.FC<TypingAnimationProps> = ({
   speed = 50,
   onComplete,
   onCancel,
+  onProgress,
   className = '',
   showCursor = true,
   startDelay = 0,
@@ -59,17 +61,25 @@ const TypingAnimation: React.FC<TypingAnimationProps> = ({
       if (currentIndex >= text.length && isTyping) {
         setIsTyping(false);
         onComplete?.();
+        onProgress?.(1); // 완료 시 100% 진행률
       }
       return;
     }
 
     const timer = setTimeout(() => {
       setDisplayedText(prev => prev + text[currentIndex]);
-      setCurrentIndex(prev => prev + 1);
+      setCurrentIndex(prev => {
+        const newIndex = prev + 1;
+        // 진행률 콜백 호출
+        if (onProgress && text.length > 0) {
+          onProgress(newIndex / text.length);
+        }
+        return newIndex;
+      });
     }, speed);
 
     return () => clearTimeout(timer);
-  }, [currentIndex, isTyping, text, speed, onComplete, isCancelled]);
+  }, [currentIndex, isTyping, text, speed, onComplete, onProgress, isCancelled]);
 
   // 클릭 시 즉시 완성
   const handleClick = () => {
