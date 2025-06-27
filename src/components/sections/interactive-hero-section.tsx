@@ -264,31 +264,56 @@ export function InteractiveHeroSection({ onPreRegisterClick }: InteractiveHeroSe
                                     value={inputText}
                                     onChange={(e) => {
                                         setInputText(e.target.value);
-                                        // 자동 크기 조절
-                                        const textarea = e.target;
-                                        textarea.style.height = 'auto';
-                                        const scrollHeight = textarea.scrollHeight;
-                                        const maxHeight = 300; // 최대 높이 300px
-                                        const targetHeight = Math.min(scrollHeight, maxHeight);
-                                        textarea.style.height = `${Math.max(targetHeight, 120)}px`;
-                                        
-                                        // 최대 높이 도달 시 스크롤 표시
-                                        if (scrollHeight > maxHeight) {
-                                            textarea.style.overflowY = 'auto';
-                                        } else {
-                                            textarea.style.overflowY = 'hidden';
-                                        }
+                                        // 개선된 자동 크기 조절 로직
+                                        requestAnimationFrame(() => {
+                                            const textarea = e.target;
+                                            textarea.style.height = 'auto';
+                                            const scrollHeight = textarea.scrollHeight;
+                                            const maxHeight = 300; // 최대 높이 300px
+                                            const minHeight = 120; // 최소 높이 120px
+                                            const targetHeight = Math.min(Math.max(scrollHeight, minHeight), maxHeight);
+                                            textarea.style.height = `${targetHeight}px`;
+                                            
+                                            // 최대 높이 도달 시 스크롤 표시
+                                            if (scrollHeight > maxHeight) {
+                                                textarea.style.overflowY = 'auto';
+                                            } else {
+                                                textarea.style.overflowY = 'hidden';
+                                            }
+                                        });
+                                    }}
+                                    onInput={(e) => {
+                                        // 입력 이벤트에도 반응하도록 추가
+                                        requestAnimationFrame(() => {
+                                            const textarea = e.target as HTMLTextAreaElement;
+                                            textarea.style.height = 'auto';
+                                            const scrollHeight = textarea.scrollHeight;
+                                            const maxHeight = 300;
+                                            const minHeight = 120;
+                                            const targetHeight = Math.min(Math.max(scrollHeight, minHeight), maxHeight);
+                                            textarea.style.height = `${targetHeight}px`;
+                                            
+                                            if (scrollHeight > maxHeight) {
+                                                textarea.style.overflowY = 'auto';
+                                            } else {
+                                                textarea.style.overflowY = 'hidden';
+                                            }
+                                        });
                                     }}
                                     placeholder="프롬프트를 입력하세요. 예: '고객에게 제품 소개 이메일을 작성해주세요'"
                                     className={cn(
                                         "w-full min-h-[120px] p-4 pr-24 bg-brand-dark-primary/50 border border-brand-surface-secondary/30 rounded-xl",
                                         "text-brand-text-primary placeholder:text-brand-text-secondary/60",
                                         "focus:outline-none focus:ring-2 focus:ring-brand-accent-blue/50 focus:border-brand-accent-blue/50",
-                                        "transition-all duration-200",
+                                        "transition-all duration-150 ease-out",
                                         isTyping && "animate-pulse",
                                         usageSync.isLimitReached && "opacity-50 cursor-not-allowed"
                                     )}
-                                    style={{ resize: 'none', overflowY: 'hidden' }}
+                                    style={{ 
+                                        resize: 'none', 
+                                        overflowY: 'hidden',
+                                        transition: 'height 0.15s ease-out, border-color 0.2s ease-out'
+                                    }}
                                     disabled={isLoading || isTyping || usageSync.isLimitReached}
                                 />
 

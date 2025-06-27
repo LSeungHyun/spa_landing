@@ -622,24 +622,45 @@ export default function HomePage() {
                                 <div className="relative">
                                     <textarea
                                         id="prompt-input"
-                                        className="w-full bg-[#2f2f2f] border border-gray-600 rounded-xl px-4 py-3 pr-48 md:pr-40 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[60px] transition-all duration-200"
+                                        className="w-full bg-[#2f2f2f] border border-gray-600 rounded-xl px-4 py-3 pr-48 md:pr-40 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[60px] transition-all duration-150 ease-out"
                                         value={inputText}
                                         onChange={(e) => {
                                             setInputText(e.target.value);
-                                            // 자동 크기 조절
-                                            const textarea = e.target;
-                                            textarea.style.height = 'auto';
-                                            const scrollHeight = textarea.scrollHeight;
-                                            const maxHeight = 200; // 최대 높이 200px
-                                            const targetHeight = Math.min(scrollHeight, maxHeight);
-                                            textarea.style.height = `${Math.max(targetHeight, 60)}px`;
-                                            
-                                            // 최대 높이 도달 시 스크롤 표시
-                                            if (scrollHeight > maxHeight) {
-                                                textarea.style.overflowY = 'auto';
-                                            } else {
-                                                textarea.style.overflowY = 'hidden';
-                                            }
+                                            // 개선된 자동 크기 조절 로직
+                                            requestAnimationFrame(() => {
+                                                const textarea = e.target;
+                                                textarea.style.height = 'auto';
+                                                const scrollHeight = textarea.scrollHeight;
+                                                const maxHeight = 200; // 최대 높이 200px
+                                                const minHeight = 60; // 최소 높이 60px
+                                                const targetHeight = Math.min(Math.max(scrollHeight, minHeight), maxHeight);
+                                                textarea.style.height = `${targetHeight}px`;
+                                                
+                                                // 최대 높이 도달 시 스크롤 표시
+                                                if (scrollHeight > maxHeight) {
+                                                    textarea.style.overflowY = 'auto';
+                                                } else {
+                                                    textarea.style.overflowY = 'hidden';
+                                                }
+                                            });
+                                        }}
+                                        onInput={(e) => {
+                                            // 입력 이벤트에도 반응하도록 추가
+                                            requestAnimationFrame(() => {
+                                                const textarea = e.target as HTMLTextAreaElement;
+                                                textarea.style.height = 'auto';
+                                                const scrollHeight = textarea.scrollHeight;
+                                                const maxHeight = 200;
+                                                const minHeight = 60;
+                                                const targetHeight = Math.min(Math.max(scrollHeight, minHeight), maxHeight);
+                                                textarea.style.height = `${targetHeight}px`;
+                                                
+                                                if (scrollHeight > maxHeight) {
+                                                    textarea.style.overflowY = 'auto';
+                                                } else {
+                                                    textarea.style.overflowY = 'hidden';
+                                                }
+                                            });
                                         }}
                                         onKeyDown={(e) => {
                                             if (e.key === 'Enter' && !e.shiftKey) {
@@ -660,7 +681,11 @@ export default function HomePage() {
                                         placeholder="프롬프트를 입력하세요"
                                         disabled={isLoading}
                                         maxLength={500}
-                                        style={{ resize: 'none', overflowY: 'hidden' }}
+                                        style={{ 
+                                            resize: 'none', 
+                                            overflowY: 'hidden',
+                                            transition: 'height 0.15s ease-out, border-color 0.2s ease-out'
+                                        }}
                                     />
                                     
                                     {/* 입력 필드 내부 버튼 그룹 - 모바일 최적화 */}

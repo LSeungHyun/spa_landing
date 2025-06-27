@@ -31,7 +31,8 @@ export function SmartTextarea({
     const { textareaRef, resize } = useAutoResize({
         minRows,
         maxRows,
-        lineHeight: 24
+        lineHeight: 24,
+        enableSmoothResize: true
     });
 
     // 값이 변경될 때마다 크기 조절
@@ -66,6 +67,21 @@ export function SmartTextarea({
         }
     };
 
+    const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        onChange(e.target.value);
+        // 개선된 크기 조절 로직
+        requestAnimationFrame(() => {
+            resize();
+        });
+    };
+
+    const handleInput = (e: React.FormEvent<HTMLTextAreaElement>) => {
+        // 입력 이벤트에도 반응
+        requestAnimationFrame(() => {
+            resize();
+        });
+    };
+
     const charCount = value.length;
     const wordCount = value.trim() ? value.trim().split(/\s+/).length : 0;
 
@@ -76,21 +92,23 @@ export function SmartTextarea({
                 <textarea
                     ref={textareaRef}
                     value={value}
-                    onChange={(e) => {
-                        onChange(e.target.value);
-                        // 입력 즉시 크기 조절
-                        setTimeout(resize, 0);
-                    }}
+                    onChange={handleChange}
+                    onInput={handleInput}
                     placeholder={placeholder}
                     className={`
             w-full px-4 py-3 pr-20 
             bg-brand-surface-primary border border-brand-surface-secondary
-            rounded-xl transition-all duration-200
+            rounded-xl transition-all duration-150 ease-out
             text-brand-text-primary placeholder-brand-text-secondary
             focus:outline-none focus:ring-2 focus:ring-brand-accent-blue/50 focus:border-brand-accent-blue
             ${isExpanded ? 'rounded-b-none' : ''}
           `}
-                    style={{ minHeight: `${minRows * 24}px` }}
+                    style={{ 
+                        minHeight: `${minRows * 24}px`,
+                        resize: 'none',
+                        overflowY: 'hidden',
+                        transition: 'height 0.15s ease-out, border-color 0.2s ease-out'
+                    }}
                     onFocus={() => setIsExpanded(true)}
                     onBlur={() => setTimeout(() => setIsExpanded(false), 150)}
                 />

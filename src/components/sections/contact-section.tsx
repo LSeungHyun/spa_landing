@@ -7,7 +7,7 @@ import { ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { AutoResizeTextarea } from "@/components/ui/auto-resize-textarea";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 
@@ -23,6 +23,7 @@ export function ContactSection({
   ...props
 }: ContactSectionProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [message, setMessage] = useState("");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -102,12 +103,16 @@ export function ContactSection({
                 <Label htmlFor="message" className="text-foreground text-left">
                   문의 내용
                 </Label>
-                <Textarea
+                <AutoResizeTextarea
                   id="message"
                   name="message"
-                  required
+                  value={message}
+                  onChange={setMessage}
+                  minRows={3}
+                  maxRows={8}
                   placeholder="도입 관련 문의사항을 자유롭게 작성해주세요."
-                  className="min-h-[100px] bg-white/5"
+                  className="bg-white/5"
+                  required
                 />
               </div>
 

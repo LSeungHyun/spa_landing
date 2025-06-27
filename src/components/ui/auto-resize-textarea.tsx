@@ -9,6 +9,7 @@ export interface AutoResizeTextareaProps
   minRows?: number;
   maxRows?: number;
   lineHeight?: number;
+  enableSmoothResize?: boolean;
 }
 
 const AutoResizeTextarea = React.forwardRef<
@@ -21,12 +22,14 @@ const AutoResizeTextarea = React.forwardRef<
   minRows = 1, 
   maxRows = 10, 
   lineHeight = 24,
+  enableSmoothResize = true,
   ...props 
 }, ref) => {
   const { textareaRef, resize } = useAutoResize({
     minRows,
     maxRows,
     lineHeight,
+    enableSmoothResize,
   });
 
   // ref 병합을 위한 함수
@@ -51,23 +54,38 @@ const AutoResizeTextarea = React.forwardRef<
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     onChange(e.target.value);
-    // 입력 즉시 크기 조절
-    setTimeout(resize, 0);
+    // 입력 즉시 크기 조절 - requestAnimationFrame으로 성능 최적화
+    requestAnimationFrame(() => {
+      resize();
+    });
   };
+
+  // 키보드 입력 시에도 즉시 반응
+  const handleInput = React.useCallback((e: React.FormEvent<HTMLTextAreaElement>) => {
+    requestAnimationFrame(() => {
+      resize();
+    });
+  }, [resize]);
 
   return (
     <textarea
       className={cn(
-        'flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200',
+        'flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
+        enableSmoothResize ? 'transition-all duration-150 ease-out' : '',
         className,
       )}
       ref={mergedRef}
       value={value}
       onChange={handleChange}
+      onInput={handleInput}
       style={{ 
         resize: 'none', 
         minHeight: `${minRows * lineHeight}px`,
-        overflowY: 'hidden'
+        overflowY: 'hidden',
+        // 부드러운 크기 조절을 위한 추가 스타일
+        ...(enableSmoothResize && {
+          transition: 'height 0.15s ease-out, border-color 0.2s ease-out',
+        })
       }}
       {...props}
     />
