@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Sparkles, Copy, RotateCcw, Loader2 } from 'lucide-react';
 import { Button } from './ui/button';
+import { useAutoResize } from '@/hooks/use-auto-resize';
 
 interface SmartTextareaProps {
     value: string;
@@ -27,21 +28,16 @@ export function SmartTextarea({
 }: SmartTextareaProps) {
     const [originalValue, setOriginalValue] = useState('');
     const [isExpanded, setIsExpanded] = useState(false);
-    const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const { textareaRef, resize } = useAutoResize({
+        minRows,
+        maxRows,
+        lineHeight: 24
+    });
 
-    // 자동 높이 조절
+    // 값이 변경될 때마다 크기 조절
     useEffect(() => {
-        const textarea = textareaRef.current;
-        if (textarea) {
-            textarea.style.height = 'auto';
-            const scrollHeight = textarea.scrollHeight;
-            const lineHeight = 24; // 대략적인 라인 높이
-            const minHeight = minRows * lineHeight;
-            const maxHeight = maxRows * lineHeight;
-
-            textarea.style.height = `${Math.min(Math.max(scrollHeight, minHeight), maxHeight)}px`;
-        }
-    }, [value, minRows, maxRows]);
+        resize();
+    }, [value, resize]);
 
     const handleEnhance = async () => {
         if (!onEnhance || !value.trim()) return;
@@ -80,12 +76,16 @@ export function SmartTextarea({
                 <textarea
                     ref={textareaRef}
                     value={value}
-                    onChange={(e) => onChange(e.target.value)}
+                    onChange={(e) => {
+                        onChange(e.target.value);
+                        // 입력 즉시 크기 조절
+                        setTimeout(resize, 0);
+                    }}
                     placeholder={placeholder}
                     className={`
-            w-full px-4 py-3 pr-12 
+            w-full px-4 py-3 pr-20 
             bg-brand-surface-primary border border-brand-surface-secondary
-            rounded-xl resize-none transition-all duration-300
+            rounded-xl transition-all duration-200
             text-brand-text-primary placeholder-brand-text-secondary
             focus:outline-none focus:ring-2 focus:ring-brand-accent-blue/50 focus:border-brand-accent-blue
             ${isExpanded ? 'rounded-b-none' : ''}

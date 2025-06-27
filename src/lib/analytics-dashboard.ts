@@ -382,7 +382,7 @@ class AnalyticsDashboard {
         events: journeyEvents,
         total_duration: totalDuration,
         final_conversion: hasRegistration,
-        conversion_type: hasRegistration ? 'registration' : hasDemo ? 'demo_only' : undefined
+        conversion_type: hasRegistration ? 'registration' as const : hasDemo ? 'demo_only' as const : undefined
       };
     }).slice(0, 100); // 최근 100개 세션만
   }

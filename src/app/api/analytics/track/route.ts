@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { extractIP } from '@/lib/utils/ip-utils';
+import { getClientIP } from '@/lib/utils/ip-utils';
 
 // Supabase 클라이언트 생성
 const supabase = createClient(
@@ -44,7 +44,8 @@ export async function POST(request: NextRequest) {
     const body: AnalyticsEventData = await request.json();
     
     // IP 주소 추출
-    const ip_address = extractIP(request);
+    const ipInfo = getClientIP(request);
+    const ip_address = ipInfo.address;
     
     // 이벤트 데이터 정리 및 검증
     const eventRecord = {

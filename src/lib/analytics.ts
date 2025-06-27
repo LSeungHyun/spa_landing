@@ -25,7 +25,7 @@ export interface UserBehaviorEvent {
               'persona_select' | 'prompt_input' | 'prompt_improve' | 'email_submit' |
               'form_error' | 'session_start' | 'session_end';
   event_category: 'engagement' | 'conversion' | 'interaction' | 'error';
-  event_action: 'view' | 'click' | 'submit' | 'select' | 'scroll' | 'input' | 'complete';
+  event_action: 'view' | 'click' | 'submit' | 'select' | 'scroll' | 'input' | 'complete' | 'exit';
   event_label?: string;
   value?: number;
   session_id: string;
@@ -560,4 +560,3 @@ export const trackABTestVariant = (testName: string, variant: string, userGroup?
   analytics.trackABTestVariant(testName, variant, userGroup);
 
 export default AnalyticsManager; 
-} 

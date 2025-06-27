@@ -513,10 +513,10 @@ export default function HomePage() {
                         {/* 섹션 헤더 */}
                         <div className="text-center mb-12">
                             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                                3초만에 프롬프트 개선 체험 🚀
+                                클릭 한번에 프롬프트 개선 체험 🚀
                             </h2>
                             <p className="text-xl text-blue-100 max-w-2xl mx-auto">
-                                샘플을 클릭하거나 직접 입력해서 AI가 어떻게 프롬프트를 개선하는지 확인해보세요
+                                프롬프트를 입력한 후, 직접 버튼을 눌러 AI가 어떻게 더 나은 문장으로 다듬는지 확인해보세요.
                             </p>
                         </div>
 
@@ -622,10 +622,25 @@ export default function HomePage() {
                                 <div className="relative">
                                     <textarea
                                         id="prompt-input"
-                                        className="w-full resize-none bg-[#2f2f2f] border border-gray-600 rounded-xl px-4 py-3 pr-40 md:pr-32 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[60px] max-h-[120px]"
-                                        rows={2}
+                                        className="w-full bg-[#2f2f2f] border border-gray-600 rounded-xl px-4 py-3 pr-48 md:pr-40 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[60px] transition-all duration-200"
                                         value={inputText}
-                                        onChange={(e) => setInputText(e.target.value)}
+                                        onChange={(e) => {
+                                            setInputText(e.target.value);
+                                            // 자동 크기 조절
+                                            const textarea = e.target;
+                                            textarea.style.height = 'auto';
+                                            const scrollHeight = textarea.scrollHeight;
+                                            const maxHeight = 200; // 최대 높이 200px
+                                            const targetHeight = Math.min(scrollHeight, maxHeight);
+                                            textarea.style.height = `${Math.max(targetHeight, 60)}px`;
+                                            
+                                            // 최대 높이 도달 시 스크롤 표시
+                                            if (scrollHeight > maxHeight) {
+                                                textarea.style.overflowY = 'auto';
+                                            } else {
+                                                textarea.style.overflowY = 'hidden';
+                                            }
+                                        }}
                                         onKeyDown={(e) => {
                                             if (e.key === 'Enter' && !e.shiftKey) {
                                                 if (inputText.trim() && inputText.length <= 500) {
@@ -645,10 +660,11 @@ export default function HomePage() {
                                         placeholder="프롬프트를 입력하세요"
                                         disabled={isLoading}
                                         maxLength={500}
+                                        style={{ resize: 'none', overflowY: 'hidden' }}
                                     />
                                     
                                     {/* 입력 필드 내부 버튼 그룹 - 모바일 최적화 */}
-                                    <div className="absolute right-2 md:right-3 bottom-3 flex items-center space-x-2 md:space-x-1">
+                                    <div className="absolute right-6 md:right-6 bottom-3 flex items-center space-x-2 md:space-x-1">
                                         
                                         {/* 테스트 버튼 - 모바일 최적화 */}
                                         <button
