@@ -127,16 +127,7 @@ export function MobileNavBar({
             },
         ];
 
-        // 체험 후 또는 사전 등록 섹션이 표시될 때 추가 아이템
-        if (showPreRegistration || improveCount >= 2) {
-            baseItems.push({
-                id: 'pre-registration',
-                label: '무료 등록',
-                icon: Gift,
-                action: () => scrollToSection('pre-registration'),
-                badge: 'NEW',
-            });
-        }
+        // 무료 등록 버튼 제거 (예약 버튼과 중복되므로)
 
         // 예약 아이템 (항상 표시) - 사전 등록 섹션으로 스크롤
         baseItems.push({

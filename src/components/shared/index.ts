@@ -5,7 +5,7 @@ export { PersonaCard } from './persona-card';
 export { FeatureCard } from './feature-card';
 export { PricingCard } from './pricing-card';
 export { TestimonialCard } from './testimonial-card';
-export { BenefitCard, CompactBenefitCard } from './benefit-card';
+export { default as BenefitCard } from './benefit-card';
 
 // Demo components
 export { DemoInterface } from './demo-interface';
@@ -16,4 +16,9 @@ export { default as EmailRegistrationModal } from './email-registration-modal';
 export { ProcessDisplay } from './process-display';
 export { PromptComparison } from './prompt-comparison';
 export { ScenarioCard } from './scenario-card';
-export { EnhancedPreRegistrationForm } from './enhanced-pre-registration-form'; 
+export { default as TypingAnimation } from './typing-animation';
+export { default as UsageIndicator } from './usage-indicator';
+
+export { EnhancedPreRegistrationForm } from './enhanced-pre-registration-form';
+export { default as EnhanceInterceptModal } from './enhance-intercept-modal';
+export { default as RegistrationBanner } from './registration-banner'; 

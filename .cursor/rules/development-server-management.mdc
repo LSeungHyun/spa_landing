@@ -1,0 +1,279 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Development Server Management & Resource Optimization Protocol
+
+## 🎯 Core Problem Analysis
+**Root Cause**: Automatic development server execution after task completion creates resource waste, user frustration, and workflow inefficiencies.
+
+**Impact Assessment**:
+- Multiple concurrent server instances
+- System resource depletion
+- User workflow interruption
+- Unnecessary process management overhead
+
+## 🚫 CRITICAL PROHIBITION: Auto-Server Execution
+
+### **NEVER DO - Automatic Development Server Launch**
+
+```bash
+# ❌ FORBIDDEN: Auto-launching development servers
+npm run dev
+yarn dev
+pnpm dev
+next dev
+# These commands should NEVER be executed automatically after task completion
+```
+
+### **ALWAYS DO - Verification Only Approach**
+
+```bash
+# ✅ CORRECT: Build verification for code quality assurance
+npm run build
+npm run type-check
+npm run lint
+# These commands verify code integrity without resource waste
+```
+
+## 📋 Development Workflow Protocol
+
+### **Phase 1: Task Completion Verification**
+**REQUIRED ACTIONS:**
+1. **Code Quality Check**: Execute `npm run build` to verify compilation
+2. **Type Safety Validation**: Confirm zero TypeScript errors
+3. **Dependency Integrity**: Ensure all imports resolve correctly
+4. **Performance Impact**: Validate bundle size remains optimal
+
+**FORBIDDEN ACTIONS:**
+- ❌ Automatic server startup
+- ❌ Background process initiation
+- ❌ Port occupation without user consent
+- ❌ Resource-intensive operations without explicit request
+
+### **Phase 2: User Empowerment Strategy**
+**COMMUNICATION PATTERN:**
+```markdown
+## ✅ Task Completed Successfully
+
+**Changes Implemented:**
+- [Specific change 1]
+- [Specific change 2]
+- [Specific change 3]
+
+**Verification Status:**
+- ✅ Build: Successful
+- ✅ Types: No errors
+- ✅ Dependencies: Resolved
+
+**Next Steps:**
+Run `npm run dev` when you're ready to test the changes locally.
+```
+
+### **Phase 3: Resource Respect Principle**
+**CORE TENETS:**
+1. **User Agency**: Users control their development environment
+2. **Resource Conservation**: Minimize system resource consumption
+3. **Workflow Autonomy**: Respect user's preferred development timing
+4. **Process Hygiene**: Avoid orphaned processes and port conflicts
+
+## 🔧 Implementation Guidelines
+
+### **Build Verification Standards**
+```typescript
+// ✅ CORRECT: Verification-only approach
+const verifyTaskCompletion = async () => {
+  try {
+    // 1. Build verification
+    await execCommand('npm run build');
+    
+    // 2. Type checking
+    await execCommand('tsc --noEmit');
+    
+    // 3. Linting (if configured)
+    await execCommand('npm run lint');
+    
+    return {
+      status: 'success',
+      message: 'All verifications passed',
+      userAction: 'Run `npm run dev` to test changes'
+    };
+  } catch (error) {
+    return {
+      status: 'error',
+      message: 'Verification failed',
+      details: error.message
+    };
+  }
+};
+
+// ❌ WRONG: Auto-server launch
+const badTaskCompletion = async () => {
+  await execCommand('npm run build');
+  await execCommand('npm run dev'); // FORBIDDEN
+};
+```
+
+### **Communication Templates**
+
+#### **Success Completion Template**
+```markdown
+## 🎯 Implementation Complete
+
+### Changes Summary:
+- **Feature**: [Description]
+- **Files Modified**: [List]
+- **Testing Status**: Build verified ✅
+
+### Quality Assurance:
+- ✅ TypeScript compilation successful
+- ✅ No build errors detected
+- ✅ Dependencies resolved correctly
+
+### User Action Required:
+Execute `npm run dev` in your terminal when ready to test the implementation.
+
+**Rationale**: This approach respects your development workflow and prevents resource conflicts.
+```
+
+#### **Error Handling Template**
+```markdown
+## ⚠️ Task Completion with Issues
+
+### Build Status:
+- ❌ Compilation errors detected
+- 📝 Issues to resolve: [List]
+
+### Recommended Actions:
+1. Review error details above
+2. Apply suggested fixes
+3. Run `npm run build` to verify
+4. Execute `npm run dev` when ready
+
+**Note**: Development server not auto-started due to build issues.
+```
+
+## 🧠 Cognitive Bias Prevention
+
+### **Mental Model Correction**
+**OLD THINKING**: "Complete the task → Start server → User can immediately test"
+**NEW THINKING**: "Complete the task → Verify quality → Empower user choice"
+
+### **Decision Framework**
+Before executing any command, ask:
+1. **Is this command necessary for task completion?**
+2. **Does this command consume user resources?**
+3. **Can the user execute this when they're ready?**
+4. **Am I respecting user workflow autonomy?**
+
+If answers are No, Yes, Yes, No respectively → **DO NOT EXECUTE**
+
+## 📊 Resource Impact Assessment
+
+### **Memory & CPU Considerations**
+```bash
+# Development servers typically consume:
+# - 100-500MB RAM
+# - 5-15% CPU (depending on project size)
+# - 1 port (usually 3000, 3001, etc.)
+# - File system watchers (inotify on Linux)
+```
+
+### **Multi-Instance Problems**
+- Port conflicts (EADDRINUSE errors)
+- Resource multiplication (N servers = N × resource usage)
+- Process management complexity
+- Potential memory leaks from orphaned processes
+
+## 🎯 Success Metrics
+
+### **Efficiency Indicators**
+- ✅ Zero auto-launched development servers
+- ✅ Consistent build verification completion
+- ✅ User feedback indicating workflow respect
+- ✅ Reduced system resource complaints
+
+### **Quality Indicators**
+- ✅ All tasks complete with verified builds
+- ✅ Zero TypeScript errors in deliverables
+- ✅ Clear user action guidance provided
+- ✅ Proper error handling and communication
+
+## 🔄 Exception Handling
+
+### **When Server Launch Might Be Acceptable**
+**ONLY** in these specific scenarios:
+1. **Explicit User Request**: "Start the development server"
+2. **Debugging Requirement**: User specifically asks for live debugging
+3. **Demo Preparation**: User requests immediate demonstration setup
+
+**NEVER** acceptable:
+- Task completion workflows
+- Automatic "helpful" actions
+- Background convenience operations
+- Proactive testing setups
+
+## 📝 Implementation Checklist
+
+### **Before Task Completion**
+- [ ] All code changes implemented correctly
+- [ ] Build verification executed successfully
+- [ ] TypeScript errors resolved
+- [ ] Dependencies properly imported
+
+### **At Task Completion**
+- [ ] Success message with clear summary
+- [ ] User action guidance provided
+- [ ] No automatic server processes started
+- [ ] Resource usage minimized
+
+### **Communication Quality**
+- [ ] Clear, actionable next steps
+- [ ] Respectful of user workflow
+- [ ] Professional tone maintained
+- [ ] Technical accuracy verified
+
+## 🚀 Advanced Optimization Strategies
+
+### **Intelligent Build Caching**
+```bash
+# Leverage Next.js build cache for faster verification
+npm run build -- --no-lint  # Skip linting if already verified
+```
+
+### **Selective Verification**
+```typescript
+// Smart verification based on change scope
+const selectiveVerification = (changedFiles: string[]) => {
+  const needsFullBuild = changedFiles.some(file => 
+    file.includes('next.config') || 
+    file.includes('package.json') ||
+    file.includes('tsconfig.json')
+  );
+  
+  return needsFullBuild ? 'full-build' : 'type-check-only';
+};
+```
+
+### **Resource Monitoring**
+```bash
+# Monitor system resources before any operations
+ps aux | grep node  # Check existing Node processes
+lsof -i :3000       # Check port availability
+free -m             # Check available memory
+```
+
+## 🎯 Conclusion
+
+This protocol ensures:
+- **Respect for User Workflow**: Users control their development environment
+- **Resource Optimization**: Minimal system resource consumption
+- **Quality Assurance**: Proper verification without waste
+- **Professional Standards**: Clear communication and reliable delivery
+
+**Remember**: The goal is task completion with verification, not convenience automation that creates resource conflicts.
+
+---
+
+*"Efficiency is doing things right; effectiveness is doing the right things." - This rule ensures we do both.*

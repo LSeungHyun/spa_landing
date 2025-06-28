@@ -6,11 +6,15 @@ import { Container } from '@/components/ui/container';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+
 import { Send, Wand2, Loader2, Sparkles, Users, Star, ArrowRight, CheckCircle, Menu, X, Mail, Gift, Zap, Clock, Copy, Check, type LucideProps } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { MobileNavBar } from '@/components/layout/mobile-nav-bar';
 import { EnhancedPreRegistrationForm } from '@/components/shared/enhanced-pre-registration-form';
 import { TypingAnimation } from '@/components/shared/typing-animation';
+import { EnhanceInterceptModal } from '@/components/shared/enhance-intercept-modal';
+import { RegistrationBanner } from '@/components/shared/registration-banner';
+
 
 interface ChatMessage {
     id: string;
@@ -45,6 +49,13 @@ export default function HomePage() {
     const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
     const [hasUsedImproveButton, setHasUsedImproveButton] = useState(false);
     const [hasShownImproveSuggestion, setHasShownImproveSuggestion] = useState(false);
+    
+    // 새로운 상태들
+    const [showInterceptModal, setShowInterceptModal] = useState(false);
+    const [showRegistrationBanner, setShowRegistrationBanner] = useState(false);
+    const [bannerDismissed, setBannerDismissed] = useState(false);
+    
+
     const demoRef = useRef<HTMLDivElement>(null);
     const preRegRef = useRef<HTMLDivElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -139,13 +150,24 @@ export default function HomePage() {
 
     // 3회 체험 후 자동으로 사전 등록 유도
     useEffect(() => {
-        if (improveCount >= 2 && !showPreRegistration) {
+        if (improveCount >= 3 && !showPreRegistration) {
             setTimeout(() => {
                 setShowPreRegistration(true);
                 preRegRef.current?.scrollIntoView({ behavior: 'smooth' });
             }, 1000);
         }
     }, [improveCount, showPreRegistration]);
+
+    // 3회 향상 후 등록 배너 표시
+    useEffect(() => {
+        if (improveCount >= 3 && !bannerDismissed) {
+            setTimeout(() => {
+                setShowRegistrationBanner(true);
+            }, 2000);
+        }
+    }, [improveCount, bannerDismissed]);
+
+
 
     // 샘플 프롬프트 - 즉시 체험 유도
     const samplePrompts = [
@@ -355,13 +377,10 @@ export default function HomePage() {
     const handleSendMessage = () => {
         if (!inputText.trim()) return;
 
-        // 개선하기 버튼을 사용하지 않고 바로 전송하는 경우 안내
+        // 향상 버튼을 사용하지 않은 경우 인터셉트 모달 표시
         if (!hasUsedImproveButton && !hasShownImproveSuggestion) {
-            setHasShownImproveSuggestion(true);
-            toast.info('💡 프롬프트 개선하기', {
-                description: '🪄 마법봉 버튼을 눌러 AI가 프롬프트를 더 효과적으로 개선해보세요!',
-                duration: 4000,
-            });
+            setShowInterceptModal(true);
+            return;
         }
 
         const userMessage: ChatMessage = {
@@ -392,7 +411,9 @@ export default function HomePage() {
         }, 1000);
 
         setInputText('');
-        resetTextareaHeight(); // 텍스트 클리어와 함께 높이도 리셋
+        resetTextareaHeight();
+        // 메시지 전송 후 향상 버튼 사용 상태 리셋
+        setHasUsedImproveButton(false);
     };
 
     // 실제 API를 사용하는 사전 등록 함수
@@ -443,6 +464,62 @@ export default function HomePage() {
     const handleEnhancedRegistrationSuccess = (data: any) => {
         setShowPreRegistration(false);
         toast.success('🎉 사전 등록이 성공적으로 완료되었습니다!');
+    };
+
+    // 인터셉트 모달 핸들러들
+    const handleInterceptEnhance = () => {
+        setShowInterceptModal(false);
+        setHasShownImproveSuggestion(true);
+        handleImprovePrompt();
+    };
+
+    const handleInterceptSendAnyway = () => {
+        setShowInterceptModal(false);
+        setHasShownImproveSuggestion(true);
+        
+        // 실제 메시지 전송 로직 실행
+        const userMessage: ChatMessage = {
+            id: Date.now().toString(),
+            type: 'user',
+            content: inputText,
+            timestamp: new Date()
+        };
+
+        setChatMessages(prev => [...prev, userMessage]);
+
+        // AI 응답 시뮬레이션
+        setTimeout(() => {
+            const responses = [
+                '네, 이해했습니다. 더 구체적인 요구사항이 있으시면 말씀해주세요! 타이핑 애니메이션을 통해 더욱 생동감 있는 대화 경험을 제공합니다.',
+                '좋은 프롬프트네요! 이런 식으로 작성하면 AI가 더 정확한 답변을 드릴 수 있어요. 실시간 타이핑 효과로 마치 실제 대화하는 것 같은 느낌을 받으실 수 있습니다.',
+                '프롬프트가 훨씬 명확해졌어요. 실제로 사용해보시면 차이를 느끼실 거예요! GPT 스타일의 타이핑 애니메이션이 적용되어 더욱 몰입감 있는 경험을 제공합니다.'
+            ];
+
+            const aiMessage: ChatMessage = {
+                id: (Date.now() + 1).toString(),
+                type: 'ai',
+                content: responses[Math.floor(Math.random() * responses.length)],
+                timestamp: new Date(),
+                isTyping: true
+            };
+            setChatMessages(prev => [...prev, aiMessage]);
+        }, 1000);
+
+        setInputText('');
+        resetTextareaHeight();
+        // 메시지 전송 후 향상 버튼 사용 상태 리셋
+        setHasUsedImproveButton(false);
+    };
+
+    // 등록 배너 핸들러들
+    const handleBannerJoinBeta = () => {
+        setShowRegistrationBanner(false);
+        scrollToPreRegistration();
+    };
+
+    const handleBannerClose = () => {
+        setShowRegistrationBanner(false);
+        setBannerDismissed(true);
     };
 
     const scrollToDemo = () => {
@@ -746,7 +823,12 @@ export default function HomePage() {
                                             if (e.key === 'Enter' && !e.shiftKey) {
                                                 if (inputText.trim() && inputText.length <= 500) {
                                                     e.preventDefault();
-                                                    handleSendMessage();
+                                                    // 향상 버튼을 사용하지 않았다면 인터셉트 모달 표시
+                                                    if (!hasUsedImproveButton && !hasShownImproveSuggestion) {
+                                                        setShowInterceptModal(true);
+                                                    } else {
+                                                        handleSendMessage();
+                                                    }
                                                 }
                                             }
                                             if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
@@ -820,7 +902,14 @@ export default function HomePage() {
                                         {/* 전송 버튼 - 모바일 최적화 */}
                                         <button
                                             type="button"
-                                            onClick={handleSendMessage}
+                                            onClick={() => {
+                                                // 향상 버튼을 사용하지 않았다면 인터셉트 모달 표시
+                                                if (!hasUsedImproveButton && !hasShownImproveSuggestion) {
+                                                    setShowInterceptModal(true);
+                                                } else {
+                                                    handleSendMessage();
+                                                }
+                                            }}
                                             disabled={isLoading || !inputText.trim() || inputText.length > 500}
                                             className={cn(
                                                 "rounded-lg p-2 md:p-2 text-white transition-all duration-200",
@@ -911,12 +1000,12 @@ export default function HomePage() {
                                             <span className="font-medium">프롬프트 개선 완료!</span>
                                         </div>
                                         <p className="text-sm text-gray-300 leading-relaxed">
-                                            {improveCount < 2
-                                                ? `🚀 프롬프트가 ${(improveCount + 1) * 10}배 향상되었습니다! ${2 - improveCount}번 더 체험해보세요.`
+                                            {improveCount < 3
+                                                ? `🚀 프롬프트가 ${(improveCount) * 15 + 10}% 향상되었습니다! ${3 - improveCount}번 더 체험해보세요.`
                                                 : '⚡ 프롬프트 성능이 극적으로 개선되었습니다!'
                                             }
                                         </p>
-                                        {improveCount >= 2 && (
+                                        {improveCount >= 3 && (
                                             <div className="mt-2 text-xs text-green-300">
                                                 🎯 사전 등록하고 더 강력한 AI 기능을 경험해보세요!
                                             </div>
@@ -929,7 +1018,7 @@ export default function HomePage() {
             </section>
 
             {/* Pre-Registration Section - 개선된 폼 */}
-            {(showPreRegistration || improveCount >= 2) && (
+            {(showPreRegistration || improveCount >= 3) && (
                 <section ref={preRegRef} data-section="pre-registration" className="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-purple-900/50 to-blue-900/50 animate-fade-in">
                     <Container>
                         <div className="max-w-4xl mx-auto">
@@ -1044,6 +1133,21 @@ export default function HomePage() {
                         scrollToPreRegistration();
                     }
                 }}
+            />
+
+            {/* Enhance Intercept Modal */}
+            <EnhanceInterceptModal
+                isOpen={showInterceptModal}
+                onClose={() => setShowInterceptModal(false)}
+                onEnhanceNow={handleInterceptEnhance}
+                onSendAnyway={handleInterceptSendAnyway}
+            />
+
+            {/* Registration Banner */}
+            <RegistrationBanner
+                isVisible={showRegistrationBanner}
+                onClose={handleBannerClose}
+                onJoinBeta={handleBannerJoinBeta}
             />
         </div>
     );
