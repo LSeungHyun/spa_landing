@@ -12,6 +12,7 @@ export { default as ChromeExtensionBadge, TrustElements, BrowserExtensionIndicat
 
 // Demo components
 export { DemoInterface } from './demo-interface';
+export { EnhancedDemoInterface } from './enhanced-demo-interface';
 export { default as ProcessingSteps } from './processing-steps';
 export { DiffComparison } from './diff-comparison';
 export { default as ProcessStepCard } from './process-step-card';

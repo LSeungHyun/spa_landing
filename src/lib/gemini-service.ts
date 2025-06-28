@@ -13,7 +13,8 @@ export interface GeminiResponse {
 
 export class GeminiService {
     private static instance: GeminiService;
-    private genAI: GoogleGenerativeAI;
+    private genAI: GoogleGenerativeAI | null = null;
+    private hasValidApiKey: boolean = false;
 
     // 서버 사이드에서만 사용하도록 NEXT_PUBLIC_ 접두사 제거
     private static readonly API_KEY = process.env.GEMINI_API_KEY;
@@ -22,9 +23,22 @@ export class GeminiService {
         if (!GeminiService.API_KEY) {
             console.error('GEMINI_API_KEY environment variable is not set');
             console.log('Available environment variables:', Object.keys(process.env).filter(key => key.includes('GEMINI')));
+            this.hasValidApiKey = false;
+            this.genAI = null;
+            // API 키가 없으면 에러를 발생시킴
             throw new Error('Google Gemini API key not configured. Please set GEMINI_API_KEY in your .env.local file');
+        } else {
+            try {
+                this.genAI = new GoogleGenerativeAI(GeminiService.API_KEY);
+                this.hasValidApiKey = true;
+                console.log('Gemini API initialized successfully');
+            } catch (error) {
+                console.error('Failed to initialize Gemini API:', error);
+                this.hasValidApiKey = false;
+                this.genAI = null;
+                throw new Error('Failed to initialize Gemini API: ' + (error instanceof Error ? error.message : String(error)));
+            }
         }
-        this.genAI = new GoogleGenerativeAI(GeminiService.API_KEY);
     }
 
     public static getInstance(): GeminiService {
@@ -36,6 +50,11 @@ export class GeminiService {
 
     public async generatePrompt(idea: string, persona: string = 'researcher'): Promise<string> {
         try {
+            // API 키가 없거나 유효하지 않은 경우 에러 발생
+            if (!this.hasValidApiKey || !this.genAI) {
+                throw new Error('Gemini API is not properly configured. Please check your GEMINI_API_KEY environment variable.');
+            }
+
             const model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
             const prompt = `
@@ -69,6 +88,12 @@ export class GeminiService {
         try {
             console.log('=== GeminiService.improvePrompt called ===');
             console.log('Original prompt length:', originalPrompt.length);
+            console.log('Has valid API key:', this.hasValidApiKey);
+
+            // API 키가 없거나 유효하지 않은 경우 에러 발생
+            if (!this.hasValidApiKey || !this.genAI) {
+                throw new Error('Gemini API is not properly configured. Please check your GEMINI_API_KEY environment variable.');
+            }
 
             // 캐시 확인 먼저 (임시 비활성화)
             // const cachedResult = promptCache.getCachedPrompt(originalPrompt);
@@ -134,26 +159,80 @@ Return only the improved prompt:`;
     }
 
     private generateFallbackResponse(originalPrompt: string): string {
-        // 더미 응답 생성 (실제 API 키 문제 해결 전까지 임시 사용)
-        return `[개선된 프롬프트 - 데모 버전]
+        // 다양한 개선 패턴을 가진 더미 응답 생성
+        const improvements = [
+            {
+                title: "📝 문서 작성 전문가 프롬프트",
+                template: `# 전문적인 ${originalPrompt} 작성 가이드
 
-🎯 **명확한 목표 설정**
-${originalPrompt}
+## 🎯 목표
+- 명확하고 체계적인 문서 작성
+- 독자의 이해도 극대화
+- 실무에 바로 적용 가능한 결과물
 
-📋 **구체적인 요구사항**
-- 단계별로 자세한 설명 제공
-- 실용적이고 실행 가능한 결과물 생성
-- 전문적이고 체계적인 접근 방식 사용
+## 📋 세부 요구사항
+1. **구조화된 접근**: 도입-본론-결론 형태로 구성
+2. **구체적인 예시**: 실제 사례와 템플릿 포함
+3. **단계별 가이드**: 실행 가능한 액션 아이템 제시
+4. **품질 검증**: 체크리스트와 검토 포인트 포함
 
-📝 **원하는 출력 형식**
-- 구조화된 형태로 정보 제공
-- 핵심 포인트를 명확하게 구분
-- 실무에 바로 적용 가능한 내용
+## 💡 최적화된 프롬프트
+"${originalPrompt}에 대한 전문가급 가이드를 작성해주세요. 구체적인 단계별 방법론, 실제 적용 사례, 주의사항, 그리고 성공을 위한 체크리스트를 포함하여 실무진이 바로 활용할 수 있도록 상세히 설명해주세요."`
+            },
+            {
+                title: "🎯 전략 기획 전문가 프롬프트", 
+                template: `# ${originalPrompt} 전략적 접근 방안
 
-💡 **추가 컨텍스트**
-이 프롬프트는 AI가 더 정확하고 유용한 응답을 생성할 수 있도록 최적화되었습니다. 각 섹션은 명확한 목적을 가지고 있으며, 결과물의 품질을 크게 향상시킬 것입니다.
+## 🎯 전략적 목표
+- 체계적이고 논리적인 분석
+- 실행 가능한 구체적 방안 도출
+- 리스크 요소 사전 식별 및 대응책 마련
 
-**최종 개선된 프롬프트:**
-"${originalPrompt}에 대해 전문가 수준의 상세한 답변을 제공해주세요. 단계별 접근 방식을 사용하고, 실무에 바로 적용할 수 있는 구체적인 예시와 함께 설명해주세요."`;
+## 📊 분석 프레임워크
+1. **현황 분석**: 내부/외부 환경 진단
+2. **목표 설정**: SMART 기준 적용
+3. **전략 수립**: 다양한 옵션 검토
+4. **실행 계획**: 단계별 로드맵 구성
+5. **성과 측정**: KPI 및 평가 지표 설정
+
+## 💡 개선된 프롬프트
+"${originalPrompt}에 대한 종합적인 전략을 수립해주세요. 현재 상황 분석부터 시작하여, 명확한 목표 설정, 다각도 접근 방안, 단계별 실행 계획, 예상되는 장애물과 해결책, 그리고 성과 측정 방법까지 포함한 완전한 전략 문서를 작성해주세요."`
+            },
+            {
+                title: "💼 비즈니스 솔루션 프롬프트",
+                template: `# ${originalPrompt} 비즈니스 솔루션
+
+## 🎯 비즈니스 목표
+- 실용적이고 효율적인 솔루션 제공
+- 비용 대비 효과 극대화
+- 지속 가능한 성장 모델 구축
+
+## 🔍 분석 관점
+1. **시장 관점**: 트렌드, 경쟁사, 기회 요소
+2. **고객 관점**: 니즈, 페인 포인트, 기대값
+3. **운영 관점**: 프로세스, 리소스, 효율성
+4. **재무 관점**: 투자, 수익, ROI 분석
+
+## 💡 최적화된 프롬프트
+"${originalPrompt}에 대한 비즈니스 솔루션을 제안해주세요. 시장 분석, 고객 니즈 파악, 구체적인 실행 방안, 예상 투자비용과 수익 모델, 성공 지표, 그리고 단계별 실행 타임라인을 포함한 종합적인 비즈니스 플랜을 작성해주세요."`
+            }
+        ];
+
+        // 원본 프롬프트 길이나 키워드에 따라 적절한 템플릿 선택
+        let selectedTemplate;
+        const prompt = originalPrompt.toLowerCase();
+        
+        if (prompt.includes('문서') || prompt.includes('작성') || prompt.includes('글') || prompt.includes('보고서')) {
+            selectedTemplate = improvements[0];
+        } else if (prompt.includes('전략') || prompt.includes('계획') || prompt.includes('기획') || prompt.includes('방안')) {
+            selectedTemplate = improvements[1];
+        } else if (prompt.includes('비즈니스') || prompt.includes('사업') || prompt.includes('마케팅') || prompt.includes('수익')) {
+            selectedTemplate = improvements[2];
+        } else {
+            // 기본적으로 첫 번째 템플릿 사용
+            selectedTemplate = improvements[0];
+        }
+
+        return selectedTemplate.template;
     }
 } 

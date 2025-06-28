@@ -158,16 +158,17 @@ export async function POST(req: NextRequest) {
 
             // Gemini API 에러 처리
             if (geminiError instanceof Error) {
-                if (geminiError.message.includes('Google Gemini API key not configured')) {
+                if (geminiError.message.includes('Google Gemini API key not configured') || 
+                    geminiError.message.includes('Gemini API is not properly configured')) {
                     return createErrorResponse(
-                        'Gemini API 키가 설정되지 않았습니다. 환경 변수를 확인해주세요.',
-                        500
+                        '🔑 Gemini API 키가 설정되지 않았습니다.\n\n📋 설정 방법:\n1. Google AI Studio (https://aistudio.google.com) 방문\n2. API 키 생성\n3. .env.local 파일에 GEMINI_API_KEY=your_key 추가\n4. 서버 재시작',
+                        503  // Service Unavailable - 설정 문제
                     );
                 }
 
                 if (geminiError.message.includes('API key not valid')) {
                     return createErrorResponse(
-                        'Gemini API 키가 유효하지 않습니다. Google AI Studio에서 새로운 키를 발급받아주세요.',
+                        '❌ Gemini API 키가 유효하지 않습니다.\n\nGoogle AI Studio에서 새로운 키를 발급받아 .env.local 파일을 업데이트해주세요.',
                         401
                     );
                 }

@@ -104,9 +104,22 @@ export function InteractiveHeroSection({ onPreRegisterClick }: InteractiveHeroSe
                         }, 2000);
                     }
                 } else if (response.status === 503) {
-                    // Gemini API 할당량 초과 (서비스 문제)
-                    toast.warning('AI 서비스가 일시적으로 사용량이 많습니다. 잠시 후 다시 시도해주세요.', {
-                        description: '이는 사용자의 일일 한도와는 별개의 문제입니다.'
+                    // API 키 설정 문제 또는 서비스 문제
+                    if (data.error && data.error.includes('API 키가 설정되지 않았습니다')) {
+                        toast.error('🔑 Gemini API 키가 설정되지 않았습니다', {
+                            description: '.env.local 파일에 GEMINI_API_KEY를 추가해주세요',
+                            duration: 5000,
+                        });
+                    } else {
+                        toast.warning('AI 서비스가 일시적으로 사용량이 많습니다. 잠시 후 다시 시도해주세요.', {
+                            description: '이는 사용자의 일일 한도와는 별개의 문제입니다.'
+                        });
+                    }
+                } else if (response.status === 401) {
+                    // API 키 유효성 문제
+                    toast.error('❌ API 키가 유효하지 않습니다', {
+                        description: 'Google AI Studio에서 새로운 키를 발급받아주세요',
+                        duration: 5000,
                     });
                 } else {
                     toast.error(data.error || '프롬프트 향상에 실패했습니다');
