@@ -38,7 +38,7 @@ src/components/
   - `persona-data.ts`: 페르소나 데이터
   - `persona-card.tsx`: 개별 카드 컴포넌트
   
-- **twelve-scenarios-demo.tsx**: 12가지 시나리오 데모 컴포넌트
+- 데모 관련 컴포넌트들의 체계적 관리
   - `demo-scenarios.ts`: 데모 시나리오 데이터
   - `demo-interface.tsx`: 인터랙티브 인터페이스
 
@@ -116,8 +116,9 @@ import { PersonaCard, DemoInterface } from '@/components/shared';
 ```
 src/components/
 ├── demo/                    # 데모 관련 컴포넌트
-│   ├── twelve-scenarios-demo.tsx # 12가지 시나리오 데모
 │   ├── before-after-demo.tsx # 전후 비교 데모
+│   ├── monaco-editor-demo.tsx # 모나코 에디터 데모
+│   ├── realtime-improvement-demo.tsx # 실시간 개선 데모
 │   └── index.ts            # Barrel exports
 ├── sections/               # 페이지 섹션 컴포넌트
 │   ├── hero-section.tsx    # 히어로 섹션
@@ -191,7 +192,7 @@ src/components/
 2. **데모 컴포넌트들** 최적화:
    - `demo-scenarios.ts`: 시나리오 데이터
    - `demo-interface.tsx`: 인터페이스 컴포넌트
-   - `twelve-scenarios-demo.tsx`: 12가지 시나리오 데모
+   - 다양한 데모 컴포넌트들의 모듈화
 
 ### 폴더별 Import 패턴
 
@@ -206,7 +207,7 @@ import { PersonaCard, DemoInterface } from '@/components/shared';
 import { personas, demoScenarios } from '@/components/data';
 
 // Demo components
-import { TwelveScenariosDemo, BeforeAfterDemo } from '@/components/demo';
+import { BeforeAfterDemo, MonacoEditorDemo } from '@/components/demo';
 ```
 
 ## 🔧 마이그레이션 가이드

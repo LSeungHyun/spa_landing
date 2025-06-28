@@ -33,26 +33,24 @@ const scenarios: ComparisonScenario[] = [
         category: "개발/기획",
         before: {
             title: "막연한 아이디어",
-            description: "온라인 쇼핑몰 앱을 만들고 싶어요. 사용자가 편리하게 쇼핑할 수 있었으면 좋겠어요.",
+            description: "온라인 쇼핑몰 앱을 만들고 싶어요.",
             problems: [
-                "구체적인 기능 정의 부족",
-                "기술 스택 선택의 어려움",
-                "개발 일정 산정 불가",
-                "비용 예측 어려움"
+                "기능 정의 부족",
+                "기술 선택 어려움",
+                "일정 산정 불가"
             ],
-            time: "기획 단계에서 3주 소요",
+            time: "3주 소요",
             success: "30% 성공률"
         },
         after: {
-            title: "전문가 수준 기획서",
-            description: "사용자 인증, 상품 검색/필터링, 장바구니, 결제 시스템, 리뷰 관리, 푸시 알림이 포함된 완전한 이커머스 앱 기획서",
+            title: "완성된 기획서",
+            description: "상품 검색, 장바구니, 결제, 리뷰 시스템이 포함된 완전한 앱 기획서",
             benefits: [
-                "상세한 기능 명세서 자동 생성",
-                "최적화된 기술 스택 추천",
-                "단계별 개발 마일스톤 제시",
-                "정확한 리소스 계획 수립"
+                "상세 기능 명세서 생성",
+                "최적 기술 스택 추천",
+                "단계별 개발 계획"
             ],
-            time: "2분 만에 완성",
+            time: "2분 완성",
             success: "95% 성공률"
         }
     },
@@ -61,26 +59,24 @@ const scenarios: ComparisonScenario[] = [
         category: "콘텐츠",
         before: {
             title: "모호한 콘셉트",
-            description: "IT 분야 유튜브 채널을 시작하고 싶은데, 어떤 콘텐츠를 만들어야 할지 모르겠어요.",
+            description: "IT 유튜브 채널을 시작하고 싶어요.",
             problems: [
                 "타겟 오디언스 불분명",
                 "콘텐츠 방향성 부재",
-                "차별화 포인트 없음",
-                "수익화 전략 부재"
+                "차별화 포인트 없음"
             ],
-            time: "시행착오로 2개월 소요",
+            time: "2개월 소요",
             success: "20% 성공률"
         },
         after: {
             title: "완성된 채널 전략",
-            description: "초보 개발자 대상 'Web 개발 입문' 채널로, 주 2회 튜토리얼과 라이브 코딩, 월 1회 트렌드 리뷰 콘텐츠 구성",
+            description: "초보 개발자 대상 'Web 개발 입문' 채널, 주 2회 튜토리얼 콘텐츠",
             benefits: [
-                "명확한 타겟 페르소나 정의",
-                "콘텐츠 캘린더 자동 생성",
-                "차별화된 콘셉트 개발",
+                "명확한 타겟 정의",
+                "콘텐츠 캘린더 생성",
                 "수익화 로드맵 제시"
             ],
-            time: "3분 만에 완성",
+            time: "3분 완성",
             success: "90% 성공률"
         }
     },
@@ -89,26 +85,24 @@ const scenarios: ComparisonScenario[] = [
         category: "마케팅",
         before: {
             title: "단순한 광고 아이디어",
-            description: "신제품 런칭 기념으로 소셜미디어 광고를 돌리고 싶어요. 많은 사람들이 알았으면 좋겠어요.",
+            description: "신제품 소셜미디어 광고를 하고 싶어요.",
             problems: [
-                "타겟 고객 세분화 부족",
+                "타겟 고객 불분명",
                 "채널별 전략 없음",
-                "성과 측정 기준 모호",
-                "예산 배분 계획 없음"
+                "성과 측정 기준 모호"
             ],
-            time: "캠페인 설계에 1주일",
+            time: "1주일 소요",
             success: "40% 성공률"
         },
         after: {
             title: "데이터 기반 캠페인",
-            description: "25-35세 직장인 대상, 인스타그램/페이스북 복합 캠페인으로 브랜드 인지도 20% 향상 목표의 체계적 마케팅 전략",
+            description: "25-35세 직장인 대상 인스타그램/페이스북 복합 캠페인",
             benefits: [
-                "세밀한 타겟팅 전략 수립",
-                "채널별 최적화된 크리에이티브",
-                "명확한 KPI 및 측정 체계",
-                "ROI 최적화 예산 배분"
+                "세밀한 타겟팅 전략",
+                "채널별 최적화 크리에이티브",
+                "명확한 KPI 측정 체계"
             ],
-            time: "5분 만에 완성",
+            time: "5분 완성",
             success: "85% 성공률"
         }
     }
@@ -149,7 +143,7 @@ export function BeforeAfterDemo() {
                             </span>
                         </h2>
                         <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-                            단순한 아이디어도 SPA가 있다면 전문가 수준의 완성된 기획서로 변화합니다
+                            막연한 아이디어를 전문가 수준의 완성된 결과물로 변화시킵니다
                         </p>
                     </motion.div>
                 </div>
@@ -198,15 +192,15 @@ export function BeforeAfterDemo() {
                                     {currentScenario.before.title}
                                 </h3>
                             </div>
-                            <p className="text-muted-foreground text-lg leading-relaxed">
+                            <p className="text-muted-foreground leading-relaxed">
                                 &quot;{currentScenario.before.description}&quot;
                             </p>
                         </div>
 
                         <div className="space-y-4 mb-6">
-                            <h4 className="font-semibold text-red-700 dark:text-red-300 flex items-center gap-2">
-                                <AlertCircle size={16} />
-                                주요 문제점
+                            <h4 className="font-semibold text-red-700 dark:text-red-300 flex items-center gap-2 text-sm">
+                                <AlertCircle size={14} />
+                                문제점
                             </h4>
                             <ul className="space-y-2">
                                 {currentScenario.before.problems.map((problem, index) => (
@@ -252,15 +246,15 @@ export function BeforeAfterDemo() {
                                     {currentScenario.after.title}
                                 </h3>
                             </div>
-                            <p className="text-muted-foreground text-lg leading-relaxed">
+                            <p className="text-muted-foreground leading-relaxed">
                                 {currentScenario.after.description}
                             </p>
                         </div>
 
                         <div className="space-y-4 mb-6">
-                            <h4 className="font-semibold text-green-700 dark:text-green-300 flex items-center gap-2">
-                                <CheckCircle size={16} />
-                                핵심 개선사항
+                            <h4 className="font-semibold text-green-700 dark:text-green-300 flex items-center gap-2 text-sm">
+                                <CheckCircle size={14} />
+                                개선사항
                             </h4>
                             <ul className="space-y-2">
                                 {currentScenario.after.benefits.map((benefit, index) => (
@@ -299,9 +293,8 @@ export function BeforeAfterDemo() {
                                 이제 모든 아이디어가 전문가 수준이 됩니다
                             </span>
                         </h3>
-                        <p className="text-lg text-muted-foreground mb-6">
-                            SPA는 단순한 아이디어를 구체적이고 실행 가능한 전문가 수준의 기획서로 변환합니다.
-                            더 이상 &apos;어떻게 시작해야 할지 모르겠다&apos;는 고민은 필요없습니다.
+                        <p className="text-muted-foreground mb-6">
+                            막연한 아이디어를 실행 가능한 전문가 수준의 결과물로 변환합니다.
                         </p>
                         <div className="flex flex-wrap justify-center gap-6 text-sm">
                             <div className="flex items-center gap-2">

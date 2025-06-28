@@ -39,7 +39,8 @@ interface ImprovePromptResponse {
 
 export default function HomePage() {
     const [inputText, setInputText] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
+    const [isTestLoading, setIsTestLoading] = useState(false);
+    const [isImproveLoading, setIsImproveLoading] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [showPreRegistration, setShowPreRegistration] = useState(false);
@@ -221,7 +222,7 @@ export default function HomePage() {
             return;
         }
 
-        setIsLoading(true);
+        setIsImproveLoading(true);
         setHasTriedDemo(true);
         setHasUsedImproveButton(true); // 개선하기 버튼 사용 기록
 
@@ -281,7 +282,7 @@ export default function HomePage() {
             toast.error('프롬프트 향상에 실패했습니다. 다시 시도해주세요.');
             console.error(error);
         } finally {
-            setIsLoading(false);
+            setIsImproveLoading(false);
         }
     };
 
@@ -292,7 +293,7 @@ export default function HomePage() {
             return;
         }
 
-        setIsLoading(true);
+        setIsTestLoading(true);
         setHasTriedDemo(true);
         setHasUsedImproveButton(true); // 개선하기 버튼 사용 기록
 
@@ -376,7 +377,7 @@ export default function HomePage() {
             toast.error('테스트 개선에 실패했습니다. 다시 시도해주세요.');
             console.error(error);
         } finally {
-            setIsLoading(false);
+            setIsTestLoading(false);
         }
     };
 
@@ -750,7 +751,7 @@ export default function HomePage() {
                                 ))}
                                 
                                 {/* 로딩 상태 */}
-                                {isLoading && (
+                                {(isTestLoading || isImproveLoading) && (
                                     <div className="flex justify-start">
                                         <div className="bg-[#171717] px-4 py-3 rounded-2xl">
                                             <div className="flex items-center space-x-2">
@@ -804,7 +805,7 @@ export default function HomePage() {
                                             }
                                         }}
                                         placeholder="프롬프트를 입력하세요"
-                                        disabled={isLoading}
+                                        disabled={isTestLoading || isImproveLoading}
                                         maxLength={500}
                                         style={{ 
                                             resize: 'none', 
@@ -820,7 +821,7 @@ export default function HomePage() {
                                         <button
                                             type="button"
                                             onClick={handleTestImprovePrompt}
-                                            disabled={isLoading || !inputText.trim() || inputText.length > 500}
+                                            disabled={isTestLoading || isImproveLoading || !inputText.trim() || inputText.length > 500}
                                             className={cn(
                                                 "rounded-lg p-2 md:p-2 text-white transition-all duration-200",
                                                 "bg-gray-600 hover:bg-gray-500",
@@ -833,7 +834,7 @@ export default function HomePage() {
                                             title="테스트 개선 (Shift+Ctrl+Enter)"
                                             aria-label="테스트 개선하기"
                                         >
-                                            {isLoading ? (
+                                            {isTestLoading ? (
                                                 <div className="animate-spin">
                                                     <Loader2 size={16} />
                                                 </div>
@@ -846,7 +847,7 @@ export default function HomePage() {
                                         <button
                                             type="button"
                                             onClick={handleImprovePrompt}
-                                            disabled={isLoading || !inputText.trim() || inputText.length > 500}
+                                            disabled={isTestLoading || isImproveLoading || !inputText.trim() || inputText.length > 500}
                                             className={cn(
                                                 "rounded-lg p-2 md:p-2 text-white transition-all duration-200",
                                                 "bg-purple-600 hover:bg-purple-700",
@@ -859,7 +860,13 @@ export default function HomePage() {
                                             title="프롬프트 개선 (Ctrl+Enter)"
                                             aria-label="프롬프트 개선하기"
                                         >
-                                            <Wand2 size={16} />
+                                            {isImproveLoading ? (
+                                                <div className="animate-spin">
+                                                    <Loader2 size={16} />
+                                                </div>
+                                            ) : (
+                                                <Wand2 size={16} />
+                                            )}
                                         </button>
 
                                         {/* 전송 버튼 - 모바일 최적화 */}
@@ -873,7 +880,7 @@ export default function HomePage() {
                                                     handleSendMessage();
                                                 }
                                             }}
-                                            disabled={isLoading || !inputText.trim() || inputText.length > 500}
+                                            disabled={isTestLoading || isImproveLoading || !inputText.trim() || inputText.length > 500}
                                             className={cn(
                                                 "rounded-lg p-2 md:p-2 text-white transition-all duration-200",
                                                 "bg-blue-600 hover:bg-blue-700",
