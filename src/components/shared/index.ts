@@ -7,6 +7,9 @@ export { PricingCard } from './pricing-card';
 export { TestimonialCard } from './testimonial-card';
 export { default as BenefitCard } from './benefit-card';
 
+// Chrome Extension components
+export { default as ChromeExtensionBadge, TrustElements, BrowserExtensionIndicator } from './chrome-extension-badge';
+
 // Demo components
 export { DemoInterface } from './demo-interface';
 export { default as ProcessingSteps } from './processing-steps';

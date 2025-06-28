@@ -3,15 +3,41 @@
 import { motion } from 'framer-motion';
 import { Container } from '@/components/ui/container';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Sparkles, Zap, Clock, Target } from 'lucide-react';
+import { ArrowRight, Sparkles, Zap, Clock, Target, Chrome, Download, Eye } from 'lucide-react';
 
 interface HeroSectionProps {
     onPreRegisterClick?: () => void;
+    onDemoScrollClick?: () => void;
 }
 
-export function HeroSection({ onPreRegisterClick }: HeroSectionProps) {
+export function HeroSection({ onPreRegisterClick, onDemoScrollClick }: HeroSectionProps) {
+    const handleDemoScroll = () => {
+        if (onDemoScrollClick) {
+            onDemoScrollClick();
+        } else {
+            // 데모 섹션으로 부드럽게 스크롤
+            const demoSection = document.getElementById('demo-section');
+            if (demoSection) {
+                demoSection.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+    };
+
+    const handlePreRegisterScroll = () => {
+        if (onPreRegisterClick) {
+            onPreRegisterClick();
+        }
+        // 사전등록 섹션으로 자동 스크롤
+        setTimeout(() => {
+            const preRegSection = document.querySelector('[data-section="pre-registration"]');
+            if (preRegSection) {
+                preRegSection.scrollIntoView({ behavior: 'smooth' });
+            }
+        }, 100);
+    };
+
     return (
-        <section className="pt-20 pb-16 bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50">
+        <section className="pt-20 pb-16 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
             <Container>
                 <div className="max-w-4xl mx-auto text-center">
                     <motion.div
@@ -20,133 +46,244 @@ export function HeroSection({ onPreRegisterClick }: HeroSectionProps) {
                         transition={{ duration: 0.8 }}
                         className="mb-8"
                     >
-                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full text-blue-700 font-medium mb-6">
-                            <Sparkles className="w-4 h-4" />
-                            노력 없는 전문성, 증폭된 결과물
+                        {/* Chrome Extension Badge - 다크 테마 */}
+                        <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-blue-900/50 to-purple-900/50 rounded-full text-blue-300 font-medium mb-6 border border-blue-700/50 backdrop-blur-sm">
+                            <Chrome className="w-5 h-5 text-blue-400" />
+                            <span className="text-sm font-semibold">Chrome 확장 프로그램</span>
+                            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                            <span className="text-xs bg-green-900/50 text-green-300 px-2 py-1 rounded-full border border-green-700/50">곧 출시</span>
                         </div>
 
-                        <h1 className="text-5xl md:text-6xl font-bold mb-6">
-                            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                                백지의 압박
-                            </span>
-                            <br />
-                            <span className="text-slate-800">
-                                이제 그만.
-                            </span>
+                        {/* Main Headlines - 자연스러운 줄바꿈 최적화 */}
+                        <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 leading-tight max-w-4xl mx-auto text-transparent bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text">
+                            🧠
+                            {/* 모바일 전용 2줄 */}
+                            <div className="sm:hidden">
+                                <div>ChatGPT가 더</div>
+                                <div>똑똑해지는 마법</div>
+                            </div>
+
+                            {/* PC 전용 2줄 */}
+                            <div className="hidden sm:block">
+                                <div>ChatGPT가 더 똑똑해지는</div>
+                                <div>마법</div>
+                            </div>
                         </h1>
 
-                        <p className="text-xl md:text-2xl text-slate-600 mb-4 leading-relaxed">
-                            막연한 아이디어를 <strong>1분 안에</strong> 완성된 결과물로
+                        <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold text-gray-200 mb-6 leading-relaxed max-w-3xl mx-auto">
+                            📌 브라우저에서 즉시&nbsp;작동하는 크롬&nbsp;확장&nbsp;프로그램
+                        </h2>
+
+                        <p className="text-lg sm:text-xl md:text-2xl text-gray-300 mb-4 leading-relaxed max-w-4xl mx-auto">
+                            <strong className="text-blue-300">ChatGPT 옆에 딱&nbsp;붙어</strong> 막연한 아이디어를 <strong className="text-purple-300">1분&nbsp;안에</strong> 완성된&nbsp;결과물로
                         </p>
 
-                        <p className="text-lg text-slate-500 mb-8">
-                            보이지 않는 강화 엔진이 당신의 창작과 기획을 10배 빠르게 만듭니다
+                        <p className="text-base sm:text-lg text-gray-400 mb-8 max-w-3xl mx-auto">
+                            보이지 않는 강화&nbsp;엔진이 당신의 창작과&nbsp;기획을 10배&nbsp;빠르게 만듭니다
                         </p>
                     </motion.div>
 
+                    {/* Enhanced CTA Buttons - 모바일 최적화 */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.2 }}
-                        className="flex flex-col sm:flex-row gap-4 justify-center mb-12"
+                        className="flex flex-col gap-4 justify-center mb-12 px-4 sm:px-0"
                     >
                         <Button
                             size="lg"
-                            className="text-lg px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                            onClick={onPreRegisterClick}
+                            className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-300 text-white font-semibold"
+                            onClick={handlePreRegisterScroll}
                         >
-                            무료 체험 시작하기
-                            <ArrowRight className="ml-2 w-5 h-5" />
+                            <Download className="mr-2 w-4 h-4 sm:w-5 sm:h-5" />
+                            <span className="hidden sm:inline">Chrome 확장 프로그램 출시 알림 받기</span>
+                            <span className="sm:hidden">출시 알림 받기</span>
                         </Button>
-                        <Button variant="outline" size="lg" className="text-lg px-8 py-4 border-slate-300 hover:bg-slate-50">
-                            <Zap className="mr-2 w-5 h-5" />
-                            1분 데모 보기
+                        <Button 
+                            variant="outline" 
+                            size="lg" 
+                            className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 border-gray-600 bg-gray-800/50 hover:bg-gray-700/50 text-gray-200 hover:text-white shadow-md hover:shadow-lg transition-all duration-300 backdrop-blur-sm"
+                            onClick={handleDemoScroll}
+                        >
+                            <Eye className="mr-2 w-4 h-4 sm:w-5 sm:h-5" />
+                            <span className="hidden sm:inline">👇 지금 바로 체험해보세요</span>
+                            <span className="sm:hidden">👇 1분 체험</span>
                         </Button>
                     </motion.div>
 
+                    {/* Enhanced Demo Comparison - 다크 테마 */}
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.8, delay: 0.4 }}
                         className="relative mb-12"
                     >
-                        <div className="bg-white rounded-2xl shadow-2xl p-8 border border-slate-200">
-                            <div className="grid md:grid-cols-2 gap-8 items-center">
-                                <div className="text-left">
-                                    <div className="flex items-center gap-2 mb-4">
+                        <div className="bg-gray-800/50 rounded-2xl shadow-2xl p-6 sm:p-8 border border-gray-700/50 backdrop-blur-sm">
+                            {/* Browser Window Frame - 다크 테마 */}
+                            <div className="bg-gray-900/80 rounded-t-lg p-3 mb-6 border-b border-gray-600/50">
+                                <div className="flex items-center gap-2">
+                                    <div className="flex gap-2">
                                         <div className="w-3 h-3 bg-red-400 rounded-full"></div>
-                                        <h3 className="text-lg font-semibold text-red-600">
-                                            백지의 압박 상황
-                                        </h3>
+                                        <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
+                                        <div className="w-3 h-3 bg-green-400 rounded-full"></div>
                                     </div>
-                                    <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-700">
-                                        <div className="mb-2 text-xs text-red-500">입력</div>
-                                        &ldquo;구독 결제 시스템 만들어줘&rdquo;
-                                        <div className="mt-3 pt-3 border-t border-red-200">
-                                            <div className="text-xs text-red-500 mb-1">결과</div>
-                                            막막함... 어디서부터 시작해야 할지 모르겠음 😰
+                                    <div className="flex-1 bg-gray-800 rounded px-3 py-1 mx-2 sm:mx-4 text-xs text-gray-400 border border-gray-600/50">
+                                        chat.openai.com
+                                    </div>
+                                    <div className="flex items-center gap-1 bg-blue-900/50 text-blue-300 px-2 py-1 rounded text-xs border border-blue-700/50">
+                                        <Chrome className="w-3 h-3" />
+                                        <span className="hidden sm:inline">Smart Prompt</span>
+                                        <span className="sm:hidden">SPA</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* 개선된 비교 섹션 */}
+                            <div className="space-y-8">
+                                {/* 1단계: 기본 프롬프트 */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 items-start">
+                                    <div className="text-left">
+                                        <div className="flex items-center gap-2 mb-4">
+                                            <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
+                                            <h3 className="text-base sm:text-lg font-semibold text-yellow-400">
+                                                일반적인 프롬프트
+                                            </h3>
+                                        </div>
+                                        <div className="bg-yellow-900/20 border border-yellow-700/50 rounded-lg p-4 text-sm">
+                                            <div className="mb-2 text-xs text-yellow-400">사용자 입력</div>
+                                            <div className="text-gray-300 mb-3 font-mono text-sm bg-gray-900/50 p-2 rounded">
+                                                "구독 결제 시스템 만들어줘"
+                                            </div>
+                                            <div className="mt-3 pt-3 border-t border-yellow-700/30">
+                                                <div className="text-xs text-yellow-400 mb-2">ChatGPT 응답 (일부)</div>
+                                                <div className="text-gray-300 text-sm leading-relaxed">
+                                                    "구독 결제 시스템을 만들기 위해서는 다음과 같은 요소들이 필요합니다:<br/>
+                                                    1. 사용자 인증 시스템<br/>
+                                                    2. 결제 처리 로직<br/>
+                                                    3. 구독 관리..."
+                                                </div>
+                                                <div className="mt-2 text-xs text-yellow-500 italic">
+                                                    💭 너무 일반적이고 구체적인 실행 계획이 부족
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="text-left">
+                                        <div className="flex items-center gap-2 mb-4">
+                                            <div className="w-3 h-3 bg-blue-400 rounded-full"></div>
+                                            <h3 className="text-base sm:text-lg font-semibold text-blue-400">
+                                                1단계: 프롬프트 개선
+                                            </h3>
+                                            <div className="flex items-center gap-1 text-xs bg-blue-900/30 text-blue-300 px-2 py-1 rounded-full border border-blue-700/50">
+                                                <Zap className="w-3 h-3" />
+                                                <span>자동 개선</span>
+                                            </div>
+                                        </div>
+                                        <div className="bg-blue-900/20 border border-blue-700/50 rounded-lg p-4 text-sm">
+                                            <div className="mb-2 text-xs text-blue-400">개선된 프롬프트</div>
+                                            <div className="text-gray-300 mb-3 font-mono text-sm bg-gray-900/50 p-2 rounded">
+                                                "B2B SaaS 스타트업을 위한 구독 결제 시스템을 설계해주세요.<br/><br/>
+                                                <strong>요구사항:</strong><br/>
+                                                - 월/연 구독 플랜 지원<br/>
+                                                - Stripe 연동<br/>
+                                                - 무료 체험 기간<br/>
+                                                - 사용량 기반 과금<br/><br/>
+                                                <strong>산출물:</strong> 기능 명세서, API 설계, 보안 가이드"
+                                            </div>
+                                            <div className="mt-2 text-xs text-blue-400">
+                                                ⚡ 구체적인 맥락과 요구사항 추가
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="text-left">
-                                    <div className="flex items-center gap-2 mb-4">
-                                        <div className="w-3 h-3 bg-green-400 rounded-full"></div>
-                                        <h3 className="text-lg font-semibold text-green-600">
-                                            스마트 프롬프트 결과
-                                        </h3>
-                                        <div className="flex items-center gap-1 text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
-                                            <Clock className="w-3 h-3" />
-                                            1분
+                                {/* 2단계: 결과 비교 */}
+                                <div className="border-t border-gray-600/30 pt-6">
+                                    <div className="text-center mb-6">
+                                        <div className="inline-flex items-center gap-2 bg-green-900/30 text-green-300 px-4 py-2 rounded-full text-sm border border-green-700/50">
+                                            <Target className="w-4 h-4" />
+                                            <span>결과 비교</span>
                                         </div>
                                     </div>
-                                    <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-sm text-green-700">
-                                        <div className="mb-2 text-xs text-green-600">입력</div>
-                                        &ldquo;구독 결제 시스템 만들어줘&rdquo;
-                                        <div className="mt-3 pt-3 border-t border-green-200">
-                                            <div className="text-xs text-green-600 mb-1">결과</div>
-                                            <div className="font-medium">
-                                                ✅ 완전한 기능 명세서<br />
-                                                ✅ API 설계 가이드<br />
-                                                ✅ 보안 체크리스트<br />
-                                                ✅ 개발 일정 계획
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 items-start">
+                                        <div className="text-left">
+                                            <div className="flex items-center gap-2 mb-4">
+                                                <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
+                                                <h4 className="text-base font-semibold text-yellow-400">기본 프롬프트 결과</h4>
+                                            </div>
+                                            <div className="bg-yellow-900/20 border border-yellow-700/50 rounded-lg p-4 text-sm space-y-2">
+                                                <div className="text-yellow-300">✓ 기본적인 개념 설명</div>
+                                                <div className="text-yellow-300">✓ 일반적인 기능 목록</div>
+                                                <div className="text-red-300">✗ 구체적인 구현 방법 부족</div>
+                                                <div className="text-red-300">✗ 프로젝트별 맞춤화 없음</div>
+                                                <div className="text-red-300">✗ 실행 계획 부재</div>
                                             </div>
                                         </div>
+
+                                        <div className="text-left">
+                                            <div className="flex items-center gap-2 mb-4">
+                                                <div className="w-3 h-3 bg-green-400 rounded-full"></div>
+                                                <h4 className="text-base font-semibold text-green-400">개선된 프롬프트 결과</h4>
+                                            </div>
+                                            <div className="bg-green-900/20 border border-green-700/50 rounded-lg p-4 text-sm space-y-2">
+                                                <div className="text-green-300">✓ 상세한 기능 명세서 (12페이지)</div>
+                                                <div className="text-green-300">✓ Stripe API 연동 가이드</div>
+                                                <div className="text-green-300">✓ 데이터베이스 스키마 설계</div>
+                                                <div className="text-green-300">✓ 보안 체크리스트</div>
+                                                <div className="text-green-300">✓ 4주 개발 로드맵</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* 핵심 가치 제안 */}
+                                <div className="bg-gradient-to-r from-purple-900/30 to-blue-900/30 rounded-xl p-6 border border-purple-700/50">
+                                    <div className="text-center">
+                                        <h4 className="text-lg font-semibold text-purple-300 mb-3">
+                                            💡 핵심 차이점
+                                        </h4>
+                                        <p className="text-gray-300 text-sm leading-relaxed">
+                                            Smart Prompt Assistant는 <strong className="text-blue-300">같은 ChatGPT</strong>를 사용하되,<br/>
+                                            <strong className="text-purple-300">더 구체적이고 맥락이 풍부한 프롬프트</strong>로 변환하여<br/>
+                                            <strong className="text-green-300">실무에 바로 적용 가능한 결과물</strong>을 얻어냅니다.
+                                        </p>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </motion.div>
 
-                    {/* ROI Stats Preview */}
+                    {/* ROI Stats Preview - 다크 테마 */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.6 }}
-                        className="grid grid-cols-1 md:grid-cols-3 gap-6"
+                        className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6"
                     >
-                        <div className="bg-white rounded-xl p-6 shadow-lg border border-slate-100">
-                            <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-lg mb-4 mx-auto">
-                                <Clock className="w-6 h-6 text-blue-600" />
+                        <div className="bg-gray-800/50 rounded-xl p-6 shadow-lg border border-gray-700/50 backdrop-blur-sm">
+                            <div className="flex items-center justify-center w-12 h-12 bg-blue-900/50 rounded-lg mb-4 mx-auto border border-blue-700/50">
+                                <Clock className="w-6 h-6 text-blue-400" />
                             </div>
-                            <div className="text-2xl font-bold text-slate-800 mb-1">90%</div>
-                            <div className="text-sm text-slate-600">기획 시간 단축</div>
+                            <div className="text-2xl font-bold text-white mb-1">90%</div>
+                            <div className="text-sm text-gray-400">기획 시간 단축</div>
                         </div>
 
-                        <div className="bg-white rounded-xl p-6 shadow-lg border border-slate-100">
-                            <div className="flex items-center justify-center w-12 h-12 bg-purple-100 rounded-lg mb-4 mx-auto">
-                                <Target className="w-6 h-6 text-purple-600" />
+                        <div className="bg-gray-800/50 rounded-xl p-6 shadow-lg border border-gray-700/50 backdrop-blur-sm">
+                            <div className="flex items-center justify-center w-12 h-12 bg-purple-900/50 rounded-lg mb-4 mx-auto border border-purple-700/50">
+                                <Target className="w-6 h-6 text-purple-400" />
                             </div>
-                            <div className="text-2xl font-bold text-slate-800 mb-1">3.5배</div>
-                            <div className="text-sm text-slate-600">결과물 품질 향상</div>
+                            <div className="text-2xl font-bold text-white mb-1">3.5배</div>
+                            <div className="text-sm text-gray-400">결과물 품질 향상</div>
                         </div>
 
-                        <div className="bg-white rounded-xl p-6 shadow-lg border border-slate-100">
-                            <div className="flex items-center justify-center w-12 h-12 bg-green-100 rounded-lg mb-4 mx-auto">
-                                <Sparkles className="w-6 h-6 text-green-600" />
+                        <div className="bg-gray-800/50 rounded-xl p-6 shadow-lg border border-gray-700/50 backdrop-blur-sm">
+                            <div className="flex items-center justify-center w-12 h-12 bg-green-900/50 rounded-lg mb-4 mx-auto border border-green-700/50">
+                                <Sparkles className="w-6 h-6 text-green-400" />
                             </div>
-                            <div className="text-2xl font-bold text-slate-800 mb-1">95%</div>
-                            <div className="text-sm text-slate-600">사용자 만족도</div>
+                            <div className="text-2xl font-bold text-white mb-1">95%</div>
+                            <div className="text-sm text-gray-400">사용자 만족도</div>
                         </div>
                     </motion.div>
                 </div>

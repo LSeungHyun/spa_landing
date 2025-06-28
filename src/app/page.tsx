@@ -14,6 +14,7 @@ import { EnhancedPreRegistrationForm } from '@/components/shared/enhanced-pre-re
 import { TypingAnimation } from '@/components/shared/typing-animation';
 import { EnhanceInterceptModal } from '@/components/shared/enhance-intercept-modal';
 import { RegistrationBanner } from '@/components/shared/registration-banner';
+import { HeroSection } from '@/components/sections/hero-section';
 
 
 interface ChatMessage {
@@ -635,64 +636,13 @@ export default function HomePage() {
             </header>
 
             {/* Hero Section */}
-            <section data-section="hero" className="pt-24 pb-12 px-4 sm:px-6 lg:px-8 text-center">
-                <Container>
-                    <div className="max-w-4xl mx-auto">
-                        <div className="space-y-8">
-                            {/* 메인 헤드라인 */}
-                            <div className="space-y-4 animate-fade-in">
-                                <div className="inline-flex items-center space-x-2 bg-blue-500/20 text-blue-300 px-4 py-2 rounded-full text-sm font-medium">
-                                    <Zap size={16} />
-                                    <span>AI 프롬프트 최적화 도구</span>
-                                </div>
-                                <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white leading-tight">
-                                    프롬프트를 <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">10배 더 스마트</span>하게
-                                </h1>
-                                <p className="text-xl sm:text-2xl text-blue-100 max-w-3xl mx-auto leading-relaxed">
-                                    AI와 대화할 때 더 정확하고 유용한 답변을 얻는 비밀,
-                                    <strong className="text-white"> 바로 프롬프트 작성법</strong>입니다.
-                                </p>
-                            </div>
-
-                            {/* CTA 버튼들 */}
-                            <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4 animate-slide-up">
-                                <Button
-                                    {...({ onClick: scrollToDemo } as any)}
-                                    size="lg"
-                                    className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold px-8 py-4 rounded-xl shadow-xl transform hover:scale-105 transition-all duration-200 focus-visible-enhanced"
-                                >
-                                    <span className="mr-2"><Wand2 size={20} /></span>
-                                    지금 바로 체험하기
-                                </Button>
-                                <Button
-                                    {...({ onClick: scrollToPreRegistration } as any)}
-                                    variant="outline"
-                                    size="lg"
-                                    className="w-full sm:w-auto border-2 border-blue-400 text-blue-400 hover:bg-blue-400 hover:text-white px-8 py-4 rounded-xl font-semibold transition-all duration-200"
-                                >
-                                    <span className="mr-2"><Gift size={20} /></span>
-                                    무료 사전 등록
-                                </Button>
-                            </div>
-
-                            {/* 사회적 증거 */}
-                            <div className="flex items-center justify-center space-x-8 text-blue-200 text-sm animate-fade-in-delayed">
-                                <div className="flex items-center space-x-2">
-                                    <Users size={16} />
-                                    <span>1,247명 사전 등록</span>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                    <span className="text-yellow-400"><Star size={16} /></span>
-                                    <span>4.9/5 만족도</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </Container>
-            </section>
+            <HeroSection 
+                onPreRegisterClick={() => setShowPreRegistration(true)}
+                onDemoScrollClick={scrollToDemo}
+            />
 
             {/* Demo Section */}
-            <section ref={demoRef} data-section="demo" className="py-16 px-4 sm:px-6 lg:px-8">
+            <section id="demo-section" ref={demoRef} data-section="demo" className="py-16 px-4 sm:px-6 lg:px-8">
                 <Container>
                     <div className="max-w-4xl mx-auto">
                         {/* 섹션 헤더 */}
