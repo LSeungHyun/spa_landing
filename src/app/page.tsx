@@ -43,6 +43,8 @@ export default function HomePage() {
     const [hasTriedDemo, setHasTriedDemo] = useState(false);
     const [improveCount, setImproveCount] = useState(0);
     const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
+    const [hasUsedImproveButton, setHasUsedImproveButton] = useState(false);
+    const [hasShownImproveSuggestion, setHasShownImproveSuggestion] = useState(false);
     const demoRef = useRef<HTMLDivElement>(null);
     const preRegRef = useRef<HTMLDivElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -161,6 +163,35 @@ export default function HomePage() {
         }, 100);
     };
 
+    // 텍스트 영역 자동 크기 조절 함수
+    const adjustTextareaHeight = useCallback(() => {
+        if (textareaRef.current) {
+            requestAnimationFrame(() => {
+                const textarea = textareaRef.current;
+                if (!textarea) return;
+                
+                textarea.style.height = 'auto';
+                const scrollHeight = textarea.scrollHeight;
+                const maxHeight = 200; // 최대 높이 200px
+                const minHeight = 60; // 최소 높이 60px
+                const targetHeight = Math.min(Math.max(scrollHeight, minHeight), maxHeight);
+                textarea.style.height = `${targetHeight}px`;
+                
+                // 최대 높이 도달 시 스크롤 표시
+                if (scrollHeight > maxHeight) {
+                    textarea.style.overflowY = 'auto';
+                } else {
+                    textarea.style.overflowY = 'hidden';
+                }
+            });
+        }
+    }, []);
+
+    // inputText 변경 시 자동으로 텍스트 영역 크기 조절
+    useEffect(() => {
+        adjustTextareaHeight();
+    }, [inputText, adjustTextareaHeight]);
+
     const handleImprovePrompt = async () => {
         if (!inputText.trim()) {
             toast.error('프롬프트를 입력해주세요');
@@ -169,6 +200,7 @@ export default function HomePage() {
 
         setIsLoading(true);
         setHasTriedDemo(true);
+        setHasUsedImproveButton(true); // 개선하기 버튼 사용 기록
 
         try {
             // 실제 Gemini API를 사용한 프롬프트 개선
@@ -187,7 +219,7 @@ export default function HomePage() {
                 if (response.status === 429) {
                     // 사용 제한 초과 (실제 사용자 한도)
                     toast.error(data.error || '일일 사용 한도(3회)를 초과했습니다.');
-                    // 사전 등록 유도
+                    // 사전 등록 유도 - 제거된 자동 스크롤
                     setTimeout(() => {
                         scrollToPreRegistration();
                     }, 2000);
@@ -206,16 +238,7 @@ export default function HomePage() {
             if (data.improvedPrompt) {
                 setInputText(data.improvedPrompt);
                 setImproveCount(prev => prev + 1);
-
-                // 토스트 알림 제거 - UI에서 "프롬프트 개선 완료!" 메시지가 이미 표시되므로 중복 방지
-                // 기존 토스트 알림 코드 주석 처리:
-                // if (improveCount === 0) {
-                //     toast.success('🚀 AI가 프롬프트를 10배 향상시켰습니다!');
-                // } else if (improveCount === 1) {
-                //     toast.success('⚡ AI 프롬프트 성능이 극적으로 개선되었습니다!');
-                // } else {
-                //     toast.success('🎯 AI가 완벽한 프롬프트로 변환했습니다!');
-                // }
+                // 자동 스크롤 제거 - 프롬프트 개선 후 페이지 이동 없음
             }
 
         } catch (error) {
@@ -235,6 +258,7 @@ export default function HomePage() {
 
         setIsLoading(true);
         setHasTriedDemo(true);
+        setHasUsedImproveButton(true); // 개선하기 버튼 사용 기록
 
         // 로딩 시뮬레이션
         await new Promise(resolve => setTimeout(resolve, 1500));
@@ -310,16 +334,7 @@ export default function HomePage() {
             const improvedPrompt = generateTestImprovement(inputText);
             setInputText(improvedPrompt);
             setImproveCount(prev => prev + 1);
-
-            // 토스트 알림 제거 - UI에서 "프롬프트 개선 완료!" 메시지가 이미 표시되므로 중복 방지
-            // 기존 토스트 알림 코드 주석 처리:
-            // if (improveCount === 0) {
-            //     toast.success('🧪 테스트: AI가 프롬프트를 10배 향상시켰습니다!');
-            // } else if (improveCount === 1) {
-            //     toast.success('🧪 테스트: AI 프롬프트 성능이 극적으로 개선되었습니다!');
-            // } else {
-            //     toast.success('🧪 테스트: AI가 완벽한 프롬프트로 변환했습니다!');
-            // }
+            // 자동 스크롤 제거 - 프롬프트 개선 후 페이지 이동 없음
 
         } catch (error) {
             toast.error('테스트 개선에 실패했습니다. 다시 시도해주세요.');
@@ -339,6 +354,15 @@ export default function HomePage() {
 
     const handleSendMessage = () => {
         if (!inputText.trim()) return;
+
+        // 개선하기 버튼을 사용하지 않고 바로 전송하는 경우 안내
+        if (!hasUsedImproveButton && !hasShownImproveSuggestion) {
+            setHasShownImproveSuggestion(true);
+            toast.info('💡 프롬프트 개선하기', {
+                description: '🪄 마법봉 버튼을 눌러 AI가 프롬프트를 더 효과적으로 개선해보세요!',
+                duration: 4000,
+            });
+        }
 
         const userMessage: ChatMessage = {
             id: Date.now().toString(),
@@ -712,41 +736,11 @@ export default function HomePage() {
                                         value={inputText}
                                         onChange={(e) => {
                                             setInputText(e.target.value);
-                                            // 개선된 자동 크기 조절 로직
-                                            requestAnimationFrame(() => {
-                                                const textarea = e.target;
-                                                textarea.style.height = 'auto';
-                                                const scrollHeight = textarea.scrollHeight;
-                                                const maxHeight = 200; // 최대 높이 200px
-                                                const minHeight = 60; // 최소 높이 60px
-                                                const targetHeight = Math.min(Math.max(scrollHeight, minHeight), maxHeight);
-                                                textarea.style.height = `${targetHeight}px`;
-                                                
-                                                // 최대 높이 도달 시 스크롤 표시
-                                                if (scrollHeight > maxHeight) {
-                                                    textarea.style.overflowY = 'auto';
-                                                } else {
-                                                    textarea.style.overflowY = 'hidden';
-                                                }
-                                            });
+                                            // adjustTextareaHeight는 useEffect에서 자동으로 호출됨
                                         }}
                                         onInput={(e) => {
-                                            // 입력 이벤트에도 반응하도록 추가
-                                            requestAnimationFrame(() => {
-                                                const textarea = e.target as HTMLTextAreaElement;
-                                                textarea.style.height = 'auto';
-                                                const scrollHeight = textarea.scrollHeight;
-                                                const maxHeight = 200;
-                                                const minHeight = 60;
-                                                const targetHeight = Math.min(Math.max(scrollHeight, minHeight), maxHeight);
-                                                textarea.style.height = `${targetHeight}px`;
-                                                
-                                                if (scrollHeight > maxHeight) {
-                                                    textarea.style.overflowY = 'auto';
-                                                } else {
-                                                    textarea.style.overflowY = 'hidden';
-                                                }
-                                            });
+                                            // 입력 이벤트 시에도 즉시 크기 조절
+                                            adjustTextareaHeight();
                                         }}
                                         onKeyDown={(e) => {
                                             if (e.key === 'Enter' && !e.shiftKey) {
