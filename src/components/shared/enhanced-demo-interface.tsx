@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip } from '@/components/ui/tooltip';
 import { 
     Chrome, 
     Minimize2, 
@@ -214,9 +214,12 @@ export function EnhancedDemoInterface({
                     </Button>
                     
                     {/* Smart Prompt Assistant Extension */}
-                    <TooltipProvider>
-                        <Tooltip open={showTooltip}>
-                            <TooltipTrigger asChild>
+                    <Tooltip 
+                        content="Smart Prompt Assistant - ChatGPT 응답을 자동으로 개선합니다"
+                        isVisible={showTooltip}
+                        position="bottom"
+                    >
+
                                 <motion.div
                                     animate={isExtensionActive ? { scale: [1, 1.1, 1] } : {}}
                                     transition={{ duration: 0.5 }}
@@ -242,13 +245,7 @@ export function EnhancedDemoInterface({
                                         )}
                                     </Button>
                                 </motion.div>
-                            </TooltipTrigger>
-                            <TooltipContent side="bottom" className="bg-purple-600 text-white">
-                                <p className="font-medium">Smart Prompt Assistant</p>
-                                <p className="text-xs">ChatGPT 응답을 자동으로 개선합니다</p>
-                            </TooltipContent>
                         </Tooltip>
-                    </TooltipProvider>
 
                     <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-gray-600">
                         <MoreHorizontal className="w-4 h-4" />

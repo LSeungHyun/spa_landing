@@ -2,6 +2,7 @@
   "version": 2,
   "regions": ["icn1"],
   "public": true,
+  "alias": ["smart-prompt-assistant.vercel.app"],
   "github": {
     "enabled": true,
     "autoAlias": true
