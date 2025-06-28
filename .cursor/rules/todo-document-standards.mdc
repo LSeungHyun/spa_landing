@@ -1,0 +1,502 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# 📋 TODO Document Creation & Management Standards
+
+## 🎯 Core Philosophy & Objectives
+
+**MISSION**: Create systematically structured, automation-ready TODO documents that enable seamless AI-driven project progression and maintain consistent quality across all development phases.
+
+**CRITICAL SUCCESS FACTORS**:
+- **Automation-First Design**: Every element must support automated progression
+- **Granular Tracking**: Precise status monitoring at task, phase, and project levels
+- **Predictable Structure**: Standardized templates that eliminate ambiguity
+- **Quality Gates**: Built-in checkpoints that prevent progression without verification
+
+---
+
+## 🚨 ABSOLUTE REQUIREMENTS (Non-Negotiable)
+
+### **MUST ALWAYS INCLUDE - Document Header Architecture**
+
+#### 1. **Automated Progression Control Block**
+```markdown
+## 🤖 Automated Progression Control
+**Cursor AI Auto-Progression**: ✅ ENABLED / ⏸️ PAUSED / ❌ DISABLED
+**Execution Mode**: Sequential Phase Progression (Phase 1 → Phase 2 → ... → Phase N)
+**Current Active Target**: Phase X ([Specific Task Name])
+
+### Automation Rules & Triggers
+1. **"Proceed with work" Command**: Auto-execute next incomplete task in current phase
+2. **File Creation/Modification**: Automatically generate and modify required code files
+3. **Status Synchronization**: Auto-update document status upon task completion
+4. **Quality Gate Enforcement**: Mandatory checkpoint verification before phase advancement
+5. **Phase Transition Protocol**: Automatic progression to next phase upon checkpoint clearance
+
+### Current Execution Context
+- **Active Phase**: Phase X ([Descriptive Phase Name])
+- **Next Scheduled Task**: [Specific Task Item with Clear Scope]
+- **Priority Level**: HIGH / MEDIUM / LOW
+- **Estimated Completion**: [Realistic Time Estimate]
+
+### Pre-Mapped File Generation Paths
+```
+Phase 1: ✅ COMPLETED (3/3 tasks) / 🔄 IN_PROGRESS (2/3 tasks) / ⏸️ PENDING
+- ComponentName: src/components/[folder]/[filename].tsx (✅ COMPLETED)
+- ServiceName: src/lib/services/[filename].ts (🔄 IN_PROGRESS)
+- TypeDefinition: src/types/[filename].ts (⏸️ PENDING)
+
+Phase 2: ⏸️ PENDING (0/2 tasks)
+- APIRoute: src/app/api/[route]/route.ts (⏸️ PENDING)
+- CustomHook: src/hooks/use-[hookname].ts (⏸️ PENDING)
+```
+```
+
+#### 2. **Project Context & Scope Definition**
+```markdown
+## 🎯 Project Specification
+- **Primary Objective**: [Measurable, specific goal statement]
+- **Success Metrics**: [Quantifiable success criteria]
+- **Ultimate Target**: [Final deliverable and acceptance criteria]
+- **Business Context**: [Why this project exists and its impact]
+- **Technical Scope**: [Technology stack and architectural boundaries]
+```
+
+#### 3. **Progress Monitoring Dashboard**
+```markdown
+## 📊 Progress Monitoring Dashboard
+- **Total Phases**: N phases defined
+- **Completed Phases**: X phases (Phase 1 ✅, Phase 2 ✅, ...)
+- **Active Phase**: Phase Y ([Current phase description])
+- **Overall Completion**: X% (Completed tasks / Total tasks × 100)
+- **Projected Completion**: YYYY-MM-DD
+- **Risk Factors**: [Identified blockers and mitigation strategies]
+```
+
+### **MUST FOLLOW - Phase Architecture Standards**
+
+#### 1. **Phase Header Template (Mandatory Structure)**
+```markdown
+## 🔧 Phase X: [Descriptive Phase Name]
+**Status**: ✅ COMPLETED / 🔄 IN_PROGRESS / ⏸️ PENDING / ❌ FAILED / 🚫 BLOCKED
+**Estimated Duration**: X days/weeks
+**Assigned Team**: Development / Design / DevOps / QA
+**Target Completion**: YYYY-MM-DD
+**Actual Completion**: YYYY-MM-DD (only when completed)
+**Dependencies**: [List of prerequisite phases or external dependencies]
+
+### Task Inventory
+```
+
+#### 2. **Task Specification Template (Mandatory Detail Level)**
+```markdown
+- [x] **[Action-Oriented Task Name]** ✅ **COMPLETED (YYYY-MM-DD)** / 🔄 **IN_PROGRESS** / ⏸️ **PENDING**
+  - **Status**: ✅ COMPLETED / 🔄 IN_PROGRESS / ⏸️ PENDING / ❌ FAILED / 🚫 BLOCKED
+  - **Target File**: `src/[specific/path]/[filename].[ext]`
+  - **Detailed Scope**: [Comprehensive description of what needs to be implemented]
+  - **Implementation Requirements**:
+    - ✅ Requirement 1 (check when completed)
+    - ✅ Requirement 2 (check when completed)
+    - 🔄 Requirement 3 (use 🔄 when in progress)
+    - ⏸️ Requirement 4 (use ⏸️ when pending)
+  - **Acceptance Criteria**: [Specific, testable completion conditions]
+  - **Priority Level**: HIGH / MEDIUM / LOW
+  - **Estimated Effort**: [Time estimate in hours/days]
+  - **Risk Assessment**: [Potential challenges and mitigation strategies]
+  - **Git Commit Reference**: [commit-hash] - "[descriptive commit message]" (when completed)
+  - **Verification Evidence**: [How completion was validated]
+```
+
+#### 3. **Phase Quality Gate Checkpoint (Mandatory)**
+```markdown
+### 🔍 Phase X Quality Gate Checkpoint
+- [x] Functional Requirements: All features working as specified ✅
+- [x] Performance Standards: Meets or exceeds performance benchmarks ✅
+- [x] Code Quality: Passes linting, formatting, and review standards ✅
+- [x] Test Coverage: All test cases passing with >90% coverage ✅
+- [x] Documentation: All changes documented and up-to-date ✅
+- [x] Security Review: No security vulnerabilities identified ✅
+- [x] Integration Testing: Works correctly with existing systems ✅
+- [x] Stakeholder Approval: Required approvals obtained ✅
+```
+
+---
+
+## 🤖 Automation & AI Integration Protocols
+
+### **MUST IMPLEMENT - Status Update Automation**
+
+#### 1. **Task Lifecycle State Management**
+```markdown
+**Task Initiation Protocol**:
+- Change status: ⏸️ PENDING → 🔄 IN_PROGRESS
+- Record start timestamp
+- Assign responsible team member
+- Create tracking branch (if applicable)
+
+**Task Completion Protocol**:
+- Change status: 🔄 IN_PROGRESS → ✅ COMPLETED
+- Record completion date (YYYY-MM-DD format)
+- Add git commit hash and descriptive message
+- Check all implementation requirements (✅)
+- Document verification evidence
+- Update overall progress percentage
+- Auto-trigger project completion check if last task
+
+**Project Completion Auto-Trigger**:
+- Detect when final task status changes to ✅ COMPLETED
+- Automatically validate all quality gates and checkpoints
+- Generate completion report with final metrics
+- Execute automatic file movement to `docs/todo_list/end_todo/`
+- Update document filename with completion timestamp
+- Remove from active project tracking systems
+
+**Phase Completion Protocol**:
+- Change phase status to ✅ COMPLETED
+- Complete all quality gate checkpoints
+- Update progress dashboard
+- Activate next phase (change status to 🔄 IN_PROGRESS)
+- Generate phase completion report
+```
+
+#### 2. **File Path Pre-Mapping System**
+```markdown
+### Automated File Generation Mapping
+```
+Phase 1: Infrastructure Setup
+- Database Schema: migrations/[timestamp]_create_[table].sql (⏸️ PENDING)
+- Service Layer: src/lib/services/[service-name].ts (⏸️ PENDING)
+- Type Definitions: src/types/[domain].ts (⏸️ PENDING)
+
+Phase 2: API Development  
+- Route Handlers: src/app/api/[endpoint]/route.ts (⏸️ PENDING)
+- Middleware: src/lib/middleware/[middleware-name].ts (⏸️ PENDING)
+- Error Handlers: src/lib/errors/[error-type].ts (⏸️ PENDING)
+
+Phase 3: Frontend Integration
+- React Components: src/components/[category]/[component-name].tsx (⏸️ PENDING)
+- Custom Hooks: src/hooks/use-[functionality].ts (⏸️ PENDING)
+- State Management: src/store/[slice-name].ts (⏸️ PENDING)
+```
+```
+
+### **MUST FOLLOW - File Creation Standards**
+
+#### 1. **Path Consistency Rules**
+- ✅ ALWAYS pre-define file paths before implementation begins
+- ✅ ALWAYS follow existing project architecture patterns
+- ✅ ALWAYS use TypeScript strict mode compliance
+- ✅ ALWAYS maintain consistent naming conventions
+- ❌ NEVER create files in arbitrary locations
+- ❌ NEVER deviate from established folder structure
+- ❌ NEVER ignore existing code style guidelines
+
+#### 2. **Code Quality Requirements**
+- ✅ ALWAYS include comprehensive TypeScript types
+- ✅ ALWAYS add proper error handling
+- ✅ ALWAYS implement input validation
+- ✅ ALWAYS include unit tests for new functionality
+- ✅ ALWAYS document complex logic with comments
+- ❌ NEVER use `any` types without explicit justification
+- ❌ NEVER skip error handling for async operations
+- ❌ NEVER commit code without proper testing
+
+---
+
+## 📊 Quality Assurance & Verification Standards
+
+### **MUST ACHIEVE - Completion Criteria**
+
+#### 1. **Task-Level Completion Standards**
+```markdown
+**MANDATORY COMPLETION CHECKLIST**:
+- [ ] Functional Requirements: 100% of specified features implemented
+- [ ] Code Review: Peer review completed and approved
+- [ ] Testing: Unit tests written and passing (>90% coverage)
+- [ ] Documentation: All changes documented in code and README
+- [ ] Performance: Meets or exceeds performance benchmarks
+- [ ] Security: Security review completed (if applicable)
+- [ ] Integration: Works correctly with existing codebase
+- [ ] Deployment: Successfully deployed to staging environment
+```
+
+#### 2. **Phase-Level Quality Gates**
+```markdown
+**MANDATORY PHASE COMPLETION CRITERIA**:
+- [ ] All task-level completion checklists satisfied
+- [ ] Integration testing: All components work together correctly
+- [ ] Performance testing: System meets performance requirements
+- [ ] User acceptance: Stakeholder approval obtained
+- [ ] Documentation: Phase deliverables documented
+- [ ] Risk mitigation: All identified risks addressed
+- [ ] Next phase readiness: Prerequisites for next phase satisfied
+```
+
+### **MUST TRACK - Progress Metrics**
+
+#### 1. **Quantitative Progress Indicators**
+```markdown
+**PROGRESS CALCULATION FORMULAS**:
+- Overall Progress = (Completed Tasks / Total Tasks) × 100
+- Phase Progress = (Completed Phase Tasks / Total Phase Tasks) × 100
+- Velocity = Tasks Completed / Time Period
+- Quality Score = (Tasks Passing All Criteria / Total Completed Tasks) × 100
+```
+
+#### 2. **Schedule Management**
+```markdown
+**TIMELINE TRACKING REQUIREMENTS**:
+- Planned vs. Actual completion dates for each task
+- Delay analysis with root cause identification
+- Resource allocation and utilization tracking
+- Risk factor impact assessment
+- Mitigation strategy effectiveness measurement
+```
+
+---
+
+## 🔄 Document Lifecycle Management
+
+### **MUST FOLLOW - Document Creation & Storage Standards**
+
+#### 1. **Initial Document Creation Protocol**
+```markdown
+**DOCUMENT CREATION REQUIREMENTS**:
+1. **Primary Location**: All new TODO documents MUST be created in `docs/todo_list/` directory
+2. **Naming Convention**: Use descriptive, kebab-case naming: `[project-name]-todo.md`
+3. **Template Compliance**: MUST follow the complete template structure defined in this rule
+4. **Initial Status**: All new documents start with "🔄 IN_PROGRESS" status
+5. **File Path Validation**: Verify the target directory exists before creation
+6. **Index Update**: Add new document to project documentation index
+
+**EXAMPLE CREATION FLOW**:
+- Create: `docs/todo_list/user-authentication-system-todo.md`
+- Verify: Document follows mandatory template structure
+- Register: Add to documentation index or README
+- Activate: Set initial phase to 🔄 IN_PROGRESS
+```
+
+#### 2. **Document Organization Structure**
+```markdown
+**MANDATORY DIRECTORY STRUCTURE**:
+```
+docs/todo_list/
+├── [active-project-1]-todo.md          # 🔄 IN_PROGRESS documents
+├── [active-project-2]-todo.md          # 🔄 IN_PROGRESS documents  
+├── [paused-project]-todo.md            # ⏸️ PAUSED documents
+└── end_todo/                           # ✅ COMPLETED documents
+    ├── [completed-project-1]-todo.md
+    └── [completed-project-2]-todo.md
+```
+```
+
+### **MUST FOLLOW - State Transition Protocols**
+
+#### 1. **Active → Completed Transition**
+```markdown
+**AUTOMATIC COMPLETION PROTOCOL**:
+1. **Auto-Verification Trigger**: When final task status changes to ✅ COMPLETED
+2. **Quality Gate Auto-Check**: System automatically verifies all checkpoints are satisfied
+3. **Progress Validation**: Confirm overall completion reaches 100% (all tasks ✅ COMPLETED)
+4. **Final Report Generation**: Auto-generate completion summary with metrics and timestamps
+5. **Automatic File Movement**: Move document from `docs/todo_list/` to `docs/todo_list/end_todo/` directory
+6. **Index Auto-Update**: Update project documentation index with completion status
+7. **Archive Workflow**: Archive related working files and branches automatically
+8. **Retrospective Scheduling**: Auto-schedule post-project retrospective meeting
+
+**AUTOMATED FILE MOVEMENT RULES**:
+- **Trigger Condition**: ALL tasks marked as ✅ COMPLETED AND all quality gates passed
+- **Source Path**: `docs/todo_list/[project-name]-todo.md`
+- **Destination Path**: `docs/todo_list/end_todo/[project-name]-todo.md`
+- **Completion Timestamp**: Add completion date to filename: `[project-name]-todo-completed-YYYY-MM-DD.md`
+- **Backup Protocol**: Create backup in original location before moving
+- **Verification Step**: Confirm successful move and file integrity
+- **Index Update**: Remove from active TODO list, add to completed projects index
+
+**COMPLETION VALIDATION CHECKLIST**:
+- [ ] All Phase statuses are ✅ COMPLETED
+- [ ] All individual tasks are ✅ COMPLETED  
+- [ ] All quality gate checkpoints are satisfied (✅)
+- [ ] Overall progress shows 100% completion
+- [ ] Final project metrics documented
+- [ ] Git commits recorded for all completed tasks
+- [ ] Verification evidence provided for all tasks
+```
+
+#### 2. **Active → Paused Transition**
+```markdown
+**PAUSE PROTOCOL**:
+1. Document specific reason for pause with timestamp
+2. Record current progress state in detail
+3. Identify resumption prerequisites and timeline
+4. Document handover information for team continuity
+5. Set up monitoring for pause condition resolution
+6. Schedule regular review meetings for pause status
+```
+
+### **MUST INCLUDE - Historical Documentation**
+
+#### 1. **Change Log Management**
+```markdown
+## 📝 Detailed Change History
+- **YYYY-MM-DD HH:MM**: Phase X completed - Overall progress: X% - [Responsible Team Member]
+- **YYYY-MM-DD HH:MM**: Task Y completed - File Z created/modified - [Developer Name]
+- **YYYY-MM-DD HH:MM**: Issue A identified - Resolution strategy B implemented - [Team Lead]
+- **YYYY-MM-DD HH:MM**: Quality gate checkpoint passed - Phase advancement approved - [QA Lead]
+```
+
+#### 2. **Decision Documentation**
+```markdown
+## 🤔 Critical Decision Log
+- **YYYY-MM-DD**: [Decision Made] - [Rationale] - [Decision Maker] - [Impact Assessment]
+- **YYYY-MM-DD**: [Technical Choice] - [Alternatives Considered] - [Selection Criteria] - [Long-term Implications]
+- **YYYY-MM-DD**: [Process Change] - [Trigger Event] - [Expected Benefits] - [Success Metrics]
+```
+
+---
+
+## 🚫 CRITICAL PROHIBITIONS (Absolute Don'ts)
+
+### **NEVER DO - Fatal Document Errors**
+
+#### 1. **Ambiguous Task Definition**
+```markdown
+❌ FATAL ERROR: "Improve the UI"
+✅ CORRECT APPROACH: "Implement responsive navigation header with hover effects, mobile hamburger menu, and accessibility compliance (WCAG 2.1 AA) in src/components/layout/header.tsx"
+
+❌ FATAL ERROR: "Fix bugs"  
+✅ CORRECT APPROACH: "Resolve IP address extraction error in usage-limit-service.ts by implementing multi-header fallback logic and IPv6 normalization"
+
+❌ FATAL ERROR: "Add tests"
+✅ CORRECT APPROACH: "Create comprehensive unit tests for authentication service with 95% code coverage, including edge cases for token validation and refresh logic"
+```
+
+#### 2. **Missing Verification Standards**
+```markdown
+❌ FATAL ERROR: Subjective completion assessment without measurable criteria
+✅ CORRECT APPROACH: Specific, testable acceptance criteria with clear pass/fail conditions
+
+❌ FATAL ERROR: No quality gates or checkpoints
+✅ CORRECT APPROACH: Mandatory phase-level quality gates with objective verification methods
+
+❌ FATAL ERROR: Unclear success metrics
+✅ CORRECT APPROACH: Quantifiable success criteria with measurement methodology
+```
+
+#### 3. **Unstructured File Management**
+```markdown
+❌ FATAL ERROR: Creating TODO documents outside `docs/todo_list/` directory
+✅ CORRECT APPROACH: All TODO documents MUST be created in `docs/todo_list/` directory
+
+❌ FATAL ERROR: Using arbitrary file names without kebab-case convention
+✅ CORRECT APPROACH: Use descriptive kebab-case naming: `[project-name]-todo.md`
+
+❌ FATAL ERROR: Creating files in random locations during implementation
+✅ CORRECT APPROACH: Pre-defined file path mapping aligned with existing architecture
+
+❌ FATAL ERROR: Inconsistent naming conventions
+✅ CORRECT APPROACH: Strict adherence to established naming patterns and code style guides
+
+❌ FATAL ERROR: Missing dependency management
+✅ CORRECT APPROACH: Clear dependency mapping and prerequisite identification
+```
+
+### **NEVER ALLOW - Quality Compromise Patterns**
+
+#### 1. **Incomplete Status Tracking**
+```markdown
+❌ PROHIBITED: Tasks without clear status indicators
+❌ PROHIBITED: Missing completion dates and verification evidence  
+❌ PROHIBITED: Unclear progress percentage calculations
+❌ PROHIBITED: No git commit tracking for completed work
+```
+
+#### 2. **Automation-Hostile Structure**
+```markdown
+❌ PROHIBITED: Manual-only progression workflows
+❌ PROHIBITED: Inconsistent status update patterns
+❌ PROHIBITED: Missing automation trigger points
+❌ PROHIBITED: Unclear next-action identification
+```
+
+#### 3. **Documentation Debt**
+```markdown
+❌ PROHIBITED: Outdated progress information
+❌ PROHIBITED: Missing change history documentation
+❌ PROHIBITED: Unclear decision rationale
+❌ PROHIBITED: No post-completion retrospective analysis
+```
+
+#### 4. **Completed Document Mismanagement**
+```markdown
+❌ FATAL ERROR: Leaving completed TODO documents in `docs/todo_list/` directory
+✅ CORRECT APPROACH: Automatically move all 100% completed documents to `docs/todo_list/end_todo/`
+
+❌ FATAL ERROR: Manual file movement without completion validation
+✅ CORRECT APPROACH: Use automated completion protocol with full validation checklist
+
+❌ FATAL ERROR: Incomplete projects marked as completed and moved
+✅ CORRECT APPROACH: Verify ALL tasks ✅ COMPLETED and quality gates passed before movement
+
+❌ FATAL ERROR: Moving documents without timestamp and backup
+✅ CORRECT APPROACH: Add completion date to filename and create backup before movement
+```
+
+---
+
+## 📋 Pre-Flight Document Validation Checklist
+
+### **BEFORE DOCUMENT CREATION**
+- [ ] **Document Location**: Verify `docs/todo_list/` directory exists and is accessible
+- [ ] **Naming Convention**: Document name follows kebab-case pattern: `[project-name]-todo.md`
+- [ ] **Template Readiness**: Complete template structure prepared according to standards
+- [ ] Project objectives clearly defined with measurable success criteria
+- [ ] Phase breakdown logically structured with appropriate granularity
+- [ ] File path mapping pre-defined and architecture-compliant
+- [ ] Automation triggers and workflows designed for seamless AI progression
+- [ ] Quality gates and verification standards established
+- [ ] Resource allocation and timeline estimates realistic and achievable
+
+### **DURING DOCUMENT MAINTENANCE**
+- [ ] All mandatory sections present and properly formatted
+- [ ] Task-level detail sufficient for autonomous implementation
+- [ ] Status indicators consistent and up-to-date across all items
+- [ ] Progress calculations accurate and automatically maintainable
+- [ ] Quality checkpoints comprehensive and objectively verifiable
+
+### **AFTER DOCUMENT COMPLETION**
+- [ ] All automation workflows tested and functional
+- [ ] File path mapping accuracy verified through implementation
+- [ ] Progress tracking effectiveness validated through usage
+- [ ] Team comprehension and usability confirmed through feedback
+- [ ] Documentation completeness assessed through retrospective analysis
+
+---
+
+## 🎯 Success Metrics & KPIs
+
+### **Document Quality Indicators**
+- [ ] Automation Success Rate: >95% of "proceed with work" commands execute successfully
+- [ ] Task Completion Predictability: >90% accuracy in completion time estimates  
+- [ ] Team Comprehension Score: >98% of team members can execute tasks without clarification
+- [ ] Documentation Maintenance Overhead: <5% of total project time
+
+### **Project Management Effectiveness**
+- [ ] Schedule Adherence: >90% of tasks completed within estimated timeframes
+- [ ] Quality Gate Success: <5% of tasks require rework after completion
+- [ ] Communication Efficiency: <2% of project time spent on status clarification
+- [ ] Automation Coverage: >85% of routine tasks automated through document structure
+
+---
+
+**IMPLEMENTATION MANDATE**: Following these standards ensures consistent, high-quality TODO documentation that enables seamless AI-driven project progression while maintaining rigorous quality control and comprehensive progress tracking.
+
+
+
+
+
+
+
+
