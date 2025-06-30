@@ -107,7 +107,7 @@ import { PersonaCard, DemoInterface } from '@/components/shared';
 
 ---
 
-**마지막 업데이트**: 2024년 12월 - 8단계 컴포넌트 구조 개선 완료 
+**구조 개선**: 8단계 컴포넌트 구조 개선 완료 
 
 # 컴포넌트 구조 가이드
 
