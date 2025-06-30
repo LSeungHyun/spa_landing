@@ -158,6 +158,93 @@ Return only the improved prompt:`;
         }
     }
 
+    public async generateChatResponse(userMessage: string): Promise<string> {
+        try {
+            console.log('=== GeminiService.generateChatResponse called ===');
+            console.log('User message length:', userMessage.length);
+            console.log('Has valid API key:', this.hasValidApiKey);
+
+            // API 키가 없거나 유효하지 않은 경우 에러 발생
+            if (!this.hasValidApiKey || !this.genAI) {
+                throw new Error('Gemini API is not properly configured. Please check your GEMINI_API_KEY environment variable.');
+            }
+
+            const model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+            console.log('Model instance created successfully');
+
+            const prompt = `You are SPA (Smart Prompt Assistant), a helpful AI assistant specialized in improving prompts and helping users with their tasks.
+
+User message: "${userMessage}"
+
+Respond naturally and helpfully as SPA. Your personality:
+- Friendly and encouraging
+- Professional but approachable  
+- Focused on helping users improve their prompts and achieve their goals
+- Provide practical suggestions when appropriate
+- Keep responses conversational and engaging
+
+Guidelines:
+- Respond in Korean if the user writes in Korean, English if they write in English
+- Be concise but informative (2-3 sentences usually)
+- If the user's message seems like a prompt that could be improved, gently suggest how
+- Always be encouraging and positive
+- Use emojis sparingly but appropriately
+
+Generate a natural, helpful response:`;
+
+            console.log('Calling model.generateContent for chat...');
+
+            // Rate limiting을 위한 지연
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            const result = await model.generateContent(prompt);
+            console.log('generateContent completed, getting response...');
+
+            const response = await result.response;
+            console.log('Response received, extracting text...');
+
+            const text = response.text().trim();
+            console.log('Text extracted successfully, length:', text.length);
+            console.log('=== GeminiService.generateChatResponse completed ===');
+
+            return text;
+        } catch (error) {
+            console.error('=== GeminiService Chat Error Details ===');
+            console.error('Error type:', typeof error);
+            console.error('Error instanceof Error:', error instanceof Error);
+            console.error('Error message:', error instanceof Error ? error.message : error);
+            console.error('Error stack:', error instanceof Error ? error.stack : 'No stack');
+            console.error('Full error object:', error);
+
+            // API 키 무효 에러인 경우 더미 응답 제공 (개발/테스트용)
+            if (error instanceof Error && error.message.includes('API key not valid')) {
+                console.log('=== Providing fallback chat response due to invalid API key ===');
+                return this.generateFallbackChatResponse(userMessage);
+            }
+
+            throw new Error('Failed to generate chat response using Gemini API: ' + (error instanceof Error ? error.message : String(error)));
+        }
+    }
+
+    private generateFallbackChatResponse(userMessage: string): string {
+        // 사용자 메시지에 따른 적절한 더미 응답 생성
+        const message = userMessage.toLowerCase();
+        
+        if (message.includes('안녕') || message.includes('hello') || message.includes('hi')) {
+            return '안녕하세요! SPA(Smart Prompt Assistant)입니다. 프롬프트 개선이나 업무 관련 질문이 있으시면 언제든 말씀해주세요! 😊';
+        } else if (message.includes('이메일') || message.includes('email')) {
+            return '이메일 작성에 도움이 필요하시군요! 더 구체적인 정보를 주시면 효과적인 이메일 작성 방법을 안내해드릴 수 있어요. 목적이나 대상을 알려주세요.';
+        } else if (message.includes('마케팅') || message.includes('marketing')) {
+            return '마케팅 관련 작업이시네요! 타겟 고객층이나 제품 특성을 더 구체적으로 알려주시면, 더 효과적인 마케팅 전략을 제안해드릴 수 있어요. 🎯';
+        } else if (message.includes('회의') || message.includes('meeting')) {
+            return '회의 관련 업무군요! 회의록 정리나 안건 준비 등 구체적으로 어떤 부분에 도움이 필요한지 알려주시면 더 정확한 가이드를 제공해드릴게요.';
+        } else if (message.includes('블로그') || message.includes('blog')) {
+            return '블로그 포스트 작성이시군요! 주제나 타겟 독자층을 더 구체적으로 설정하면 더 매력적인 콘텐츠를 만들 수 있어요. 어떤 분야의 블로그인지 알려주세요! ✍️';
+        } else {
+            return '좋은 아이디어네요! 더 구체적인 요구사항이나 맥락을 추가하시면 더 정확하고 유용한 결과를 얻으실 수 있어요. 어떤 부분을 더 발전시키고 싶으신가요?';
+        }
+    }
+
     private generateFallbackResponse(originalPrompt: string): string {
         // 다양한 개선 패턴을 가진 더미 응답 생성
         const improvements = [

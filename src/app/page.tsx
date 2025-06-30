@@ -19,6 +19,7 @@ import { FeaturesSection } from '@/components/sections/features-section'
 import { EarlyBirdSection } from '@/components/sections/early-bird-section'
 import { PreRegistrationForm } from '@/components/spa/pre-registration-form'
 import FinalCTASection from '@/components/sections/final-cta-section'
+import { useAPIMonitoring } from '@/hooks/use-api-monitoring';
 
 
 interface ChatMessage {
@@ -42,6 +43,8 @@ interface ImprovePromptResponse {
 }
 
 export default function HomePage() {
+    const { trackAPICall, trackTestImprovement } = useAPIMonitoring();
+    
     const [inputText, setInputText] = useState('');
     const [isTestLoading, setIsTestLoading] = useState(false);
     const [isImproveLoading, setIsImproveLoading] = useState(false);
@@ -291,13 +294,14 @@ export default function HomePage() {
         }
     };
 
-    // 테스트용 개선 함수 (API 호출 없이 임시 개선안 제공)
+    // 테스트용 개선 함수 (API 호출 없이 고도화된 로컬 개선안 제공)
     const handleTestImprovePrompt = async () => {
         if (!inputText.trim()) {
             toast.error('프롬프트를 입력해주세요');
             return;
         }
 
+        const startTime = Date.now();
         setIsTestLoading(true);
         setHasTriedDemo(true);
         setHasUsedImproveButton(true); // 개선하기 버튼 사용 기록
@@ -306,81 +310,50 @@ export default function HomePage() {
         await new Promise(resolve => setTimeout(resolve, 1500));
 
         try {
-            // 임시 개선안 생성 로직
-            const generateTestImprovement = (original: string): string => {
-                // 다양한 개선 패턴들
-                const wordImprovements = [
-                    { pattern: /이메일/gi, replacement: '전문적이고 매력적인 이메일' },
-                    { pattern: /작성/gi, replacement: '세심하게 작성' },
-                    { pattern: /소개/gi, replacement: '상세하고 매력적인 소개' },
-                    { pattern: /글/gi, replacement: '고품질 콘텐츠' },
-                    { pattern: /만들어/gi, replacement: '전문적으로 제작해' },
-                    { pattern: /설명/gi, replacement: '구체적으로 설명' },
-                    { pattern: /도움/gi, replacement: '전문적인 도움' },
-                    { pattern: /내용/gi, replacement: '핵심 내용' },
-                    { pattern: /방법/gi, replacement: '효과적인 방법' },
-                    { pattern: /계획/gi, replacement: '체계적인 계획' }
-                ];
-
-                let improved = original;
-                
-                // 기본 단어 개선사항 적용
-                wordImprovements.forEach(({ pattern, replacement }) => {
-                    improved = improved.replace(pattern, replacement);
-                });
-
-                // 문장 구조 개선
-                if (improved.length > 20) {
-                    // 더 구체적인 맥락 추가
-                    const contextEnhancements = [
-                        '\n\n구체적인 요구사항:',
-                        '- 타겟 오디언스: [구체적인 대상 독자 명시]',
-                        '- 목적: [달성하고자 하는 명확한 목표]',
-                        '- 톤앤매너: [전문적/친근한/공식적 등 적절한 톤 선택]',
-                        '- 길이: [적절한 분량 가이드라인]',
-                        '- 핵심 메시지: [전달하고자 하는 주요 포인트]'
-                    ];
-
-                    // 원문 길이에 따른 차별화
-                    if (original.length < 50) {
-                        improved += contextEnhancements.join('\n');
-                        improved += '\n\n참고: 위 요구사항을 모두 반영하여 완성도 높은 결과물을 만들어주세요.';
-                    } else if (original.length < 100) {
-                        improved += contextEnhancements.slice(0, 4).join('\n');
-                        improved += '\n\n[위 내용을 바탕으로 더욱 구체적이고 전문적으로 작성해주세요]';
-                    } else {
-                        improved += '\n\n추가 개선사항: 위 내용을 더욱 구체적이고 체계적으로 구성하되, 핵심 메시지가 명확히 전달되도록 작성해주세요.';
-                    }
-                } else {
-                    // 매우 짧은 프롬프트의 경우 기본 구조 제공
-                    improved += '\n\n[이 요청을 더 구체적으로 설명해주세요. 예: 목적, 대상, 원하는 결과 등]';
-                }
-
-                // 랜덤 개선 요소 추가 (실제 AI처럼 다양성 제공)
-                const randomEnhancements = [
-                    '\n\n💡 추천: 예시나 구체적인 사례를 포함하여 요청하면 더 좋은 결과를 얻을 수 있습니다.',
-                    '\n\n🎯 팁: 원하는 결과물의 형식(예: 불렛 포인트, 단락 형태 등)을 명시해주세요.',
-                    '\n\n📝 가이드: 특정 키워드나 피해야 할 표현이 있다면 함께 알려주세요.',
-                    '\n\n⚡ 개선: 분량 제한이나 특별한 요구사항이 있다면 명시해주세요.'
-                ];
-
-                // 30% 확률로 랜덤 팁 추가
-                if (Math.random() < 0.3) {
-                    const randomTip = randomEnhancements[Math.floor(Math.random() * randomEnhancements.length)];
-                    improved += randomTip;
-                }
-
-                return improved;
-            };
-
-            const improvedPrompt = generateTestImprovement(inputText);
-            setInputText(improvedPrompt);
+            // 고도화된 프롬프트 개선 서비스 사용
+            const { PromptImprovementService } = await import('@/lib/services/prompt-improvement-service');
+            const improvementService = PromptImprovementService.getInstance();
+            
+            const originalLength = inputText.length;
+            const suggestion = improvementService.suggestImprovements(inputText);
+            const improvedLength = suggestion.improvedPrompt.length;
+            const processingTime = Date.now() - startTime;
+            
+            // 개선된 프롬프트 적용
+            setInputText(suggestion.improvedPrompt);
             setImproveCount(prev => prev + 1);
-            // 자동 스크롤 제거 - 프롬프트 개선 후 페이지 이동 없음
+            
+            // 모니터링 추적
+            trackTestImprovement(true, processingTime, originalLength, improvedLength, suggestion.score);
+            
+            // 개선사항이 있는 경우 사용자에게 알림
+            if (suggestion.improvements.length > 0) {
+                const improvementMessage = `프롬프트가 개선되었습니다! (점수: ${suggestion.score}/10)\n개선사항: ${suggestion.improvements.join(', ')}`;
+                toast.success(improvementMessage);
+            }
+            
+            // 팁이 있는 경우 추가 알림
+            if (suggestion.tips.length > 0 && Math.random() < 0.5) {
+                setTimeout(() => {
+                    toast.info(suggestion.tips[0]);
+                }, 2000);
+            }
 
         } catch (error) {
-            toast.error('테스트 개선에 실패했습니다. 다시 시도해주세요.');
-            console.error(error);
+            console.error('Test improvement error:', error);
+            
+            const processingTime = Date.now() - startTime;
+            const originalLength = inputText.length;
+            
+            // 폴백: 기존 간단한 개선 로직 사용
+            const fallbackImprovement = inputText + '\n\n[더 구체적인 요구사항을 추가하면 더 나은 결과를 얻을 수 있습니다]';
+            setInputText(fallbackImprovement);
+            setImproveCount(prev => prev + 1);
+            
+            // 에러 모니터링 추적
+            trackTestImprovement(false, processingTime, originalLength, fallbackImprovement.length);
+            
+            toast.success('기본 개선이 적용되었습니다.');
         } finally {
             setIsTestLoading(false);
         }
@@ -394,7 +367,7 @@ export default function HomePage() {
         }
     };
 
-    const handleSendMessage = () => {
+    const handleSendMessage = async () => {
         if (!inputText.trim()) return;
 
         // 향상 버튼을 사용하지 않은 경우 인터셉트 모달 표시
@@ -412,26 +385,55 @@ export default function HomePage() {
 
         setChatMessages(prev => [...prev, userMessage]);
 
-        // AI 응답 시뮬레이션
-        setTimeout(() => {
-            const responses = [
-                '네, 이해했습니다. 더 구체적인 요구사항이 있으시면 말씀해주세요! 타이핑 애니메이션을 통해 더욱 생동감 있는 대화 경험을 제공합니다.',
-                '좋은 프롬프트네요! 이런 식으로 작성하면 AI가 더 정확한 답변을 드릴 수 있어요. 실시간 타이핑 효과로 마치 실제 대화하는 것 같은 느낌을 받으실 수 있습니다.',
-                '프롬프트가 훨씬 명확해졌어요. 실제로 사용해보시면 차이를 느끼실 거예요! GPT 스타일의 타이핑 애니메이션이 적용되어 더욱 몰입감 있는 경험을 제공합니다.'
-            ];
+        // 입력 필드 초기화 및 로딩 상태 설정
+        const currentMessage = inputText;
+        setInputText('');
+        resetTextareaHeight();
 
+        try {
+            // AI 응답 생성을 위한 API 호출
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ message: currentMessage }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || '응답 생성에 실패했습니다.');
+            }
+
+            const data = await response.json();
+
+            // AI 응답을 채팅에 추가 (타이핑 애니메이션 적용)
             const aiMessage: ChatMessage = {
                 id: (Date.now() + 1).toString(),
                 type: 'ai',
-                content: responses[Math.floor(Math.random() * responses.length)],
+                content: data.response,
                 timestamp: new Date(),
                 isTyping: true
             };
             setChatMessages(prev => [...prev, aiMessage]);
-        }, 1000);
 
-        setInputText('');
-        resetTextareaHeight();
+        } catch (error) {
+            console.error('Chat API Error:', error);
+            
+            // 에러 발생 시 폴백 응답 제공
+            const fallbackMessage: ChatMessage = {
+                id: (Date.now() + 1).toString(),
+                type: 'ai',
+                content: '죄송합니다. 일시적으로 응답을 생성할 수 없습니다. 잠시 후 다시 시도해주세요. 🙏',
+                timestamp: new Date(),
+                isTyping: true
+            };
+            setChatMessages(prev => [...prev, fallbackMessage]);
+            
+            // 사용자에게 에러 알림
+            toast.error(error instanceof Error ? error.message : '응답 생성 중 오류가 발생했습니다.');
+        }
+
         // 메시지 전송 후 향상 버튼 사용 상태 리셋
         setHasUsedImproveButton(false);
     };
@@ -497,7 +499,7 @@ export default function HomePage() {
         handleImprovePrompt();
     };
 
-    const handleInterceptSendAnyway = () => {
+    const handleInterceptSendAnyway = async () => {
         setShowInterceptModal(false);
         setHasShownImproveSuggestion(true);
         
@@ -511,26 +513,55 @@ export default function HomePage() {
 
         setChatMessages(prev => [...prev, userMessage]);
 
-        // AI 응답 시뮬레이션
-        setTimeout(() => {
-            const responses = [
-                '네, 이해했습니다. 더 구체적인 요구사항이 있으시면 말씀해주세요! 타이핑 애니메이션을 통해 더욱 생동감 있는 대화 경험을 제공합니다.',
-                '좋은 프롬프트네요! 이런 식으로 작성하면 AI가 더 정확한 답변을 드릴 수 있어요. 실시간 타이핑 효과로 마치 실제 대화하는 것 같은 느낌을 받으실 수 있습니다.',
-                '프롬프트가 훨씬 명확해졌어요. 실제로 사용해보시면 차이를 느끼실 거예요! GPT 스타일의 타이핑 애니메이션이 적용되어 더욱 몰입감 있는 경험을 제공합니다.'
-            ];
+        // 입력 필드 초기화
+        const currentMessage = inputText;
+        setInputText('');
+        resetTextareaHeight();
 
+        try {
+            // AI 응답 생성을 위한 API 호출
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ message: currentMessage }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || '응답 생성에 실패했습니다.');
+            }
+
+            const data = await response.json();
+
+            // AI 응답을 채팅에 추가 (타이핑 애니메이션 적용)
             const aiMessage: ChatMessage = {
                 id: (Date.now() + 1).toString(),
                 type: 'ai',
-                content: responses[Math.floor(Math.random() * responses.length)],
+                content: data.response,
                 timestamp: new Date(),
                 isTyping: true
             };
             setChatMessages(prev => [...prev, aiMessage]);
-        }, 1000);
 
-        setInputText('');
-        resetTextareaHeight();
+        } catch (error) {
+            console.error('Chat API Error:', error);
+            
+            // 에러 발생 시 폴백 응답 제공
+            const fallbackMessage: ChatMessage = {
+                id: (Date.now() + 1).toString(),
+                type: 'ai',
+                content: '죄송합니다. 일시적으로 응답을 생성할 수 없습니다. 잠시 후 다시 시도해주세요. 🙏',
+                timestamp: new Date(),
+                isTyping: true
+            };
+            setChatMessages(prev => [...prev, fallbackMessage]);
+            
+            // 사용자에게 에러 알림
+            toast.error(error instanceof Error ? error.message : '응답 생성 중 오류가 발생했습니다.');
+        }
+
         // 메시지 전송 후 향상 버튼 사용 상태 리셋
         setHasUsedImproveButton(false);
     };
@@ -976,20 +1007,68 @@ export default function HomePage() {
 
                                 {/* 체험 후 혜택 안내 - 다크 테마 */}
                                 {hasTriedDemo && (
-                                    <div className="mt-6 p-4 bg-gradient-to-r from-green-900/50 to-blue-900/50 rounded-xl border border-green-600/50 animate-fade-in">
-                                        <div className="flex items-center space-x-2 text-green-400 mb-2">
-                                            <CheckCircle size={20} />
-                                            <span className="font-medium">프롬프트 개선 완료!</span>
+                                    <div className={`mt-6 p-4 rounded-xl animate-fade-in ${
+                                        improveCount === 1 
+                                            ? 'bg-gradient-to-r from-blue-900/50 to-cyan-900/50 border border-blue-600/50'
+                                            : improveCount === 2
+                                            ? 'bg-gradient-to-r from-purple-900/50 to-pink-900/50 border border-purple-600/50'
+                                            : improveCount === 3
+                                            ? 'bg-gradient-to-r from-yellow-900/50 to-orange-900/50 border border-yellow-600/50'
+                                            : 'bg-gradient-to-r from-green-900/50 to-emerald-900/50 border border-green-600/50'
+                                    }`}>
+                                        <div className="flex items-center space-x-2 mb-2">
+                                            {improveCount === 1 && (
+                                                <>
+                                                    <div className="text-blue-400"><CheckCircle size={20} /></div>
+                                                    <span className="font-medium text-blue-400">프롬프트 개선 완료!</span>
+                                                </>
+                                            )}
+                                            {improveCount === 2 && (
+                                                <>
+                                                    <div className="text-purple-400"><CheckCircle size={20} /></div>
+                                                    <span className="font-medium text-purple-400">프롬프트 개선 완료!</span>
+                                                </>
+                                            )}
+                                            {improveCount === 3 && (
+                                                <>
+                                                    <div className="text-yellow-400"><CheckCircle size={20} /></div>
+                                                    <span className="font-medium text-yellow-400">프롬프트 개선 완료!</span>
+                                                </>
+                                            )}
+                                            {improveCount >= 4 && (
+                                                <>
+                                                    <div className="text-green-400"><CheckCircle size={20} /></div>
+                                                    <span className="font-medium text-green-400">프롬프트 개선 완료!</span>
+                                                </>
+                                            )}
                                         </div>
                                         <p className="text-sm text-gray-300 leading-relaxed">
-                                            {improveCount < 3
-                                                ? `🚀 프롬프트가 ${(improveCount) * 15 + 10}% 향상되었습니다! ${3 - improveCount}번 더 체험해보세요.`
-                                                : '⚡ 프롬프트 성능이 극적으로 개선되었습니다!'
-                                            }
+                                            {improveCount === 1 && (
+                                                '🚀 프롬프트가 10% 향상되었습니다! 3번 더 체험해보세요.'
+                                            )}
+                                            {improveCount === 2 && (
+                                                '🔥 프롬프트가 25% 향상되었습니다! 2번 더 체험해보세요.'
+                                            )}
+                                            {improveCount === 3 && (
+                                                '✨ 프롬프트가 45% 향상되었습니다! 1번 더 체험해보세요.'
+                                            )}
+                                            {improveCount >= 4 && (
+                                                '⚡ 프롬프트 성능이 극적으로 개선되었습니다!'
+                                            )}
                                         </p>
                                         {improveCount >= 3 && (
                                             <div className="mt-2 text-xs text-green-300">
                                                 🎯 사전 등록하고 더 강력한 AI 기능을 경험해보세요!
+                                            </div>
+                                        )}
+                                        {improveCount === 1 && (
+                                            <div className="mt-2 text-xs text-blue-300">
+                                                💡 계속 개선하면 더욱 강력한 프롬프트가 됩니다!
+                                            </div>
+                                        )}
+                                        {improveCount === 2 && (
+                                            <div className="mt-2 text-xs text-purple-300">
+                                                🔮 이제 절반 이상 개선되었어요! 계속해보세요!
                                             </div>
                                         )}
                                     </div>

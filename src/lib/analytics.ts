@@ -559,4 +559,70 @@ export const trackPerformance = (metric: string, duration: number, pageUrl?: str
 export const trackABTestVariant = (testName: string, variant: string, userGroup?: string) => 
   analytics.trackABTestVariant(testName, variant, userGroup);
 
+// API 사용량 추적을 위한 새로운 이벤트 추가
+export const trackAPIUsage = (apiType: 'chat' | 'improve' | 'test', success: boolean, responseTime?: number) => {
+  try {
+    // PostHog 이벤트 추적
+    if (typeof window !== 'undefined' && window.posthog) {
+      window.posthog.capture('api_usage', {
+        api_type: apiType,
+        success: success,
+        response_time: responseTime,
+        timestamp: new Date().toISOString(),
+        user_agent: navigator.userAgent,
+        page_url: window.location.href
+      });
+    }
+
+    // 콘솔 로깅 (개발 환경)
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`[API Usage] ${apiType}: ${success ? 'SUCCESS' : 'FAILED'}${responseTime ? ` (${responseTime}ms)` : ''}`);
+    }
+  } catch (error) {
+    console.error('Failed to track API usage:', error);
+  }
+};
+
+export const trackPerformanceMetrics = (metric: {
+  name: string;
+  value: number;
+  unit: string;
+  context?: Record<string, any>;
+}) => {
+  try {
+    if (typeof window !== 'undefined' && window.posthog) {
+      window.posthog.capture('performance_metric', {
+        metric_name: metric.name,
+        metric_value: metric.value,
+        metric_unit: metric.unit,
+        context: metric.context,
+        timestamp: new Date().toISOString()
+      });
+    }
+  } catch (error) {
+    console.error('Failed to track performance metric:', error);
+  }
+};
+
+export const trackUserExperience = (event: {
+  action: string;
+  category: 'chat' | 'improve' | 'test' | 'navigation';
+  label?: string;
+  value?: number;
+}) => {
+  try {
+    if (typeof window !== 'undefined' && window.posthog) {
+      window.posthog.capture('user_experience', {
+        action: event.action,
+        category: event.category,
+        label: event.label,
+        value: event.value,
+        timestamp: new Date().toISOString()
+      });
+    }
+  } catch (error) {
+    console.error('Failed to track user experience:', error);
+  }
+};
+
 export default AnalyticsManager; 
