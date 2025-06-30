@@ -16,7 +16,10 @@ import {
     Sparkles,
     ArrowRight,
     Download,
-    Eye
+    Eye,
+    ClipboardList,
+    Lightbulb,
+    Code
 } from 'lucide-react';
 import { Container } from '@/components/ui/container';
 import { Card } from '@/components/ui/card';
@@ -271,7 +274,7 @@ export function BeforeAfterHeroSection({
                         </div>
                     </motion.div>
 
-                    {/* ROI Stats Preview - 다크 테마 */}
+                    {/* User Benefits Cards - 다크 테마 */}
                     {showMetrics && (
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
@@ -281,26 +284,26 @@ export function BeforeAfterHeroSection({
                         >
                             <div className="bg-gray-800/50 rounded-xl p-6 shadow-lg border border-gray-700/50 backdrop-blur-sm">
                                 <div className="flex items-center justify-center w-12 h-12 bg-blue-900/50 rounded-lg mb-4 mx-auto border border-blue-700/50">
-                                    <Clock className="w-6 h-6 text-blue-400" />
+                                    <ClipboardList className="w-6 h-6 text-blue-400" />
                                 </div>
-                                <div className="text-2xl font-bold text-white mb-1">90%</div>
-                                <div className="text-sm text-gray-400">기획 시간 단축</div>
+                                <div className="text-xl font-bold text-white mb-2">기획자 & PM을 위해</div>
+                                <div className="text-sm text-gray-400">명확한 요구사항 정의서(PRD)와 기술 스펙 문서를 순식간에 확보하여, 개발팀과의 소통 비용을 제로로 만드세요.</div>
                             </div>
 
                             <div className="bg-gray-800/50 rounded-xl p-6 shadow-lg border border-gray-700/50 backdrop-blur-sm">
                                 <div className="flex items-center justify-center w-12 h-12 bg-purple-900/50 rounded-lg mb-4 mx-auto border border-purple-700/50">
-                                    <TrendingUp className="w-6 h-6 text-purple-400" />
+                                    <Lightbulb className="w-6 h-6 text-purple-400" />
                                 </div>
-                                <div className="text-2xl font-bold text-white mb-1">3.5배</div>
-                                <div className="text-sm text-gray-400">결과물 품질 향상</div>
+                                <div className="text-xl font-bold text-white mb-2">1인 창업가를 위해</div>
+                                <div className="text-sm text-gray-400">머릿속 아이디어를 즉시 투자 제안서와 초기 사업 계획서의 형태로 구체화하여, 실행력을 극대화하세요.</div>
                             </div>
 
                             <div className="bg-gray-800/50 rounded-xl p-6 shadow-lg border border-gray-700/50 backdrop-blur-sm">
                                 <div className="flex items-center justify-center w-12 h-12 bg-green-900/50 rounded-lg mb-4 mx-auto border border-green-700/50">
-                                    <Sparkles className="w-6 h-6 text-green-400" />
+                                    <Code className="w-6 h-6 text-green-400" />
                                 </div>
-                                <div className="text-2xl font-bold text-white mb-1">95%</div>
-                                <div className="text-sm text-gray-400">사용자 만족도</div>
+                                <div className="text-xl font-bold text-white mb-2">개발자를 위해</div>
+                                <div className="text-sm text-gray-400">모호한 기획 대신, 체계적인 API 명세와 로드맵을 기반으로 프로젝트를 시작하여 재작업과 기술 부채를 방지하세요.</div>
                             </div>
                         </motion.div>
                     )}

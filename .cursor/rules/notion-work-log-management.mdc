@@ -310,6 +310,15 @@ Use these purpose-based section headers for organizing work entries:
 
 **Result**: [What was achieved]
 
+### 🔄 Git Commit Information
+**Commit Message**: `[commit-message]`
+**Commit Hash**: `[commit-hash]` (optional)
+**Files Changed**: [number] files, [+additions], [-deletions]
+
+**Commit Details**:
+- [Summary of changes]
+- [Impact of changes]
+
 ---
 
 ## 🔍 점검 및 검토 - [Subject]
@@ -323,12 +332,9 @@ Use these purpose-based section headers for organizing work entries:
 
 **Actions Taken**: [What was done as a result]
 
----
-
-## 🔄 Git Commit Information
-**Commit Hash**: `[commit-hash]`
+### 🔄 Git Commit Information
 **Commit Message**: `[commit-message]`
-**Files Changed**: [number] files, [+additions], [-deletions]
+**Files Changed**: [number] files
 
 **Commit Details**:
 - [Summary of changes]
@@ -345,14 +351,86 @@ Use these purpose-based section headers for organizing work entries:
 *Work log created: YYYY년 M월 D일*
 ```
 
-#### 🔄 Section Addition Protocol
+#### 🔄 **IMPROVED SECTION STRUCTURE RULES**
+
+##### 📐 Work Unit Separation Protocol
+**CRITICAL IMPROVEMENT**: Each work unit (작업 단위) must be clearly separated and self-contained.
+
+**MANDATORY STRUCTURE**:
+1. **Work Section Header** (H2): `## [Category Icon] [Category] - [Specific Task]`
+2. **Work Content**: Purpose → Implementation → Result
+3. **Git Commit Sub-section** (H3): `### 🔄 Git Commit Information`
+4. **Section Separator**: `---` (horizontal rule) after each complete work unit
+
+##### ✅ **CORRECT Work Unit Structure Example**:
+```markdown
+## 🛠️ 리팩토링 - 페이지 하단 정리 및 푸터 업데이트
+
+**Purpose**: 페이지 하단의 불필요한 통계 정보 제거 및 저작권 연도 업데이트
+**Files Modified**: 
+- `src/app/page.tsx`
+
+**Implementation Details**:
+- 페이지 하단 사전 등록 통계 섹션 완전 제거
+- "1,247명 사전 등록" 및 "4.9/5 만족도" 텍스트 제거
+- 관련 아이콘(Users, Star) 및 컨테이너 div 정리
+- 푸터 저작권 연도를 2024에서 2025로 업데이트
+
+**Result**: 페이지 하단이 더 깔끔해지고 불필요한 통계 정보가 제거됨. 푸터가 2025년으로 정확히 업데이트됨
+
+### 🔄 Git Commit Information
+**Commit Message**: `refactor: update footer and remove stats`
+**Files Changed**: 1개 파일 수정
+**Branch Status**: origin/master보다 2개 커밋 앞섰음
+
+**Commit Details**:
+- 페이지 하단 사용자 통계 표시 영역 완전 제거로 UI 정리
+- 2025년 저작권 표시로 업데이트하여 현재 연도 반영
+- 코드 정리를 통한 유지보수성 향상
+
+---
+
+## ✅ 기능 구현 - 새로운 기능 추가
+
+**Purpose**: [다음 작업의 목적]
+...
+
+### 🔄 Git Commit Information
+**Commit Message**: `[다음 커밋 메시지]`
+...
+
+---
+```
+
+##### ❌ **FORBIDDEN Structure (Old Way)**:
+```markdown
+## 🛠️ 리팩토링 - 페이지 하단 정리 및 푸터 업데이트
+[work content]
+
+---
+
+## 🔄 Git Commit Information  ← WRONG: Separate from work content
+[commit info]
+
+## ✅ 기능 구현 - 새로운 기능  ← WRONG: No separator from previous commit
+[next work content]
+```
+
+##### 🎯 **Visual Separation Rules**
+1. **Within Work Unit**: Use `### 🔄 Git Commit Information` as H3 subsection
+2. **Between Work Units**: Use `---` horizontal rule separator
+3. **Consistent Hierarchy**: H2 for work categories, H3 for git commits
+4. **Clear Boundaries**: Each work unit is self-contained with its own git information
+
+##### 🔧 **Implementation Protocol for Updates**
 When adding new work to existing logs:
 
-1. **IDENTIFY** the work purpose from the standard categories
-2. **CREATE** appropriately named section header
-3. **INCLUDE** specific feature/component name in section title
-4. **STRUCTURE** content with Purpose → Implementation → Result flow
-5. **LINK** to relevant Git commits and file changes
+1. **IDENTIFY** the work purpose from standard categories
+2. **CREATE** H2 section with appropriate category and specific task name
+3. **INCLUDE** Purpose → Implementation → Result structure
+4. **ADD** H3 subsection `### 🔄 Git Commit Information` within the work unit
+5. **CLOSE** with `---` separator before next work unit
+6. **ENSURE** each work unit is visually and logically separated
 
 #### ✅ Section Addition Examples
 ```markdown
@@ -368,6 +446,14 @@ When adding new work to existing logs:
 
 **Result**: Improved user experience with clearer benefits and streamlined registration
 
+### 🔄 Git Commit Information
+**Commit Message**: `feat: expand benefits and simplify registration`
+**Files Changed**: 1개 파일 수정
+
+**Commit Details**:
+- Benefits section expanded for better user understanding
+- Registration flow simplified for improved conversion
+
 ---
 
 ## 🛠️ 리팩토링 - 등록 플로우 간소화
@@ -381,6 +467,16 @@ When adding new work to existing logs:
 - Updated labels from "상세등록" to "사전 등록 폼"
 
 **Result**: 87 lines removed, 20 lines added, cleaner codebase
+
+### 🔄 Git Commit Information
+**Commit Message**: `refactor: simplify registration flow`
+**Files Changed**: 1개 파일 수정
+
+**Commit Details**:
+- Code complexity reduced significantly
+- User experience streamlined
+
+---
 ```
 
 ### **EMERGENCY PROTOCOLS**
@@ -408,8 +504,10 @@ mcp_notion_move-pages({
 #### ✅ Success Criteria
 - Work log appears under SPA 프로젝트(승현)
 - Title follows exact naming convention
-- Content structure uses purpose-based sections
-- Sections clearly identify work intent and outcomes
+- Content structure uses purpose-based sections with embedded git information
+- Each work unit is clearly separated with proper boundaries
+- Sections clearly identify work intent, implementation, and outcomes
+- Git commit information is properly nested within each work unit
 - User confirms correct placement and organization
 
 #### 📈 Continuous Improvement
@@ -417,6 +515,7 @@ mcp_notion_move-pages({
 - Update parent page IDs if workspace structure changes
 - Refine section categories based on actual work patterns
 - Maintain documentation accuracy and relevance
+- Ensure visual separation between work units is consistent
 
 ---
 
@@ -426,12 +525,16 @@ mcp_notion_move-pages({
 1. **DUPLICATE CHECK FIRST**: Always search for existing work logs before creating new ones
 2. Always use parent page ID `214ce2a8-927c-80-44-9484-e51c04af048e` for SPA 프로젝트(승현)
 3. Organize work by PURPOSE, not TIME
-4. Use standard section categories for consistency and searchability
-5. **ONE LOG PER DATE**: Never create multiple work logs for the same date
+4. **EMBED GIT INFO**: Include git commit information as H3 subsection within each work unit
+5. **SEPARATE WORK UNITS**: Use `---` horizontal rule between different work units
+6. Use standard section categories for consistency and searchability
+7. **ONE LOG PER DATE**: Never create multiple work logs for the same date
 
-**VERIFICATION MANTRA**: "Search first, parent second, purpose-based sections, validation always."
+**VERIFICATION MANTRA**: "Search first, parent second, purpose-based sections with embedded git info, clear boundaries always."
 
-**ORGANIZATION PRINCIPLE**: "Intent over time, purpose over chronology, uniqueness over duplication."
+**ORGANIZATION PRINCIPLE**: "Intent over time, purpose over chronology, embedded commits over separated sections, clear boundaries over merged content, uniqueness over duplication."
+
+**STRUCTURE MANTRA**: "Each work unit complete and self-contained, git commits nested within work sections, horizontal rules separate work boundaries."
 
 **DUPLICATE PREVENTION MANTRA**: "Before I create, I must search. Before I search, I must get the date. One date, one log, always."
 

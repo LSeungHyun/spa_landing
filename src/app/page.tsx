@@ -15,7 +15,6 @@ import { TypingAnimation } from '@/components/shared/typing-animation';
 import { EnhanceInterceptModal } from '@/components/shared/enhance-intercept-modal';
 import { RegistrationBanner } from '@/components/shared/registration-banner';
 import { BeforeAfterHeroSection } from '@/components/sections/before-after-hero-section';
-import { HeroSection } from '@/components/sections/hero-section'
 import { FeaturesSection } from '@/components/sections/features-section'
 import { EarlyBirdSection } from '@/components/sections/early-bird-section'
 import { PreRegistrationForm } from '@/components/spa/pre-registration-form'
