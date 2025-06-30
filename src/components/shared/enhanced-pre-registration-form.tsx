@@ -183,7 +183,7 @@ export function EnhancedPreRegistrationForm({
   }, [checkApiStatus]);
 
   return (
-    <Card className={`w-full max-w-2xl mx-auto bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 border-purple-500/30 ${className}`}>
+    <Card className={`w-full bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 border-purple-500/30 ${className}`}>
       <CardHeader>
         <CardTitle className="flex items-center space-x-2 text-white">
           <Crown className="w-6 h-6 text-yellow-400" />

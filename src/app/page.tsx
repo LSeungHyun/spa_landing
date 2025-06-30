@@ -608,10 +608,10 @@ export default function HomePage() {
                             </button>
                             <button
                                 onClick={scrollToPreRegistration}
-                                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105 shadow-lg"
+                                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105 shadow-lg flex items-center space-x-2"
                             >
                                 <Sparkles size={16} />
-                                무료 사전등록
+                                <span>무료 사전등록</span>
                             </button>
 
                         </nav>
@@ -644,9 +644,10 @@ export default function HomePage() {
                                         scrollToPreRegistration();
                                         setMobileMenuOpen(false);
                                     }}
-                                    className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 text-left"
+                                    className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 text-left flex items-center space-x-2"
                                 >
-                                    🎁 무료 사전등록 (얼리버드 혜택)
+                                    <span>🎁</span>
+                                    <span>무료 사전등록</span>
                                 </button>
 
                             </nav>
@@ -1058,25 +1059,13 @@ export default function HomePage() {
                             </div>
 
                             {/* 사전 등록 폼 */}
-                            <div className="bg-white rounded-2xl p-4">
-                                <EnhancedPreRegistrationForm
-                                    onSuccess={handleEnhancedRegistrationSuccess}
-                                />
-                            </div>
+                            <EnhancedPreRegistrationForm
+                                onSuccess={handleEnhancedRegistrationSuccess}
+                                className="w-full"
+                            />
 
                             {/* 사회적 증거 */}
-                            <div className="mt-8 text-center">
-                                <div className="flex items-center justify-center space-x-6 text-blue-200 text-sm">
-                                    <div className="flex items-center space-x-1">
-                                        <Users size={16} />
-                                        <span>1,247명 사전 등록</span>
-                                    </div>
-                                    <div className="flex items-center space-x-1">
-                                        <span className="text-yellow-400"><Star size={16} /></span>
-                                        <span>4.9/5 만족도</span>
-                                    </div>
-                                </div>
-                            </div>
+
                         </div>
                     </Container>
                 </section>
@@ -1086,7 +1075,7 @@ export default function HomePage() {
             <footer className="py-8 px-4 sm:px-6 lg:px-8 border-t border-white/10">
                 <Container>
                     <div className="text-center text-blue-200 text-sm">
-                        <p>© 2024 Smart Prompt Assistant. 더 스마트한 AI 활용의 시작.</p>
+                        <p>© 2025 Smart Prompt Assistant. 더 스마트한 AI 활용의 시작.</p>
                     </div>
                 </Container>
             </footer>
