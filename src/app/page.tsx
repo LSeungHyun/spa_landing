@@ -14,7 +14,7 @@ import { EnhancedPreRegistrationForm } from '@/components/shared/enhanced-pre-re
 import { TypingAnimation } from '@/components/shared/typing-animation';
 import { EnhanceInterceptModal } from '@/components/shared/enhance-intercept-modal';
 import { RegistrationBanner } from '@/components/shared/registration-banner';
-import { HeroSection } from '@/components/sections/hero-section';
+import { BeforeAfterHeroSection } from '@/components/sections/before-after-hero-section';
 
 
 interface ChatMessage {
@@ -56,6 +56,7 @@ export default function HomePage() {
     const [showInterceptModal, setShowInterceptModal] = useState(false);
     const [showRegistrationBanner, setShowRegistrationBanner] = useState(false);
     const [bannerDismissed, setBannerDismissed] = useState(false);
+
     
 
     const demoRef = useRef<HTMLDivElement>(null);
@@ -650,9 +651,11 @@ export default function HomePage() {
             </header>
 
             {/* Hero Section */}
-            <HeroSection 
+            <BeforeAfterHeroSection 
+                onTransformClick={scrollToDemo}
                 onPreRegisterClick={() => setShowPreRegistration(true)}
-                onDemoScrollClick={scrollToDemo}
+                showMetrics={true}
+                className="pt-16"
             />
 
             {/* Demo Section */}
@@ -987,7 +990,9 @@ export default function HomePage() {
                 </Container>
             </section>
 
-            {/* Pre-Registration Section - 개선된 폼 */}
+
+
+            {/* Pre-Registration Section - 기존 폼 (3회 체험 후에만 표시) */}
             {(showPreRegistration || improveCount >= 3) && (
                 <section ref={preRegRef} data-section="pre-registration" className="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-purple-900/50 to-blue-900/50 animate-fade-in">
                     <Container>
