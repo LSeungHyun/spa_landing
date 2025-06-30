@@ -463,10 +463,10 @@ export default function HomePage() {
                 toast.success('🎉 사전 등록 완료! 출시 알림을 받으실 거예요.');
                 setEmail('');
 
-                // 성공 후 감사 메시지
-                setTimeout(() => {
-                    toast.success('🎁 얼리버드 혜택이 적용되었습니다!');
-                }, 1500);
+                // 성공 후 감사 메시지 (중복 방지를 위해 제거)
+                // setTimeout(() => {
+                //     toast.success('🎁 얼리버드 혜택이 적용되었습니다!');
+                // }, 1500);
             } else if (response.status === 409) {
                 toast.error(data.error || '이미 등록된 이메일입니다');
             } else {
@@ -483,7 +483,11 @@ export default function HomePage() {
 
     const handleEnhancedRegistrationSuccess = (data: any) => {
         setShowPreRegistration(false);
-        toast.success('🎉 사전 등록이 성공적으로 완료되었습니다!');
+        // 토스트는 EnhancedPreRegistrationForm에서 이미 표시하므로 여기서는 제거
+        // 추가 혜택 토스트만 1.5초 후에 표시
+        setTimeout(() => {
+            toast.success('🎁 얼리버드 혜택이 적용되었습니다!');
+        }, 1500);
     };
 
     // 인터셉트 모달 핸들러들
