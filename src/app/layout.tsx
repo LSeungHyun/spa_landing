@@ -115,6 +115,25 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="SPA" />
         <meta name="mobile-web-app-capable" content="yes" />
         
+        {/* Google Analytics 4 */}
+        <script 
+          async 
+          src="https://www.googletagmanager.com/gtag/js?id=G-VRQCYCS9Q3"
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-VRQCYCS9Q3', {
+                page_title: document.title,
+                page_location: window.location.href
+              });
+            `,
+          }}
+        />
+        
         {/* 성능 최적화 */}
         <link rel="dns-prefetch" href="https://api.openai.com" />
         
