@@ -301,6 +301,15 @@ export default function HomePage() {
             return;
         }
 
+        // 3회 제한 체크 - 제한 초과 시 알림카드 표시하지 않음
+        if (improveCount >= 3) {
+            toast.error('일일 체험 한도(3회)를 모두 사용하셨습니다. 사전 등록하고 더 많은 기능을 이용해보세요!');
+            setTimeout(() => {
+                scrollToPreRegistration();
+            }, 1000);
+            return;
+        }
+
         const startTime = Date.now();
         setIsTestLoading(true);
         setHasTriedDemo(true);
@@ -895,17 +904,19 @@ export default function HomePage() {
                                         <button
                                             type="button"
                                             onClick={handleTestImprovePrompt}
-                                            disabled={isTestLoading || isImproveLoading || !inputText.trim() || inputText.length > 500}
+                                            disabled={isTestLoading || isImproveLoading || !inputText.trim() || inputText.length > 500 || improveCount >= 3}
                                             className={cn(
                                                 "rounded-lg p-2 md:p-2 text-white transition-all duration-200",
-                                                "bg-gray-600 hover:bg-gray-500",
+                                                improveCount >= 3 
+                                                    ? "bg-gray-500 cursor-not-allowed" 
+                                                    : "bg-gray-600 hover:bg-gray-500",
                                                 "disabled:opacity-50 disabled:cursor-not-allowed",
                                                 "flex items-center justify-center",
                                                 "focus:outline-none focus:ring-2 focus:ring-gray-400",
                                                 // 모바일 터치 타겟 최적화
                                                 "min-w-[44px] min-h-[44px] md:min-w-auto md:min-h-auto"
                                             )}
-                                            title="테스트 개선 (Shift+Ctrl+Enter)"
+                                            title={improveCount >= 3 ? "일일 체험 한도 초과 (3/3)" : "테스트 개선 (Shift+Ctrl+Enter)"}
                                             aria-label="테스트 개선하기"
                                         >
                                             {isTestLoading ? (
@@ -1036,8 +1047,8 @@ export default function HomePage() {
                                     </div>
                                 </div>
 
-                                {/* 체험 후 혜택 안내 - 다크 테마 */}
-                                {hasTriedDemo && (
+                                {/* 체험 후 혜택 안내 - 다크 테마 (3회 이하에서만 표시) */}
+                                {hasTriedDemo && improveCount <= 3 && (
                                     <div className={`mt-6 p-4 rounded-xl animate-fade-in ${
                                         improveCount === 1 
                                             ? 'bg-gradient-to-r from-blue-900/50 to-cyan-900/50 border border-blue-600/50'
@@ -1066,26 +1077,19 @@ export default function HomePage() {
                                                     <span className="font-medium text-yellow-400">프롬프트 개선 완료!</span>
                                                 </>
                                             )}
-                                            {improveCount >= 4 && (
-                                                <>
-                                                    <div className="text-green-400"><CheckCircle size={20} /></div>
-                                                    <span className="font-medium text-green-400">프롬프트 개선 완료!</span>
-                                                </>
-                                            )}
+
                                         </div>
                                         <p className="text-sm text-gray-300 leading-relaxed">
                                             {improveCount === 1 && (
-                                                '🚀 프롬프트가 10% 향상되었습니다! 3번 더 체험해보세요.'
+                                                '🚀 프롬프트가 향상되었습니다! 2번 더 체험해보세요.'
                                             )}
                                             {improveCount === 2 && (
-                                                '🔥 프롬프트가 25% 향상되었습니다! 2번 더 체험해보세요.'
+                                                '🔥 프롬프트가 더욱 향상되었습니다! 1번 더 체험해보세요.'
                                             )}
                                             {improveCount === 3 && (
-                                                '✨ 프롬프트가 45% 향상되었습니다! 1번 더 체험해보세요.'
+                                                '✨ 프롬프트가 완벽하게 개선되었습니다!'
                                             )}
-                                            {improveCount >= 4 && (
-                                                '⚡ 프롬프트 성능이 극적으로 개선되었습니다!'
-                                            )}
+
                                         </p>
                                         {improveCount >= 3 && (
                                             <div className="mt-2 text-xs text-green-300">
