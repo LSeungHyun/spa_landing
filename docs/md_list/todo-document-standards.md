@@ -33,8 +33,6 @@
 - **Overall Progress**: X.X% ([Completed Tasks]/[Total Tasks] × 100)
 - **Next Scheduled Task**: [Specific Task Item with Clear Scope]
 - **Priority Level**: HIGH / MEDIUM / LOW
-- **Estimated Completion**: [Auto-calculated based on velocity]
-- **Current Velocity**: X.X tasks/day (rolling 7-day average)
 - **Risk Status**: 🟢 LOW / 🟡 MEDIUM / 🔴 HIGH / ⚫ CRITICAL
 
 ### Automation Rules & Triggers
@@ -79,8 +77,8 @@ Phase 2: 🔄 IN_PROGRESS (1/2 tasks) - Started: [date]
 **Total Duration**: [Auto-calculated: current_date - creation_date]
 
 ### Phase-by-Phase Breakdown (Auto-Updated)
-- **Phase 1**: ✅ COMPLETED (100%) - [Phase Name] - Completed on [Auto-date] - Duration: X days
-- **Phase 2**: ✅ COMPLETED (100%) - [Phase Name] - Completed on [Auto-date] - Duration: X days
+- **Phase 1**: ✅ COMPLETED (100%) - [Phase Name] - Completed on [Auto-date]
+- **Phase 2**: ✅ COMPLETED (100%) - [Phase Name] - Completed on [Auto-date]
 - **Phase 3**: 🔄 IN_PROGRESS (67%) - [Phase Name] - 2/3 tasks completed - Started: [Auto-date]
 - **Phase 4**: ⏸️ PENDING (0%) - [Phase Name] - Waiting for Phase 3
 - **Phase 5**: ⏸️ PENDING (0%) - [Phase Name] - Waiting for Phase 4
@@ -93,9 +91,6 @@ Phase 2: 🔄 IN_PROGRESS (1/2 tasks) - Started: [date]
 - **In Progress Tasks**: Y tasks 🔄
 - **Pending Tasks**: Z tasks ⏸️
 - **Overall Completion**: X.X% (auto-calculated)
-- **Average Phase Duration**: X.X days
-- **Project Velocity**: X.X tasks per day
-- **Estimated Completion**: [Auto-calculated based on velocity]
 
 ### Next Actions Queue (Auto-Generated)
 1. **Immediate**: [Next task to be executed] - Priority: HIGH
@@ -113,8 +108,6 @@ Phase 2: 🔄 IN_PROGRESS (1/2 tasks) - Started: [date]
 - **Business Context**: [Why this project exists and its impact]
 - **Technical Scope**: [Technology stack and architectural boundaries]
 - **Project Started**: [Auto-generated: new Date().toISOString().split('T')[0]]
-- **Target Completion**: [Estimated end date based on velocity]
-- **Current Velocity**: [Auto-calculated: completed_tasks / days_elapsed]
 - **Risk Assessment**: [Overall project risk level with mitigation strategies]
 ```
 
@@ -177,15 +170,9 @@ const phaseProgress = Math.round((completedTasksInPhase / totalTasksInPhase) * 1
 // Overall project progress
 const overallProgress = Math.round((totalCompletedTasks / totalProjectTasks) * 100 * 10) / 10
 
-// Project velocity (tasks per day)
-const daysSinceStart = Math.ceil((new Date() - new Date(projectStartDate)) / (1000 * 60 * 60 * 24))
-const velocity = Math.round((totalCompletedTasks / daysSinceStart) * 10) / 10
+// Remove velocity calculations
 
-// Estimated completion date
-const remainingTasks = totalProjectTasks - totalCompletedTasks
-const estimatedDaysRemaining = Math.ceil(remainingTasks / velocity)
-const estimatedCompletion = new Date(Date.now() + estimatedDaysRemaining * 24 * 60 * 60 * 1000)
-  .toISOString().split('T')[0]
+// Remove estimated completion calculations
 
 // Phase status auto-determination
 const phaseStatus = phaseProgress === 100 ? '✅ COMPLETED' :
@@ -212,11 +199,6 @@ const projectStatus = overallProgress === 100 ? '✅ COMPLETED' :
 **Status**: ✅ COMPLETED / 🔄 IN_PROGRESS / ⏸️ PENDING / ❌ FAILED / 🚫 BLOCKED
 **Progress**: X.X% (X/Y tasks completed) [Auto-calculated]
 **Started**: [Auto-generated start timestamp]
-**Target Duration**: X days/weeks [Initial estimate]
-**Actual Duration**: [Auto-calculated when completed] 
-**Assigned Team**: Development / Design / DevOps / QA
-**Target Completion**: [Auto-calculated based on velocity]
-**Actual Completion**: [Auto-generated when phase completed]
 **Dependencies**: [List of prerequisite phases or external dependencies]
 **Risk Level**: 🟢 LOW / 🟡 MEDIUM / 🔴 HIGH / ⚫ CRITICAL
 
@@ -226,8 +208,6 @@ const projectStatus = overallProgress === 100 ? '✅ COMPLETED' :
 **In Progress**: Y tasks 🔄 (Y.Y% of phase)
 **Pending**: Z tasks ⏸️ (Z.Z% of phase)  
 **Blocked**: W tasks 🚫 (W.W% of phase)
-**Average Task Duration**: X.X days [Auto-calculated]
-**Phase Velocity**: X.X tasks/day [Auto-calculated]
 ```
 
 #### 2. **Enhanced Task Specification Template (Mandatory Detail Level)**
@@ -236,7 +216,6 @@ const projectStatus = overallProgress === 100 ? '✅ COMPLETED' :
   - **Status**: ✅ COMPLETED / 🔄 IN_PROGRESS / ⏸️ PENDING / ❌ FAILED / 🚫 BLOCKED
   - **Started**: [Auto-generated: new Date().toISOString()]
   - **Completed**: [Auto-generated: new Date().toISOString()]
-  - **Duration**: [Auto-calculated: completion_time - start_time] days
   - **Target File**: `src/[specific/path]/[filename].[ext]`
   - **Detailed Scope**: [Comprehensive description of what needs to be implemented]
   - **Implementation Requirements**:
@@ -246,8 +225,6 @@ const projectStatus = overallProgress === 100 ? '✅ COMPLETED' :
     - ⏸️ Requirement 4 (pending)
   - **Acceptance Criteria**: [Specific, testable completion conditions]
   - **Priority Level**: HIGH / MEDIUM / LOW
-  - **Estimated Effort**: [Initial time estimate in hours/days]
-  - **Actual Effort**: [Auto-calculated when completed] hours/days
   - **Risk Assessment**: [Potential challenges and mitigation strategies]
   - **Git Commit Reference**: [commit-hash] - "[descriptive commit message]" (when completed)
   - **Verification Evidence**: [How completion was validated]
@@ -406,25 +383,20 @@ function triggerProjectCompletion() {
 - **[2025-01-02 14:30:45]**: Task "프롬프트 개선 알림 시스템 개선" completed - Phase 6 progress: 0% → 33% - Overall: 85% → 88%
 - **[2025-01-02 09:15:23]**: Phase 5 completed (100%) - Auto-advancing to Phase 6 - Project: 85% complete
 - **[2025-01-01 16:45:32]**: Task "전환율 최적화 대시보드 구축" completed - Phase 5 progress: 67% → 100%
-- **[2025-01-01 11:20:15]**: Quality gate checkpoint passed for Phase 4 - All criteria satisfied - Duration: 2 days
+- **[2025-01-01 11:20:15]**: Quality gate checkpoint passed for Phase 4 - All criteria satisfied
 - **[2024-12-31 13:10:08]**: Risk level changed: 🟡 MEDIUM → 🟢 LOW - Reason: All blockers resolved
-- **[2024-12-30 08:45:22]**: Velocity update: 2.3 tasks/day - Revised ETA: 2025-01-03
 
 **Performance Metrics** (Auto-Updated):
-- **Project Velocity**: 2.1 tasks per day (rolling 7-day average)
-- **Phase Completion Rate**: 83% of phases completed on time  
-- **Task Accuracy**: 94% of tasks completed within estimated effort
 - **Quality Score**: 98% of tasks passing all acceptance criteria on first attempt
 - **Risk Mitigation**: 100% of identified risks successfully resolved
-- **Timeline Adherence**: +5% variance from original estimates (ahead of schedule)
 ```
 
 #### 2. **Decision Documentation & Context**
 ```markdown
 ## 🤔 Critical Decision Log
-- **[2025-01-02]**: Phase 6 논리 오류 수정 우선순위 상향 - 사용자 경험 개선 필요 - 개발팀 - 1일 추가 소요 예상
-- **[2025-01-01]**: 대시보드 실시간 업데이트 기능 추가 결정 - 성능 모니터링 강화 목적 - 기술팀장 - 코드 복잡도 증가 허용
-- **[2024-12-30]**: Phase 5 사용자 테스트 범위 축소 - 리소스 제약 - 프로젝트 매니저 - 핵심 기능 중심으로 집중
+- **[2025-01-02]**: Phase 6 논리 오류 수정 우선순위 상향 - 사용자 경험 개선 필요
+- **[2025-01-01]**: 대시보드 실시간 업데이트 기능 추가 결정 - 성능 모니터링 강화 목적
+- **[2024-12-30]**: Phase 5 사용자 테스트 범위 축소 - 리소스 제약으로 핵심 기능 중심으로 집중
 ```
 
 ---
@@ -494,9 +466,7 @@ function executeCompletionProtocol() {
   // 2. Calculate final metrics
   const finalMetrics = {
     totalDuration: calculateTotalDuration(),
-    averageVelocity: calculateAverageVelocity(),
-    qualityScore: calculateQualityScore(),
-    timelineVariance: calculateTimelineVariance()
+    qualityScore: calculateQualityScore()
   }
   
   // 3. Generate completion report
@@ -575,9 +545,7 @@ function validateProgressAccuracy() {
     overallProgressAccurate: validateOverallProgress(),
     statusConsistency: validateStatusConsistency(),
     dateChronology: validateDateChronology(),
-    dependencyValidation: validateDependencies(),
-    resourceAllocation: validateResourceAllocation(),
-    timelineFeasibility: validateTimelineFeasibility()
+    dependencyValidation: validateDependencies()
   }
   
   const allValid = Object.values(validations).every(v => v === true)
