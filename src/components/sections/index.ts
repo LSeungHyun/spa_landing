@@ -1,7 +1,5 @@
 // Sections barrel exports
-export { HeroSection } from './hero-section';
 export { BeforeAfterHeroSection } from './before-after-hero-section';
-export { InteractiveHeroSection } from './interactive-hero-section';
 export { FeaturesSection } from './features-section';
 export { PricingSection } from './pricing-section';
 export { TestimonialsSection } from './testimonials-section';
