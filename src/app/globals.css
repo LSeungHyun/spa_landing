@@ -1118,7 +1118,54 @@ kbd {
   }
   
   * {
-    color: black !important;
-    background: white !important;
+    -webkit-print-color-adjust: exact !important;
+    color-adjust: exact !important;
   }
+}
+
+/* 밑줄 완전 제거 - 모든 브라우저 지원 */
+.no-underline,
+textarea.no-underline,
+#prompt-input {
+  text-decoration: none !important;
+  text-decoration-line: none !important;
+  text-decoration-color: transparent !important;
+  text-decoration-style: none !important;
+  text-underline-offset: unset !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* 웹킷 브라우저 특별 처리 */
+textarea::-webkit-input-placeholder {
+  text-decoration: none !important;
+}
+
+textarea::-moz-placeholder {
+  text-decoration: none !important;
+}
+
+textarea:-ms-input-placeholder {
+  text-decoration: none !important;
+}
+
+textarea::placeholder {
+  text-decoration: none !important;
+}
+
+/* 맞춤법 검사 밑줄 완전 제거 */
+textarea {
+  -webkit-text-decoration-line: none !important;
+  -webkit-text-decoration: none !important;
+  text-decoration: none !important;
+}
+
+/* 포커스 상태에서도 밑줄 제거 */
+textarea:focus,
+textarea:active,
+textarea:hover {
+  text-decoration: none !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
 }

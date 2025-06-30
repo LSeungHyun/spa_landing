@@ -78,9 +78,9 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        if (prompt.length > 5000) {
+        if (prompt.length > 10000) {
             return createErrorResponse(
-                '프롬프트가 너무 깁니다. 5000자 이하로 입력해주세요.',
+                '프롬프트가 너무 깁니다. 10000자 이하로 입력해주세요.',
                 400
             );
         }

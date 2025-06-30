@@ -856,7 +856,7 @@ export default function HomePage() {
                                     <textarea
                                         ref={textareaRef}
                                         id="prompt-input"
-                                        className="w-full bg-[#2f2f2f] border border-gray-600 rounded-xl px-4 py-3 pr-48 md:pr-40 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[60px] transition-all duration-150 ease-out"
+                                        className="w-full bg-[#2f2f2f] border border-gray-600 rounded-xl px-4 py-3 pr-48 md:pr-40 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[60px] transition-all duration-150 ease-out no-underline"
                                         value={inputText}
                                         onChange={(e) => {
                                             setInputText(e.target.value);
@@ -868,7 +868,7 @@ export default function HomePage() {
                                         }}
                                         onKeyDown={(e) => {
                                             if (e.key === 'Enter' && !e.shiftKey) {
-                                                if (inputText.trim() && inputText.length <= 500) {
+                                                if (inputText.trim() && inputText.length <= 10000) {
                                                     e.preventDefault();
                                                     // 향상 버튼을 사용하지 않았다면 인터셉트 모달 표시
                                                     if (!hasUsedImproveButton && !hasShownImproveSuggestion) {
@@ -889,11 +889,20 @@ export default function HomePage() {
                                         }}
                                         placeholder="프롬프트를 입력하세요"
                                         disabled={isTestLoading || isImproveLoading}
-                                        maxLength={500}
+                                        maxLength={10000}
+                                        spellCheck={false}
+                                        autoComplete="off"
+                                        autoCorrect="off"
+                                        autoCapitalize="off"
                                         style={{ 
                                             resize: 'none', 
                                             overflowY: 'hidden',
-                                            transition: 'height 0.15s ease-out, border-color 0.2s ease-out'
+                                            transition: 'height 0.15s ease-out, border-color 0.2s ease-out',
+                                            textDecoration: 'none',
+                                            textDecorationLine: 'none',
+                                            textUnderlineOffset: 'unset',
+                                            borderBottom: 'none',
+                                            boxShadow: 'none'
                                         }}
                                     />
                                     
@@ -904,7 +913,7 @@ export default function HomePage() {
                                         <button
                                             type="button"
                                             onClick={handleTestImprovePrompt}
-                                            disabled={isTestLoading || isImproveLoading || !inputText.trim() || inputText.length > 500 || improveCount >= 3}
+                                            disabled={isTestLoading || isImproveLoading || !inputText.trim() || inputText.length > 10000 || improveCount >= 3}
                                             className={cn(
                                                 "rounded-lg p-2 md:p-2 text-white transition-all duration-200",
                                                 improveCount >= 3 
@@ -932,7 +941,7 @@ export default function HomePage() {
                                         <button
                                             type="button"
                                             onClick={handleImprovePrompt}
-                                            disabled={isTestLoading || isImproveLoading || !inputText.trim() || inputText.length > 500}
+                                            disabled={isTestLoading || isImproveLoading || !inputText.trim() || inputText.length > 10000}
                                             className={cn(
                                                 "rounded-lg p-2 md:p-2 text-white transition-all duration-200",
                                                 "bg-purple-600 hover:bg-purple-700",
@@ -965,7 +974,7 @@ export default function HomePage() {
                                                     handleSendMessage();
                                                 }
                                             }}
-                                            disabled={isTestLoading || isImproveLoading || !inputText.trim() || inputText.length > 500}
+                                            disabled={isTestLoading || isImproveLoading || !inputText.trim() || inputText.length > 10000}
                                             className={cn(
                                                 "rounded-lg p-2 md:p-2 text-white transition-all duration-200",
                                                 "bg-blue-600 hover:bg-blue-700",
@@ -983,11 +992,8 @@ export default function HomePage() {
                                     </div>
                                 </div>
                                 
-                                {/* 문자 수 카운터 - 입력 필드 외부 하단에 배치 */}
-                                <div className="flex justify-between items-center mt-2">
-                                    <div className="text-xs text-gray-400">
-                                        {inputText.length}/500
-                                    </div>
+                                {/* 키보드 단축키 안내 */}
+                                <div className="flex justify-end items-center mt-2">
                                     <div className="text-xs text-gray-500">
                                         Enter: 전송 | Ctrl+Enter: 개선 | Shift+Ctrl+Enter: 테스트
                                     </div>
