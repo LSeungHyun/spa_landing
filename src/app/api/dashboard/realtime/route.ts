@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { AnalyticsDashboard } from '@/lib/analytics-dashboard';
+import AnalyticsDashboard from '@/lib/analytics-dashboard';
 
 // 실시간 메트릭 조회 API
 export async function GET(request: NextRequest) {
