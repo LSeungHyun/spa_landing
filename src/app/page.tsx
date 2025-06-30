@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 
-import { Send, Wand2, Loader2, Sparkles, Users, Star, ArrowRight, CheckCircle, Menu, X, Mail, Gift, Zap, Clock, Copy, Check, type LucideProps } from 'lucide-react';
+import { Send, Wand2, Loader2, Sparkles, Users, Star, ArrowRight, CheckCircle, Menu, X, Mail, Gift, Zap, Clock, Copy, Check, Crown, type LucideProps } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { MobileNavBar } from '@/components/layout/mobile-nav-bar';
 import { EnhancedPreRegistrationForm } from '@/components/shared/enhanced-pre-registration-form';
@@ -15,6 +15,11 @@ import { TypingAnimation } from '@/components/shared/typing-animation';
 import { EnhanceInterceptModal } from '@/components/shared/enhance-intercept-modal';
 import { RegistrationBanner } from '@/components/shared/registration-banner';
 import { BeforeAfterHeroSection } from '@/components/sections/before-after-hero-section';
+import { HeroSection } from '@/components/sections/hero-section'
+import { FeaturesSection } from '@/components/sections/features-section'
+import { EarlyBirdSection } from '@/components/sections/early-bird-section'
+import { PreRegistrationForm } from '@/components/spa/pre-registration-form'
+import FinalCTASection from '@/components/sections/final-cta-section'
 
 
 interface ChatMessage {
@@ -998,43 +1003,34 @@ export default function HomePage() {
                     <Container>
                         <div className="max-w-4xl mx-auto">
                             <div className="text-center mb-8">
-                                <div className="inline-flex items-center space-x-2 bg-yellow-500/20 text-yellow-300 px-4 py-2 rounded-full text-sm font-medium mb-4">
-                                    <Gift size={16} />
-                                    <span>얼리버드 특별 혜택</span>
-                                </div>
-                                <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                                    체험이 마음에 드셨나요? 🚀
-                                </h2>
-                                <p className="text-xl text-blue-100 mb-6">
-                                    사전 등록하고 특별한 혜택을 받아보세요!
-                                </p>
+                                                            <div className="inline-flex items-center space-x-2 bg-yellow-500/20 text-yellow-300 px-4 py-2 rounded-full text-sm font-medium mb-4">
+                                <Crown size={16} />
+                                <span>First Mover Club 초대</span>
+                            </div>
+                            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                                First Mover Club에 초대합니다 🚀
+                            </h2>
+                            <p className="text-xl text-blue-100 mb-6">
+                                당신의 목소리로 제품을 완성해주세요
+                            </p>
                             </div>
 
                             {/* 혜택 리스트 */}
                             <div className="grid md:grid-cols-3 gap-4 mb-8">
                                 <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20 hover:bg-white/15 transition-all duration-300 group">
-                                    <div className="text-3xl mb-3 group-hover:scale-110 transition-transform duration-300">🚀</div>
-                                    <h3 className="font-bold text-white mb-2 text-lg">우선 액세스</h3>
-                                    <p className="text-sm text-blue-200 mb-3">정식 출시 전 7일 먼저 체험</p>
-                                    <div className="text-xs text-yellow-300 font-medium bg-yellow-500/20 px-2 py-1 rounded-full inline-block">
-                                        ₩49,000 상당 가치
-                                    </div>
-                                </div>
-                                <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20 hover:bg-white/15 transition-all duration-300 group">
-                                    <div className="text-3xl mb-3 group-hover:scale-110 transition-transform duration-300">💎</div>
-                                    <h3 className="font-bold text-white mb-2 text-lg">프리미엄 무료</h3>
-                                    <p className="text-sm text-blue-200 mb-3">프리미엄 기능 3개월 무료 + 무제한 프롬프트</p>
-                                    <div className="text-xs text-yellow-300 font-medium bg-yellow-500/20 px-2 py-1 rounded-full inline-block">
-                                        ₩87,000 상당 가치
-                                    </div>
+                                    <div className="text-3xl mb-3 group-hover:scale-110 transition-transform duration-300">💬</div>
+                                    <h3 className="font-bold text-white mb-2 text-lg">실질적인 제품 영향력</h3>
+                                    <p className="text-sm text-blue-200 mb-3">비공개 베타 우선 초대, 신기능 투표, 개발자 직접 소통 채널 참여</p>
                                 </div>
                                 <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20 hover:bg-white/15 transition-all duration-300 group">
                                     <div className="text-3xl mb-3 group-hover:scale-110 transition-transform duration-300">🏆</div>
-                                    <h3 className="font-bold text-white mb-2 text-lg">창립 멤버 특전</h3>
-                                    <p className="text-sm text-blue-200 mb-3">평생 50% 할인 + 전용 뱃지 + VIP 지원</p>
-                                    <div className="text-xs text-yellow-300 font-medium bg-yellow-500/20 px-2 py-1 rounded-full inline-block">
-                                        ₩500,000+ 평생 가치
-                                    </div>
+                                    <h3 className="font-bold text-white mb-2 text-lg">영구적인 명예와 인정</h3>
+                                    <p className="text-sm text-blue-200 mb-3">'명예의 전당(Hall of Fame)'에 닉네임 등재 및 전용 디지털 뱃지 제공</p>
+                                </div>
+                                <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20 hover:bg-white/15 transition-all duration-300 group">
+                                    <div className="text-3xl mb-3 group-hover:scale-110 transition-transform duration-300">🎁</div>
+                                    <h3 className="font-bold text-white mb-2 text-lg">감사의 웰컴 리워드</h3>
+                                    <p className="text-sm text-blue-200 mb-3">정식 출시 후 첫 결제 시 사용 가능한 ₩10,000 웰컴 크레딧 제공</p>
                                 </div>
                             </div>
 
@@ -1042,20 +1038,20 @@ export default function HomePage() {
                             <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 rounded-xl p-6 mb-8 border border-yellow-400/30">
                                 <div className="text-center">
                                     <div className="flex items-center justify-center space-x-2 mb-3">
-                                        <span className="text-2xl">⏰</span>
-                                        <span className="text-yellow-300 font-bold text-lg">한정 혜택</span>
+                                        <span className="text-2xl">👑</span>
+                                        <span className="text-yellow-300 font-bold text-lg">VIP 독점 혜택</span>
                                     </div>
                                     <p className="text-white font-semibold mb-2">
-                                        첫 100명만! 총 ₩636,000 상당 혜택
+                                        First Mover Club 특별 혜택
                                     </p>
                                     <div className="flex items-center justify-center space-x-4 text-sm text-yellow-200">
                                         <div className="flex items-center space-x-1">
                                             <Users size={16} />
-                                            <span>현재 73명 등록</span>
+                                            <span>현재 87명 참여</span>
                                         </div>
                                         <div className="flex items-center space-x-1">
                                             <Clock size={16} />
-                                            <span>27자리 남음</span>
+                                            <span>13자리 남음</span>
                                         </div>
                                     </div>
                                 </div>

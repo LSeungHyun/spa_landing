@@ -34,7 +34,7 @@ interface FeaturesSectionProps {
   subtitle?: string;
 }
 
-export default function FeaturesSection({
+function FeaturesSection({
   title = "핵심 기능",
   subtitle = "AI 기반 스마트 프롬프트 생성 도구의 주요 기능들을 확인해보세요"
 }: FeaturesSectionProps) {
@@ -85,3 +85,6 @@ export default function FeaturesSection({
     </Section>
   );
 }
+
+export { FeaturesSection };
+export default FeaturesSection;

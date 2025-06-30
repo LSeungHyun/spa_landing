@@ -10,5 +10,5 @@ export { FAQSection } from './faq-section';
 export { FAQHeaderSection } from './faq-header-section';
 export { ContactSection } from './contact-section';
 export { EarlyBirdSection } from './early-bird-section';
-export { FinalCTASection } from './final-cta-section';
+export { default as FinalCTASection } from './final-cta-section';
 export { PartnersSection } from './partners-section'; 

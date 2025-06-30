@@ -183,11 +183,14 @@ export function EnhancedPreRegistrationForm({
   }, [checkApiStatus]);
 
   return (
-    <Card className={`w-full max-w-2xl mx-auto ${className}`}>
+    <Card className={`w-full max-w-2xl mx-auto bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 border-purple-500/30 ${className}`}>
       <CardHeader>
-        <CardTitle>무료 사전 등록</CardTitle>
-        <CardDescription>
-          Smart Prompt Assistant 출시 알림을 받고 특별 혜택을 누려보세요!
+        <CardTitle className="flex items-center space-x-2 text-white">
+          <Crown className="w-6 h-6 text-yellow-400" />
+          <span>First Mover Club 참여하기</span>
+        </CardTitle>
+        <CardDescription className="text-purple-200">
+          제품 개발에 직접 참여하고 특별한 혜택을 받아보세요!
         </CardDescription>
 
         {/* 개발 모드에서만 API 상태 표시 */}
@@ -220,7 +223,7 @@ export function EnhancedPreRegistrationForm({
           {/* 기본 정보 */}
           <div className="space-y-6">
             <div>
-              <Label htmlFor="email" className="text-sm font-medium">
+              <Label htmlFor="email" className="text-sm font-medium text-white">
                 이메일 주소 *
               </Label>
               <Input
@@ -236,7 +239,7 @@ export function EnhancedPreRegistrationForm({
             </div>
 
             <div>
-              <Label htmlFor="name" className="text-sm font-medium">
+              <Label htmlFor="name" className="text-sm font-medium text-white">
                 이름 또는 닉네임 (선택사항)
               </Label>
               <Input
@@ -248,7 +251,7 @@ export function EnhancedPreRegistrationForm({
             </div>
 
             <div>
-              <Label className="text-sm font-medium">주요 역할 (선택사항)</Label>
+              <Label className="text-sm font-medium text-white">주요 역할 (선택사항)</Label>
               <div className="grid grid-cols-2 gap-3 mt-2">
                 {personaOptions.map((option) => {
                   const Icon = option.icon;
@@ -256,8 +259,8 @@ export function EnhancedPreRegistrationForm({
                     <div
                       key={option.value}
                       className={`p-3 border rounded-lg cursor-pointer transition-colors ${watchedValues.persona === option.value
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300'
+                        ? 'border-purple-400 bg-purple-500/20 text-white'
+                        : 'border-slate-600 hover:border-slate-500 bg-slate-800/50 text-gray-300 hover:text-white'
                         }`}
                       onClick={() => setValue('persona', option.value as any)}
                     >
@@ -265,7 +268,7 @@ export function EnhancedPreRegistrationForm({
                         <Icon className="w-4 h-4" />
                         <span className="text-sm font-medium">{option.label}</span>
                       </div>
-                      <p className="text-xs text-gray-600 mt-1">{option.description}</p>
+                      <p className="text-xs mt-1 opacity-75">{option.description}</p>
                     </div>
                   );
                 })}
@@ -276,60 +279,13 @@ export function EnhancedPreRegistrationForm({
             </div>
           </div>
 
-          {/* 얼리버드 혜택 카드 */}
-          <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-6 border border-blue-200">
-            <div className="flex items-center space-x-2 mb-6">
-              <GiftIcon className="w-6 h-6 text-blue-600" />
-              <h4 className="font-bold text-blue-900 text-lg">얼리버드 특별 혜택</h4>
-            </div>
-            
-            <div className="space-y-3 mb-6">
-              <CompactBenefitCard
-                icon={Zap}
-                title="우선 액세스"
-                value="₩49,000 상당 • 7일 먼저 체험"
-                color="blue"
-              />
-              <CompactBenefitCard
-                icon={Crown}
-                title="프리미엄 무료"
-                value="₩87,000 상당 • 3개월 무료"
-                color="purple"
-              />
-              <CompactBenefitCard
-                icon={Trophy}
-                title="창립 멤버 특전"
-                value="₩500,000+ 상당 • 평생 50% 할인"
-                color="yellow"
-              />
-              <CompactBenefitCard
-                icon={Users}
-                title="전용 커뮤니티"
-                value="개발진과 직접 소통"
-                color="green"
-              />
-            </div>
-            
-            <div className="bg-gradient-to-r from-yellow-100 to-orange-100 rounded-lg p-4 border border-yellow-300">
-              <div className="flex items-center justify-center space-x-2 mb-2">
-                <span className="text-lg">⚡</span>
-                <span className="font-bold text-yellow-800">총 ₩636,000 상당 혜택</span>
-              </div>
-              <div className="flex items-center justify-center space-x-4 text-xs text-yellow-700">
-                <span>첫 100명 한정</span>
-                <span>•</span>
-                <span>현재 73명 등록</span>
-                <span>•</span>
-                <span className="font-semibold text-red-600">27자리 남음</span>
-              </div>
-            </div>
-          </div>
+
 
           <div className="pt-6">
             <Button
               type="submit"
               disabled={isSubmitting || !watchedValues.email}
-              className="w-full min-w-[120px]"
+              className="w-full min-w-[120px] bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black font-semibold"
             >
               {isSubmitting ? (
                 <>
@@ -337,7 +293,7 @@ export function EnhancedPreRegistrationForm({
                   등록 중...
                 </>
               ) : (
-                '사전 등록하기'
+                'First Mover Club 참여하기'
               )}
             </Button>
           </div>

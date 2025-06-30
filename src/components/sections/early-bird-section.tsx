@@ -16,7 +16,10 @@ import {
   Trophy,
   Timer,
   Sparkles,
-  TrendingUp
+  TrendingUp,
+  MessageCircle,
+  Vote,
+  CreditCard
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { BenefitCard } from '@/components/shared/benefit-card';
@@ -75,25 +78,25 @@ const CountdownTimer: React.FC = () => {
 export function EarlyBirdSection({ onRegisterClick, className }: EarlyBirdSectionProps) {
   const benefits = [
     {
-      icon: Zap,
-      title: "우선 액세스",
-      description: "정식 출시 전 7일 먼저 체험하고 피드백을 제공할 기회",
-      value: "₩49,000 상당 가치",
+      icon: MessageCircle,
+      title: "실질적인 제품 영향력",
+      description: "비공개 베타 우선 초대, 신기능 투표, 개발자 직접 소통 채널 참여",
+      value: "",
       delay: 0.1
     },
     {
-      icon: Crown,
-      title: "프리미엄 무료",
-      description: "프리미엄 기능 3개월 무료 + 무제한 프롬프트 생성",
-      value: "₩87,000 상당 가치",
+      icon: Trophy,
+      title: "영구적인 명예와 인정",
+      description: "'명예의 전당(Hall of Fame)'에 닉네임 등재 및 전용 디지털 뱃지 제공",
+      value: "",
       highlight: true,
       delay: 0.2
     },
     {
-      icon: Trophy,
-      title: "창립 멤버 특전",
-      description: "평생 50% 할인 + 전용 뱃지 + VIP 고객 지원",
-      value: "₩500,000+ 평생 가치",
+      icon: Gift,
+      title: "감사의 웰컴 리워드",
+      description: "정식 출시 후 첫 결제 시 사용 가능한 ₩10,000 웰컴 크레딧 제공",
+      value: "",
       delay: 0.3
     }
   ];
@@ -121,28 +124,27 @@ export function EarlyBirdSection({ onRegisterClick, className }: EarlyBirdSectio
             className="text-center mb-16"
           >
             <Badge className="mb-6 bg-yellow-500/20 text-yellow-300 border-yellow-400/30 text-lg px-6 py-2">
-              <Gift className="w-5 h-5 mr-2" />
-              얼리버드 특별 혜택
+              <Crown className="w-5 h-5 mr-2" />
+              First Mover Club 초대
             </Badge>
             
             <h2 className="text-4xl md:text-6xl font-bold mb-6">
               <span className="bg-gradient-to-r from-yellow-300 via-orange-300 to-pink-300 bg-clip-text text-transparent">
-                첫 100명만
+                First Mover Club에
               </span>
               <br />
-              특별한 혜택을
+              초대합니다
             </h2>
             
             <p className="text-xl md:text-2xl text-blue-100 mb-8 max-w-3xl mx-auto leading-relaxed">
-              지금 사전 등록하고 총 <span className="font-bold text-yellow-300">₩636,000 상당</span>의 
-              혜택을 받아보세요
+              당신의 목소리로 제품을 완성해주세요
             </p>
 
             {/* 카운트다운 타이머 */}
             <div className="mb-8">
               <div className="flex items-center justify-center space-x-2 mb-4">
                 <Timer className="w-6 h-6 text-yellow-300" />
-                <span className="text-yellow-300 font-bold text-lg">한정 혜택 마감까지</span>
+                <span className="text-yellow-300 font-bold text-lg">독점 초대 마감까지</span>
               </div>
               <CountdownTimer />
             </div>
@@ -170,22 +172,22 @@ export function EarlyBirdSection({ onRegisterClick, className }: EarlyBirdSectio
             <div className="text-center relative z-10">
               <div className="flex items-center justify-center space-x-3 mb-4">
                 <Sparkles className="w-8 h-8 text-yellow-300 animate-pulse" />
-                <span className="text-yellow-300 font-bold text-2xl">한정 혜택</span>
+                <span className="text-yellow-300 font-bold text-2xl">VIP 독점 혜택</span>
                 <Sparkles className="w-8 h-8 text-yellow-300 animate-pulse" />
               </div>
               
               <h3 className="text-white font-bold text-3xl mb-4">
-                총 ₩636,000 상당 혜택
+                First Mover Club 특별 혜택
               </h3>
               
               <div className="flex items-center justify-center space-x-8 text-lg text-yellow-200 mb-6">
                 <div className="flex items-center space-x-2">
                   <Users className="w-6 h-6" />
-                  <span className="font-semibold">현재 73명 등록</span>
+                  <span className="font-semibold">현재 87명 참여</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <TrendingUp className="w-6 h-6" />
-                  <span className="font-semibold text-red-300">27자리 남음</span>
+                  <span className="font-semibold text-red-300">13자리 남음</span>
                 </div>
               </div>
 
@@ -199,8 +201,8 @@ export function EarlyBirdSection({ onRegisterClick, className }: EarlyBirdSectio
                   size="lg"
                   className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-black font-bold text-xl px-12 py-6 rounded-2xl shadow-2xl border-0"
                 >
-                  <Gift className="w-6 h-6 mr-3" />
-                  지금 무료 사전 등록하기
+                  <Crown className="w-6 h-6 mr-3" />
+                  First Mover Club 참여하기
                   <Sparkles className="w-6 h-6 ml-3" />
                 </Button>
               </motion.div>
@@ -225,8 +227,8 @@ export function EarlyBirdSection({ onRegisterClick, className }: EarlyBirdSectio
                 <span className="font-semibold">1,247명 사전 등록</span>
               </div>
               <div className="flex items-center space-x-2">
-                <Clock className="w-5 h-5" />
-                <span className="font-semibold">평균 응답시간 2초</span>
+                <MessageCircle className="w-5 h-5" />
+                <span className="font-semibold">실시간 피드백 채널</span>
               </div>
             </div>
           </motion.div>

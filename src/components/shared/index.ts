@@ -5,7 +5,7 @@ export { PersonaCard } from './persona-card';
 export { FeatureCard } from './feature-card';
 export { PricingCard } from './pricing-card';
 export { TestimonialCard } from './testimonial-card';
-export { default as BenefitCard } from './benefit-card';
+export { BenefitCard, CompactBenefitCard } from './benefit-card';
 
 // Chrome Extension components
 export { default as ChromeExtensionBadge, TrustElements, BrowserExtensionIndicator } from './chrome-extension-badge';
