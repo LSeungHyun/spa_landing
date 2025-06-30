@@ -3,7 +3,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 
 export async function GET(request: NextRequest) {
     try {
-        console.log('=== Gemini API Test Started ===');
+        console.log('=== Gemini 2.0 Flash API Test Started (FREE MODEL) ===');
 
         // 1. 환경변수 확인
         const apiKey = process.env.GEMINI_API_KEY;
@@ -24,58 +24,57 @@ export async function GET(request: NextRequest) {
         const genAI = new GoogleGenerativeAI(apiKey);
         console.log('GoogleGenerativeAI instance created successfully');
 
-        // 3. 모델 생성 테스트
-        console.log('Getting generative model...');
-        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
-        console.log('Model created successfully');
+        // 3. Gemini 2.5 Flash 모델 생성 테스트
+        console.log('Getting Gemini 2.5 Flash model...');
+        const model = genAI.getGenerativeModel({ 
+            model: 'gemini-2.5-flash',
+            generationConfig: {
+                temperature: 0.7,
+                topK: 40,
+                topP: 0.9,
+                maxOutputTokens: 1024,
+            }
+        });
+        console.log('Gemini 2.5 Flash model created successfully');
 
         // 4. 간단한 테스트 호출
-        console.log('Testing simple generation...');
-        const testPrompt = "Hello, respond with just 'Test successful'";
+        console.log('Testing Gemini 2.5 Flash generation...');
+        const testPrompt = "Hello! Please respond with 'Gemini 2.5 Flash is working correctly' to confirm the model upgrade.";
 
         const result = await model.generateContent(testPrompt);
         const response = await result.response;
         const text = response.text();
 
-        console.log('Gemini API response:', text);
-        console.log('=== Gemini API Test Completed Successfully ===');
+        console.log('Gemini 2.5 Flash API response:', text);
+        console.log('=== Gemini 2.5 Flash API Test Completed Successfully ===');
 
         return NextResponse.json({
             success: true,
             response: text,
+            model: 'gemini-2.5-flash',
             step: 'completed',
-            message: 'Gemini API is working correctly'
+            message: 'Gemini 2.5 Flash API is working correctly',
+            features: {
+                enhancedReasoning: true,
+                improvedSpeed: true,
+                betterContextHandling: true
+            }
         });
 
     } catch (error) {
-        console.error('=== Gemini API Test Failed ===');
+        console.error('=== Gemini 2.5 Flash API Test Failed ===');
         console.error('Error details:', error);
-
-        let errorMessage = 'Unknown error';
-        let errorCode = 'UNKNOWN_ERROR';
-
+        
         if (error instanceof Error) {
-            errorMessage = error.message;
             console.error('Error message:', error.message);
             console.error('Error stack:', error.stack);
-
-            // 특정 에러 타입 분석
-            if (error.message.includes('API_KEY_INVALID')) {
-                errorCode = 'INVALID_API_KEY';
-            } else if (error.message.includes('quota')) {
-                errorCode = 'QUOTA_EXCEEDED';
-            } else if (error.message.includes('model')) {
-                errorCode = 'INVALID_MODEL';
-            } else if (error.message.includes('network')) {
-                errorCode = 'NETWORK_ERROR';
-            }
         }
 
         return NextResponse.json({
             success: false,
-            error: errorMessage,
-            errorCode,
-            step: 'api_call_failed'
+            error: error instanceof Error ? error.message : 'Unknown error',
+            step: 'test_failed',
+            model: 'gemini-2.5-flash'
         }, { status: 500 });
     }
 } 

@@ -19,6 +19,14 @@ export class GeminiService {
     // 서버 사이드에서만 사용하도록 NEXT_PUBLIC_ 접두사 제거
     private static readonly API_KEY = process.env.GEMINI_API_KEY;
 
+    // 모델 버전 상수 - 용도별 최적 모델 설정
+    private static readonly MODELS = {
+        CHAT: 'gemini-2.0-flash',          // 채팅: 무료 모델
+        IMPROVE: 'gemini-2.5-flash',       // 실제 개선: 고성능 무료 모델
+        IMPROVE_TEST: 'gemini-2.0-flash',  // 테스트 개선: 무료 모델
+        GENERATE: 'gemini-2.0-flash'       // 생성: 무료 모델
+    } as const;
+
     constructor() {
         if (!GeminiService.API_KEY) {
             console.error('GEMINI_API_KEY environment variable is not set');
@@ -31,7 +39,7 @@ export class GeminiService {
             try {
                 this.genAI = new GoogleGenerativeAI(GeminiService.API_KEY);
                 this.hasValidApiKey = true;
-                console.log('Gemini API initialized successfully');
+                console.log('Gemini API initialized successfully with 2.0 Flash model (FREE)');
             } catch (error) {
                 console.error('Failed to initialize Gemini API:', error);
                 this.hasValidApiKey = false;
@@ -55,7 +63,15 @@ export class GeminiService {
                 throw new Error('Gemini API is not properly configured. Please check your GEMINI_API_KEY environment variable.');
             }
 
-            const model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+            const model = this.genAI.getGenerativeModel({ 
+                model: GeminiService.MODELS.GENERATE,
+                generationConfig: {
+                    temperature: 0.7,
+                    topK: 40,
+                    topP: 0.9,
+                    maxOutputTokens: 2048,
+                }
+            });
 
             const prompt = `
                 You are an expert academic writing assistant specialized in creating compelling research paper abstracts and introductions.
@@ -84,10 +100,16 @@ export class GeminiService {
         }
     }
 
-    public async improvePrompt(originalPrompt: string): Promise<string> {
+    public async improvePrompt(originalPrompt: string, isTest: boolean = false): Promise<string> {
         try {
-            console.log('=== GeminiService.improvePrompt called ===');
+            // 모델 선택 (테스트용 vs 실제용)
+            const selectedModel = isTest ? GeminiService.MODELS.IMPROVE_TEST : GeminiService.MODELS.IMPROVE;
+            const modelName = isTest ? 'Gemini 2.0 Flash (FREE)' : 'Gemini 2.5 Flash (FREE)';
+            
+            console.log(`=== GeminiService.improvePrompt called (${modelName}) ===`);
             console.log('Original prompt length:', originalPrompt.length);
+            console.log('Is test mode:', isTest);
+            console.log('Selected model:', selectedModel);
             console.log('Has valid API key:', this.hasValidApiKey);
 
             // API 키가 없거나 유효하지 않은 경우 에러 발생
@@ -95,37 +117,75 @@ export class GeminiService {
                 throw new Error('Gemini API is not properly configured. Please check your GEMINI_API_KEY environment variable.');
             }
 
-            // 캐시 확인 먼저 (임시 비활성화)
-            // const cachedResult = promptCache.getCachedPrompt(originalPrompt);
-            // if (cachedResult) {
-            //     console.log('Returning cached result, skipping API call');
-            //     return cachedResult;
-            // }
+            console.log(`Using ${modelName} for prompt improvement`);
 
-            console.log('No cache hit, proceeding with API call');
-            console.log('Getting model: gemini-1.5-flash');
-
-            const model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+            const model = this.genAI.getGenerativeModel({ 
+                model: selectedModel,
+                generationConfig: {
+                    temperature: isTest ? 0.7 : 0.8,  // 테스트용은 약간 낮은 temperature
+                    topK: 40,
+                    topP: 0.95,
+                    maxOutputTokens: isTest ? 2048 : 3072,  // 테스트용은 더 짧은 출력, 실제용은 2.5 Flash에 맞게 조정
+                }
+            });
             console.log('Model instance created successfully');
 
-            const prompt = `As a prompt engineer, improve this prompt for better AI responses:
+            const fullPrompt = isTest 
+                ? `As a helpful prompt engineer, analyze and improve this prompt for better AI responses:
 
-"${originalPrompt}"
+Original Prompt: "${originalPrompt}"
 
-Make it more specific, structured, and actionable. Include:
-- Clear objective
-- Specific requirements  
-- Desired format
-- Context if needed
+Your task:
+1. Analyze the prompt's current strengths and weaknesses
+2. Identify missing elements that would improve clarity
+3. Restructure for better AI comprehension
 
-Return only the improved prompt:`;
+Create an improved prompt that includes:
+- Clear, specific objective
+- Basic requirements and constraints
+- Desired output format
+- Relevant context when needed
 
-            console.log('Calling model.generateContent...');
+Focus on making the prompt:
+- More specific and actionable
+- Better structured for AI processing
+- Likely to produce better results
 
-            // Rate limiting을 위한 지연
-            await new Promise(resolve => setTimeout(resolve, 1000));
+Return only the improved prompt without additional commentary:`
+                : `As an expert prompt engineer using advanced reasoning capabilities, analyze and improve this prompt for optimal AI responses:
 
-            const result = await model.generateContent(prompt);
+Original Prompt: "${originalPrompt}"
+
+Your task:
+1. Analyze the prompt's current strengths and weaknesses with deep insight
+2. Identify missing elements that would improve clarity and effectiveness
+3. Restructure for maximum AI comprehension and output quality
+4. Apply advanced prompt engineering techniques
+
+Create an improved prompt that includes:
+- Clear, specific objective with precise language
+- Detailed requirements and constraints
+- Desired output format and structure
+- Relevant context and examples if beneficial
+- Step-by-step instructions when appropriate
+- Role definitions and expertise specifications
+- Quality criteria and success metrics
+
+Focus on making the prompt:
+- More specific and actionable
+- Better structured for AI processing
+- Likely to produce higher quality, more relevant results
+- Optimized for the specific AI model capabilities
+
+Return only the improved prompt without additional commentary:`;
+
+            console.log(`Calling model.generateContent with ${isTest ? 'standard' : 'enhanced'} configuration...`);
+
+            // Rate limiting을 위한 지연 (모델별 차등 적용)
+            const delay = isTest ? 500 : 600;  // 테스트용은 짧은 지연, 실제용은 약간 긴 지연
+            await new Promise(resolve => setTimeout(resolve, delay));
+
+            const result = await model.generateContent(fullPrompt);
             console.log('generateContent completed, getting response...');
 
             const response = await result.response;
@@ -133,15 +193,11 @@ Return only the improved prompt:`;
 
             const text = response.text().trim();
             console.log('Text extracted successfully, length:', text.length);
-
-            // 결과를 캐시에 저장 (임시 비활성화)
-            // promptCache.setCachedPrompt(originalPrompt, text);
-            console.log('Result cached for future use');
-            console.log('=== GeminiService.improvePrompt completed ===');
+            console.log(`=== GeminiService.improvePrompt completed (${modelName}) ===`);
 
             return text;
         } catch (error) {
-            console.error('=== GeminiService Error Details ===');
+            console.error(`=== GeminiService Error Details (${isTest ? 'Test Mode' : 'Premium Mode'}) ===`);
             console.error('Error type:', typeof error);
             console.error('Error instanceof Error:', error instanceof Error);
             console.error('Error message:', error instanceof Error ? error.message : error);
@@ -154,13 +210,14 @@ Return only the improved prompt:`;
                 return this.generateFallbackResponse(originalPrompt);
             }
 
-            throw new Error('Failed to improve prompt using Gemini API: ' + (error instanceof Error ? error.message : String(error)));
+            const errorModel = isTest ? 'Gemini 2.0 Flash API (FREE)' : 'Gemini 2.5 Flash API (FREE)';
+            throw new Error(`Failed to improve prompt using ${errorModel}: ` + (error instanceof Error ? error.message : String(error)));
         }
     }
 
     public async generateChatResponse(userMessage: string): Promise<string> {
         try {
-            console.log('=== GeminiService.generateChatResponse called ===');
+            console.log('=== GeminiService.generateChatResponse called (Gemini 2.0 Flash - FREE) ===');
             console.log('User message length:', userMessage.length);
             console.log('Has valid API key:', this.hasValidApiKey);
 
@@ -169,33 +226,43 @@ Return only the improved prompt:`;
                 throw new Error('Gemini API is not properly configured. Please check your GEMINI_API_KEY environment variable.');
             }
 
-            const model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-            console.log('Model instance created successfully');
+            const model = this.genAI.getGenerativeModel({ 
+                model: GeminiService.MODELS.CHAT,
+                generationConfig: {
+                    temperature: 0.9,
+                    topK: 40,
+                    topP: 0.95,
+                    maxOutputTokens: 2048,
+                }
+            });
+            console.log('Gemini 2.0 Flash model (FREE) instance created successfully');
 
-            const prompt = `You are SPA (Smart Prompt Assistant), a helpful AI assistant specialized in improving prompts and helping users with their tasks.
+            const prompt = `You are SPA (Smart Prompt Assistant), an advanced AI assistant powered by Gemini 2.0 Flash (FREE), specialized in improving prompts and helping users with their tasks.
 
 User message: "${userMessage}"
 
-Respond naturally and helpfully as SPA. Your personality:
-- Friendly and encouraging
-- Professional but approachable  
+As SPA with reliable performance capabilities, respond naturally and helpfully. Your personality:
+- Friendly, encouraging, and approachable
+- Professional with deep expertise in prompt engineering
 - Focused on helping users improve their prompts and achieve their goals
-- Provide practical suggestions when appropriate
+- Provide practical, actionable suggestions
 - Keep responses conversational and engaging
+- Use reliable reasoning for effective responses
 
 Guidelines:
 - Respond in Korean if the user writes in Korean, English if they write in English
-- Be concise but informative (2-3 sentences usually)
-- If the user's message seems like a prompt that could be improved, gently suggest how
+- Be concise but informative (2-4 sentences usually)
+- If the user's message seems like a prompt that could be improved, provide specific suggestions
 - Always be encouraging and positive
 - Use emojis sparingly but appropriately
+- Leverage reliable reasoning for good contextual understanding
 
-Generate a natural, helpful response:`;
+Generate a natural, helpful response that showcases reliable AI capabilities:`;
 
             console.log('Calling model.generateContent for chat...');
 
-            // Rate limiting을 위한 지연
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            // 2.5 Flash는 더 빠르므로 지연 시간 단축
+            await new Promise(resolve => setTimeout(resolve, 300));
 
             const result = await model.generateContent(prompt);
             console.log('generateContent completed, getting response...');
@@ -205,11 +272,11 @@ Generate a natural, helpful response:`;
 
             const text = response.text().trim();
             console.log('Text extracted successfully, length:', text.length);
-            console.log('=== GeminiService.generateChatResponse completed ===');
+            console.log('=== GeminiService.generateChatResponse completed (2.5 Flash) ===');
 
             return text;
         } catch (error) {
-            console.error('=== GeminiService Chat Error Details ===');
+            console.error('=== GeminiService Chat Error Details (2.5 Flash) ===');
             console.error('Error type:', typeof error);
             console.error('Error instanceof Error:', error instanceof Error);
             console.error('Error message:', error instanceof Error ? error.message : error);
@@ -222,7 +289,7 @@ Generate a natural, helpful response:`;
                 return this.generateFallbackChatResponse(userMessage);
             }
 
-            throw new Error('Failed to generate chat response using Gemini API: ' + (error instanceof Error ? error.message : String(error)));
+            throw new Error('Failed to generate chat response using Gemini 2.5 Flash API: ' + (error instanceof Error ? error.message : String(error)));
         }
     }
 

@@ -310,33 +310,53 @@ export default function HomePage() {
         await new Promise(resolve => setTimeout(resolve, 1500));
 
         try {
-            // 고도화된 프롬프트 개선 서비스 사용
-            const { PromptImprovementService } = await import('@/lib/services/prompt-improvement-service');
-            const improvementService = PromptImprovementService.getInstance();
-            
-            const originalLength = inputText.length;
-            const suggestion = improvementService.suggestImprovements(inputText);
-            const improvedLength = suggestion.improvedPrompt.length;
-            const processingTime = Date.now() - startTime;
-            
-            // 개선된 프롬프트 적용
-            setInputText(suggestion.improvedPrompt);
-            setImproveCount(prev => prev + 1);
-            
-            // 모니터링 추적
-            trackTestImprovement(true, processingTime, originalLength, improvedLength, suggestion.score);
-            
-            // 개선사항이 있는 경우 사용자에게 알림
-            if (suggestion.improvements.length > 0) {
-                const improvementMessage = `프롬프트가 개선되었습니다! (점수: ${suggestion.score}/10)\n개선사항: ${suggestion.improvements.join(', ')}`;
-                toast.success(improvementMessage);
+            // Gemini 2.0 Flash (무료) API를 사용한 테스트 개선
+            const response = await fetch('/api/test-improve-prompt', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ prompt: inputText }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                // 에러 상태 코드별 처리
+                if (response.status === 401) {
+                    toast.error(data.error || 'API 키가 유효하지 않습니다');
+                } else if (response.status === 503) {
+                    toast.error(data.error || 'API 서비스가 일시적으로 사용할 수 없습니다');
+                } else if (response.status === 429) {
+                    toast.error(data.error || 'API 사용량이 초과되었습니다');
+                } else {
+                    toast.error(data.error || '테스트 개선에 실패했습니다');
+                }
+                
+                // 폴백 처리
+                throw new Error(data.error || 'API 호출 실패');
             }
-            
-            // 팁이 있는 경우 추가 알림
-            if (suggestion.tips.length > 0 && Math.random() < 0.5) {
-                setTimeout(() => {
-                    toast.info(suggestion.tips[0]);
-                }, 2000);
+
+            // 성공 응답 처리
+            if (data.improvedPrompt) {
+                const originalLength = inputText.length;
+                const improvedLength = data.improvedPrompt.length;
+                const processingTime = Date.now() - startTime;
+                
+                setInputText(data.improvedPrompt);
+                setImproveCount(prev => prev + 1);
+                
+                // 모니터링 추적
+                trackTestImprovement(true, processingTime, originalLength, improvedLength);
+                
+                toast.success('🎉 프롬프트가 개선되었습니다! (Gemini 2.0 Flash - 무료)');
+                
+                // 추가 정보 표시
+                if (data.message) {
+                    setTimeout(() => {
+                        toast.info(data.message);
+                    }, 1500);
+                }
             }
 
         } catch (error) {
@@ -345,15 +365,26 @@ export default function HomePage() {
             const processingTime = Date.now() - startTime;
             const originalLength = inputText.length;
             
-            // 폴백: 기존 간단한 개선 로직 사용
-            const fallbackImprovement = inputText + '\n\n[더 구체적인 요구사항을 추가하면 더 나은 결과를 얻을 수 있습니다]';
-            setInputText(fallbackImprovement);
-            setImproveCount(prev => prev + 1);
-            
-            // 에러 모니터링 추적
-            trackTestImprovement(false, processingTime, originalLength, fallbackImprovement.length);
-            
-            toast.success('기본 개선이 적용되었습니다.');
+            // 폴백: 로컬 개선 서비스 사용
+            try {
+                const { PromptImprovementService } = await import('@/lib/services/prompt-improvement-service');
+                const improvementService = PromptImprovementService.getInstance();
+                const suggestion = improvementService.suggestImprovements(inputText);
+                
+                setInputText(suggestion.improvedPrompt);
+                setImproveCount(prev => prev + 1);
+                
+                trackTestImprovement(false, processingTime, originalLength, suggestion.improvedPrompt.length);
+                toast.success('기본 개선이 적용되었습니다 (로컬 서비스)');
+            } catch (fallbackError) {
+                // 최종 폴백
+                const fallbackImprovement = inputText + '\n\n[더 구체적인 요구사항을 추가하면 더 나은 결과를 얻을 수 있습니다]';
+                setInputText(fallbackImprovement);
+                setImproveCount(prev => prev + 1);
+                
+                trackTestImprovement(false, processingTime, originalLength, fallbackImprovement.length);
+                toast.success('기본 개선이 적용되었습니다');
+            }
         } finally {
             setIsTestLoading(false);
         }

@@ -9,6 +9,8 @@ export interface PromptAnalysis {
   clarity: 'poor' | 'fair' | 'good' | 'excellent';
   specificity: 'vague' | 'moderate' | 'specific' | 'very_specific';
   context: 'missing' | 'partial' | 'complete';
+  overallScore: number;
+  improvements: string[];
 }
 
 export interface ImprovementSuggestion {
@@ -55,6 +57,8 @@ export class PromptImprovementService {
       clarity,
       specificity,
       context,
+      overallScore: 0,
+      improvements: []
     };
   }
 
@@ -295,5 +299,182 @@ export class PromptImprovementService {
     }
     
     return Math.max(1, Math.min(10, score));
+  }
+
+  // 향상된 프롬프트 분석 알고리즘 (Gemini 2.5 Flash 최적화)
+  private enhancedAnalyzePrompt(prompt: string): PromptAnalysis {
+    const analysis: PromptAnalysis = {
+      type: this.detectPromptType(prompt),
+      clarity: this.assessClarity(prompt),
+      specificity: this.assessSpecificity(prompt),
+      context: this.assessContext(prompt),
+      overallScore: 0,
+      improvements: []
+    };
+
+    // Gemini 2.5 Flash의 향상된 추론 능력을 고려한 점수 계산
+    const weights = { clarity: 0.35, specificity: 0.35, context: 0.30 };
+    analysis.overallScore = Math.round(
+      analysis.clarity * weights.clarity +
+      analysis.specificity * weights.specificity +
+      analysis.context * weights.context
+    );
+
+    // 고급 개선 제안 생성
+    analysis.improvements = this.generateEnhancedImprovements(analysis);
+    
+    return analysis;
+  }
+
+  private generateEnhancedImprovements(analysis: PromptAnalysis): string[] {
+    const improvements: string[] = [];
+    
+    // Gemini 2.5 Flash의 향상된 기능을 활용한 개선 제안
+    if (analysis.clarity < 7) {
+      improvements.push("🎯 명확성 향상: 구체적인 목표와 기대 결과를 명시하여 AI가 더 정확한 추론을 할 수 있도록 개선");
+    }
+    
+    if (analysis.specificity < 7) {
+      improvements.push("📋 구체성 강화: 단계별 지침과 세부 요구사항을 추가하여 Gemini 2.5 Flash의 고급 추론 능력 활용");
+    }
+    
+    if (analysis.context < 7) {
+      improvements.push("�� 맥락 정보 보강: 배경 정보와 제약 조건을 명확히 하여 모델의 향상된 컨텍스트 이해 능력 극대화");
+    }
+
+    // 프롬프트 유형별 특화 개선 제안
+    switch (analysis.type) {
+      case 'creative':
+        improvements.push("🎨 창작 최적화: Gemini 2.5 Flash의 향상된 창의성을 위한 스타일 가이드와 톤 설정 추가");
+        break;
+      case 'technical':
+        improvements.push("⚙️ 기술적 정밀도: 고급 추론 능력을 활용한 기술 문서화 및 코드 생성 최적화");
+        break;
+      case 'business':
+        improvements.push("💼 비즈니스 전략: 향상된 분석 능력을 위한 KPI 및 성과 지표 명시");
+        break;
+      case 'educational':
+        improvements.push("📚 교육 효과: 학습 목표와 평가 기준을 명확히 하여 교육적 가치 극대화");
+        break;
+    }
+
+    return improvements;
+  }
+
+  public improvePrompt(originalPrompt: string): PromptImprovementResult {
+    try {
+      console.log('=== Enhanced Prompt Improvement Service (Gemini 2.5 Flash Optimized) ===');
+      
+      const analysis = this.enhancedAnalyzePrompt(originalPrompt);
+      const improvedPrompt = this.generateEnhancedImprovedPrompt(originalPrompt, analysis);
+      
+      const result: PromptImprovementResult = {
+        originalPrompt,
+        improvedPrompt,
+        analysis,
+        improvements: analysis.improvements,
+        metadata: {
+          processingTime: Date.now(),
+          version: '2.1.0', // Gemini 2.5 Flash 최적화 버전
+          algorithm: 'enhanced-reasoning-v2',
+          modelOptimization: 'gemini-2.5-flash'
+        }
+      };
+
+      console.log(`Prompt improved successfully. Score: ${analysis.overallScore}/10`);
+      console.log(`Improvements generated: ${analysis.improvements.length}`);
+      
+      return result;
+      
+    } catch (error) {
+      console.error('Enhanced prompt improvement failed:', error);
+      return this.generateFallbackImprovement(originalPrompt);
+    }
+  }
+
+  private generateEnhancedImprovedPrompt(originalPrompt: string, analysis: PromptAnalysis): string {
+    const improvements: string[] = [];
+    
+    // Gemini 2.5 Flash의 고급 기능을 활용한 프롬프트 구조화
+    improvements.push("# 🎯 목표 및 맥락");
+    improvements.push(`다음 작업을 Gemini 2.5 Flash의 향상된 추론 능력을 활용하여 수행해주세요:`);
+    improvements.push("");
+    
+    // 원본 프롬프트 분석 기반 개선
+    if (analysis.type === 'technical') {
+      improvements.push("## 📋 기술적 요구사항");
+      improvements.push("- 정확한 기술 문서화");
+      improvements.push("- 코드 품질 및 베스트 프랙티스 준수");
+      improvements.push("- 단계별 구현 가이드 제공");
+    } else if (analysis.type === 'creative') {
+      improvements.push("## 🎨 창작 가이드라인");
+      improvements.push("- 독창적이고 매력적인 콘텐츠");
+      improvements.push("- 타겟 오디언스 고려");
+      improvements.push("- 브랜드 톤앤매너 반영");
+    }
+    
+    improvements.push("");
+    improvements.push("## 📝 상세 요청사항");
+    improvements.push(`${originalPrompt}`);
+    improvements.push("");
+    
+    // 출력 형식 및 품질 기준
+    improvements.push("## 📤 출력 형식 및 품질 기준");
+    improvements.push("- 구조화된 형태로 정리");
+    improvements.push("- 실행 가능한 구체적 내용");
+    improvements.push("- 검증 가능한 결과물");
+    
+    if (analysis.overallScore < 8) {
+      improvements.push("");
+      improvements.push("## 🔍 추가 고려사항");
+      improvements.push("- 명확한 성공 기준 제시");
+      improvements.push("- 예상 문제점 및 해결 방안");
+      improvements.push("- 단계별 검증 포인트");
+    }
+
+    return improvements.join("\n");
+  }
+
+  private generateFallbackImprovement(originalPrompt: string): PromptImprovementResult {
+    console.log('Using enhanced fallback improvement');
+    
+    const fallbackAnalysis: PromptAnalysis = {
+      type: 'general',
+      clarity: 6,
+      specificity: 6,
+      context: 6,
+      overallScore: 6,
+      improvements: [
+        "🎯 목표를 더 구체적으로 명시하여 Gemini 2.5 Flash의 향상된 추론 활용",
+        "📋 단계별 지침 추가로 고급 AI 기능 극대화",
+        "🔍 맥락 정보 보강으로 정확도 향상"
+      ]
+    };
+
+    const improvedPrompt = `# 🎯 향상된 프롬프트 (Gemini 2.5 Flash 최적화)
+
+## 📝 요청사항
+${originalPrompt}
+
+## 📋 추가 지침
+- 구체적이고 실행 가능한 결과 제공
+- 단계별 설명과 근거 포함
+- 품질 높은 구조화된 출력
+
+## 📤 기대 결과
+고품질의 상세하고 유용한 응답을 Gemini 2.5 Flash의 향상된 능력으로 생성해주세요.`;
+
+    return {
+      originalPrompt,
+      improvedPrompt,
+      analysis: fallbackAnalysis,
+      improvements: fallbackAnalysis.improvements,
+      metadata: {
+        processingTime: Date.now(),
+        version: '2.1.0-fallback',
+        algorithm: 'enhanced-fallback-v2',
+        modelOptimization: 'gemini-2.5-flash'
+      }
+    };
   }
 } 

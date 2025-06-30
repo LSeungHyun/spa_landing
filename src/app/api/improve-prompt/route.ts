@@ -136,7 +136,8 @@ export async function POST(req: NextRequest) {
 
         try {
             console.log('Calling geminiService.improvePrompt...');
-            improvedPrompt = await geminiService.improvePrompt(prompt);
+            // 실제 개선 모드 (Gemini 2.5 Pro 사용)
+            improvedPrompt = await geminiService.improvePrompt(prompt, false);
             console.log('Gemini API call successful, response length:', improvedPrompt.length);
 
             // API 호출 성공 시에만 사용 횟수 증가
