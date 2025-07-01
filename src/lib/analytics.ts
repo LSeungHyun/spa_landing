@@ -6,6 +6,11 @@ declare global {
   interface Window {
     gtag: (...args: any[]) => void;
     dataLayer: any[];
+    posthog?: {
+      capture: (event: string, properties?: Record<string, any>) => void;
+      identify: (userId: string, properties?: Record<string, any>) => void;
+      reset: () => void;
+    };
   }
 }
 
@@ -20,10 +25,10 @@ export interface GAEvent {
 
 // 사용자 행동 이벤트 타입
 export interface UserBehaviorEvent {
-  event_name: 'page_view' | 'demo_start' | 'demo_complete' | 'pre_register_start' | 
-              'pre_register_complete' | 'cta_click' | 'scroll_depth' | 'exit_intent' |
-              'persona_select' | 'prompt_input' | 'prompt_improve' | 'email_submit' |
-              'form_error' | 'session_start' | 'session_end';
+  event_name: 'page_view' | 'demo_start' | 'demo_complete' | 'pre_register_start' |
+  'pre_register_complete' | 'cta_click' | 'scroll_depth' | 'exit_intent' |
+  'persona_select' | 'prompt_input' | 'prompt_improve' | 'email_submit' |
+  'form_error' | 'session_start' | 'session_end';
   event_category: 'engagement' | 'conversion' | 'interaction' | 'error';
   event_action: 'view' | 'click' | 'submit' | 'select' | 'scroll' | 'input' | 'complete' | 'exit';
   event_label?: string;
@@ -75,7 +80,7 @@ class AnalyticsManager {
 
     // GA4 측정 ID 설정 (환경변수에서 가져오기)
     const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
-    
+
     if (!GA_MEASUREMENT_ID) {
       console.warn('GA4 Measurement ID not found. Analytics will use development mode.');
       this.isInitialized = false;
@@ -115,9 +120,9 @@ class AnalyticsManager {
   // Supabase 백업 설정
   private setupSupabaseBackup(): void {
     // 프로덕션 환경에서만 Supabase 백업 활성화
-    this.supabaseBackup = process.env.NODE_ENV === 'production' && 
-                          !!process.env.NEXT_PUBLIC_SUPABASE_URL;
-    
+    this.supabaseBackup = process.env.NODE_ENV === 'production' &&
+      !!process.env.NEXT_PUBLIC_SUPABASE_URL;
+
     if (this.supabaseBackup && process.env.NODE_ENV === 'development') {
       console.log('Supabase backup enabled for analytics data');
     }
@@ -246,9 +251,9 @@ class AnalyticsManager {
 
     this.sendEvent(event);
     this.sendConversionEvent(conversionEvent);
-    this.backupToSupabase('pre_register_complete', { 
-      ...event.custom_parameters, 
-      email_masked: this.maskEmail(email) 
+    this.backupToSupabase('pre_register_complete', {
+      ...event.custom_parameters,
+      email_masked: this.maskEmail(email)
     });
   }
 
@@ -296,7 +301,7 @@ class AnalyticsManager {
   public trackScrollDepth(scroll_percentage: number, page_section?: string): void {
     // 25%, 50%, 75%, 100% 마일스톤에서만 추적
     const milestones = [25, 50, 75, 100];
-    const milestone = milestones.find(m => 
+    const milestone = milestones.find(m =>
       scroll_percentage >= m && scroll_percentage < m + 5
     );
 
@@ -467,7 +472,7 @@ class AnalyticsManager {
   // 이메일 마스킹 (개인정보 보호)
   private maskEmail(email: string): string {
     const [local, domain] = email.split('@');
-    const maskedLocal = local.length > 2 
+    const maskedLocal = local.length > 2
       ? local.substring(0, 2) + '*'.repeat(local.length - 2)
       : local;
     return `${maskedLocal}@${domain}`;
@@ -496,7 +501,7 @@ export function useScrollTracking() {
           const scrollTop = window.pageYOffset;
           const docHeight = document.documentElement.scrollHeight - window.innerHeight;
           const scrollPercent = Math.round((scrollTop / docHeight) * 100);
-          
+
           analytics.trackScrollDepth(scrollPercent);
           ticking = false;
         });
@@ -532,31 +537,31 @@ export function useExitIntentTracking() {
 // 편의 함수들
 const analytics = AnalyticsManager.getInstance();
 
-export const trackPageView = (path: string, title?: string) => 
+export const trackPageView = (path: string, title?: string) =>
   analytics.trackPageView(path, title);
 
-export const trackDemoStart = (persona?: string, inputLength?: number) => 
+export const trackDemoStart = (persona?: string, inputLength?: number) =>
   analytics.trackDemoStart(persona, inputLength);
 
-export const trackDemoComplete = (persona?: string, inputLength?: number, outputLength?: number, improvementRatio?: number) => 
+export const trackDemoComplete = (persona?: string, inputLength?: number, outputLength?: number, improvementRatio?: number) =>
   analytics.trackDemoComplete(persona, inputLength, outputLength, improvementRatio);
 
-export const trackPreRegistration = (email: string, persona?: string, source?: string) => 
+export const trackPreRegistration = (email: string, persona?: string, source?: string) =>
   analytics.trackPreRegistration(email, persona, source);
 
-export const trackPersonaSelect = (persona: string, previousPersona?: string) => 
+export const trackPersonaSelect = (persona: string, previousPersona?: string) =>
   analytics.trackPersonaSelect(persona, previousPersona);
 
-export const trackCTAClick = (ctaText: string, ctaLocation: string, pageSection?: string) => 
+export const trackCTAClick = (ctaText: string, ctaLocation: string, pageSection?: string) =>
   analytics.trackCTAClick(ctaText, ctaLocation, pageSection);
 
-export const trackFormError = (form: string, field: string, error: string) => 
+export const trackFormError = (form: string, field: string, error: string) =>
   analytics.trackFormError(form, field, error);
 
-export const trackPerformance = (metric: string, duration: number, pageUrl?: string) => 
+export const trackPerformance = (metric: string, duration: number, pageUrl?: string) =>
   analytics.trackPerformance(metric, duration, pageUrl);
 
-export const trackABTestVariant = (testName: string, variant: string, userGroup?: string) => 
+export const trackABTestVariant = (testName: string, variant: string, userGroup?: string) =>
   analytics.trackABTestVariant(testName, variant, userGroup);
 
 // API 사용량 추적을 위한 새로운 이벤트 추가
