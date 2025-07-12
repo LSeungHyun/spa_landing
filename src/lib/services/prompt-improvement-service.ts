@@ -13,11 +13,30 @@ export interface PromptAnalysis {
   improvements: string[];
 }
 
+// 점수 시스템을 위한 새로운 인터페이스
+export interface DetailedPromptScore {
+  overall: number;
+  categories: {
+    clarity: number;
+    specificity: number;
+    context: number;
+    structure: number;
+    completeness: number;
+  };
+  breakdown: {
+    strengths: string[];
+    weaknesses: string[];
+    suggestions: string[];
+  };
+  confidence: number;
+  grade: 'A' | 'B' | 'C' | 'D' | 'F';
+}
+
 export interface ImprovementSuggestion {
   improvedPrompt: string;
   improvements: string[];
   tips: string[];
-  score: number; // 1-10
+  score: number;
 }
 
 export interface PromptImprovementResult {
@@ -29,7 +48,7 @@ export interface PromptImprovementResult {
     processingTime: number;
     version: string;
     algorithm: string;
-    modelOptimization: string;
+    modelOptimization?: string;
   };
 }
 
@@ -387,7 +406,7 @@ export class PromptImprovementService {
 
     const contextScore = this.getScoreFromQuality(analysis.context);
     if (contextScore < 7) {
-      improvements.push("�� 맥락 정보 보강: 배경 정보와 제약 조건을 명확히 하여 모델의 향상된 컨텍스트 이해 능력 극대화");
+      improvements.push("🔍 맥락 정보 보강: 배경 정보와 제약 조건을 명확히 하여 모델의 향상된 컨텍스트 이해 능력 극대화");
     }
 
     // 프롬프트 유형별 특화 개선 제안
@@ -524,6 +543,340 @@ ${originalPrompt}
         algorithm: 'enhanced-fallback-v2',
         modelOptimization: 'gemini-2.5-flash'
       }
+    };
+  }
+
+  /**
+   * 실시간 점수 계산을 위한 상세 분석
+   * 타이핑 중에도 빠르게 동작하도록 최적화
+   */
+  public calculateDetailedScore(prompt: string): DetailedPromptScore {
+    const text = prompt.toLowerCase().trim();
+    
+    if (!text || text.length < 3) {
+      return this.getEmptyScore();
+    }
+
+    // 각 카테고리별 점수 계산
+    const clarity = this.calculateClarityScore(text);
+    const specificity = this.calculateSpecificityScore(text);
+    const context = this.calculateContextScore(text);
+    const structure = this.calculateStructureScore(text);
+    const completeness = this.calculateCompletenessScore(text);
+
+    // 가중치 적용하여 전체 점수 계산
+    const weights = {
+      clarity: 0.25,
+      specificity: 0.25, 
+      context: 0.20,
+      structure: 0.15,
+      completeness: 0.15
+    };
+
+    const overall = Math.round(
+      clarity * weights.clarity +
+      specificity * weights.specificity +
+      context * weights.context +
+      structure * weights.structure +
+      completeness * weights.completeness
+    );
+
+    // 강점, 약점, 제안사항 분석
+    const breakdown = this.analyzePromptBreakdown(text, {
+      clarity, specificity, context, structure, completeness
+    });
+
+    // 신뢰도 계산 (텍스트 길이와 복잡성 기반)
+    const confidence = this.calculateConfidence(text, overall);
+
+    // 등급 계산
+    const grade = this.calculateGrade(overall);
+
+    return {
+      overall,
+      categories: {
+        clarity,
+        specificity,
+        context,
+        structure,
+        completeness
+      },
+      breakdown,
+      confidence,
+      grade
+    };
+  }
+
+  private calculateClarityScore(text: string): number {
+    let score = 50; // 기본 점수
+
+    // 긍정적 요소들
+    const clarityIndicators = [
+      /명확한|구체적인|정확한|세부적인/g,
+      /단계별|순서대로|차례로/g,
+      /목표|목적|의도/g,
+      /요구사항|조건|기준/g,
+      /예시|사례|샘플/g
+    ];
+
+    clarityIndicators.forEach(pattern => {
+      const matches = text.match(pattern);
+      if (matches) {
+        score += Math.min(matches.length * 5, 15);
+      }
+    });
+
+    // 부정적 요소들
+    const clarityDeductors = [
+      /대충|적당히|알아서|뭔가/g,
+      /아무거나|그냥|막|대략/g,
+      /\?{2,}|\.{3,}/g // 연속 물음표나 말줄임표
+    ];
+
+    clarityDeductors.forEach(pattern => {
+      const matches = text.match(pattern);
+      if (matches) {
+        score -= matches.length * 8;
+      }
+    });
+
+    // 문장 구조 분석
+    const sentences = text.split(/[.!?]/).filter(s => s.trim().length > 0);
+    if (sentences.length > 1) {
+      score += 10; // 여러 문장으로 구성된 경우 가점
+    }
+
+    // 길이 보정
+    if (text.length < 20) score -= 15;
+    if (text.length > 100) score += 10;
+
+    return Math.max(0, Math.min(100, score));
+  }
+
+  private calculateSpecificityScore(text: string): number {
+    let score = 40;
+
+    // 구체적인 수치나 기준
+    const specificityIndicators = [
+      /\d+[개월일년시간분초]/g,
+      /\d+[%퍼센트]/g,
+      /\d+[명개]/g,
+      /[A-Z]{2,}/g, // 약어나 고유명사
+      /\b(API|UI|UX|SEO|AI|ML|DB|SQL)\b/gi,
+      /예를 들어|구체적으로|정확히|반드시/g
+    ];
+
+    specificityIndicators.forEach(pattern => {
+      const matches = text.match(pattern);
+      if (matches) {
+        score += Math.min(matches.length * 8, 25);
+      }
+    });
+
+    // 추상적 표현 감점
+    const abstractTerms = [
+      /좋은|나쁜|멋진|훌륭한|최고의/g,
+      /어떤|무엇|언제|어디서/g,
+      /일반적인|보통의|평범한/g
+    ];
+
+    abstractTerms.forEach(pattern => {
+      const matches = text.match(pattern);
+      if (matches) {
+        score -= matches.length * 5;
+      }
+    });
+
+    return Math.max(0, Math.min(100, score));
+  }
+
+  private calculateContextScore(text: string): number {
+    let score = 45;
+
+    // 맥락 제공 요소들
+    const contextIndicators = [
+      /배경|상황|환경|조건/g,
+      /목적|이유|왜냐하면|때문에/g,
+      /대상|타겟|사용자|고객/g,
+      /제약|한계|조건|규칙/g,
+      /현재|지금|최근|요즘/g
+    ];
+
+    contextIndicators.forEach(pattern => {
+      const matches = text.match(pattern);
+      if (matches) {
+        score += Math.min(matches.length * 7, 20);
+      }
+    });
+
+    // 역할이나 페르소나 언급
+    const roleIndicators = [
+      /개발자|디자이너|마케터|기획자|PM/g,
+      /전문가|컨설턴트|분석가|연구원/g,
+      /창업자|CEO|CTO|팀장/g
+    ];
+
+    roleIndicators.forEach(pattern => {
+      const matches = text.match(pattern);
+      if (matches) {
+        score += Math.min(matches.length * 10, 25);
+      }
+    });
+
+    return Math.max(0, Math.min(100, score));
+  }
+
+  private calculateStructureScore(text: string): number {
+    let score = 50;
+
+    // 구조적 요소들
+    if (text.includes('\n') || text.includes('|')) score += 15;
+    if (text.match(/\d+\./g)) score += 15; // 번호 매기기
+    if (text.match(/[-*•]/g)) score += 10; // 불릿 포인트
+    if (text.match(/:/g)) score += 10; // 콜론 사용
+    
+    // 논리적 연결어
+    const logicalConnectors = [
+      /따라서|그러므로|결과적으로/g,
+      /또한|그리고|더불어/g,
+      /하지만|그러나|반면/g,
+      /먼저|다음|마지막으로/g
+    ];
+
+    logicalConnectors.forEach(pattern => {
+      const matches = text.match(pattern);
+      if (matches) {
+        score += matches.length * 5;
+      }
+    });
+
+    return Math.max(0, Math.min(100, score));
+  }
+
+  private calculateCompletenessScore(text: string): number {
+    let score = 40;
+
+    // 완성도 지표들
+    const completenessIndicators = [
+      /결과|산출물|아웃풋|출력/g,
+      /형식|포맷|양식|템플릿/g,
+      /기준|평가|검토|확인/g,
+      /완료|마무리|끝|최종/g
+    ];
+
+    completenessIndicators.forEach(pattern => {
+      const matches = text.match(pattern);
+      if (matches) {
+        score += Math.min(matches.length * 8, 20);
+      }
+    });
+
+    // 질문이나 요청의 완성도
+    if (text.includes('?')) {
+      const questions = text.match(/\?/g);
+      if (questions && questions.length <= 2) {
+        score += 15; // 적절한 질문
+      } else if (questions && questions.length > 3) {
+        score -= 10; // 너무 많은 질문
+      }
+    }
+
+    // 길이 기반 완성도
+    if (text.length > 50) score += 10;
+    if (text.length > 150) score += 15;
+    if (text.length > 300) score += 10;
+
+    return Math.max(0, Math.min(100, score));
+  }
+
+  private analyzePromptBreakdown(text: string, scores: any) {
+    const strengths: string[] = [];
+    const weaknesses: string[] = [];
+    const suggestions: string[] = [];
+
+    // 강점 분석
+    if (scores.clarity >= 75) strengths.push("명확하고 이해하기 쉬운 표현");
+    if (scores.specificity >= 75) strengths.push("구체적이고 세부적인 요구사항");
+    if (scores.context >= 75) strengths.push("충분한 배경 정보와 맥락");
+    if (scores.structure >= 75) strengths.push("체계적이고 논리적인 구조");
+    if (scores.completeness >= 75) strengths.push("완성도 높은 요청사항");
+
+    // 약점 분석
+    if (scores.clarity < 60) {
+      weaknesses.push("목표와 의도가 불분명함");
+      suggestions.push("🎯 구체적인 목표와 기대 결과를 명시해보세요");
+    }
+    if (scores.specificity < 60) {
+      weaknesses.push("추상적이고 모호한 표현");
+      suggestions.push("📋 구체적인 수치, 기준, 예시를 추가해보세요");
+    }
+    if (scores.context < 60) {
+      weaknesses.push("배경 정보와 맥락 부족");
+      suggestions.push("🔍 상황, 대상, 제약조건 등 맥락 정보를 보강해보세요");
+    }
+    if (scores.structure < 60) {
+      weaknesses.push("구조적 정리 부족");
+      suggestions.push("📝 번호 매기기나 단계별 정리로 구조화해보세요");
+    }
+    if (scores.completeness < 60) {
+      weaknesses.push("요청사항의 완성도 부족");
+      suggestions.push("✅ 원하는 결과물의 형식과 품질 기준을 명시해보세요");
+    }
+
+    // 기본 제안사항
+    if (text.length < 30) {
+      suggestions.push("💬 더 자세한 설명을 추가하면 더 나은 결과를 얻을 수 있습니다");
+    }
+
+    return { strengths, weaknesses, suggestions };
+  }
+
+  private calculateConfidence(text: string, score: number): number {
+    let confidence = 80;
+
+    // 텍스트 길이 기반 신뢰도
+    if (text.length < 20) confidence -= 30;
+    else if (text.length < 50) confidence -= 15;
+    else if (text.length > 200) confidence += 10;
+
+    // 점수 기반 신뢰도
+    if (score < 40) confidence -= 20;
+    else if (score > 80) confidence += 15;
+
+    // 특수 문자나 이모지 과다 사용 시 신뢰도 감소
+    const specialChars = text.match(/[!@#$%^&*()_+={}\[\]|\\:";'<>?,./~`]/g);
+    if (specialChars && specialChars.length > text.length * 0.1) {
+      confidence -= 15;
+    }
+
+    return Math.max(50, Math.min(100, confidence));
+  }
+
+  private calculateGrade(score: number): 'A' | 'B' | 'C' | 'D' | 'F' {
+    if (score >= 90) return 'A';
+    if (score >= 80) return 'B';
+    if (score >= 70) return 'C';
+    if (score >= 60) return 'D';
+    return 'F';
+  }
+
+  private getEmptyScore(): DetailedPromptScore {
+    return {
+      overall: 0,
+      categories: {
+        clarity: 0,
+        specificity: 0,
+        context: 0,
+        structure: 0,
+        completeness: 0
+      },
+      breakdown: {
+        strengths: [],
+        weaknesses: ["프롬프트를 입력해주세요"],
+        suggestions: ["✍️ 원하는 작업이나 질문을 구체적으로 작성해보세요"]
+      },
+      confidence: 0,
+      grade: 'F'
     };
   }
 } 

@@ -1,4 +1,4 @@
-import { Boxes, Code, Scale, Search, Smartphone, Zap, Target, Clock, Users, Lightbulb } from "lucide-react";
+import { Boxes, Code, Scale, Search, Smartphone, Zap, Target, Clock, Users, Lightbulb, FileText, Workflow, Rocket } from "lucide-react";
 import { LucideIcon } from "lucide-react";
 
 export interface Feature {
@@ -11,44 +11,44 @@ export interface Feature {
 
 export const defaultFeatures: Feature[] = [
     {
-        title: "스마트 프롬프트 생성",
-        description: "AI가 당신의 의도를 파악해 최적의 프롬프트를 자동 생성합니다",
-        icon: Lightbulb,
+        title: "아이디어 → 실행 문서 변환",
+        description: "막연한 아이디어를 PRD, 기획서, 사업계획서 등 즉시 활용 가능한 실행 문서로 자동 변환합니다",
+        icon: FileText,
         size: "large",
         image: "/images/features/smart-prompt.jpg"
     },
     {
-        title: "실시간 최적화",
-        description: "사용 패턴을 학습해 개인 맞춤형 결과를 제공합니다",
-        icon: Zap,
+        title: "페르소나 맞춤 특화",
+        description: "PM, 창업자, 마케터 등 6개 역할별 특화된 템플릿으로 더 정확하고 실용적인 결과물을 제공합니다",
+        icon: Users,
         size: "small",
         image: "/images/features/optimization.jpg"
     },
     {
-        title: "다양한 템플릿",
-        description: "직업군별, 용도별 특화된 프롬프트 템플릿을 제공합니다",
-        icon: Boxes,
+        title: "ChatGPT 네이티브 통합",
+        description: "브라우저 전환 없이 ChatGPT 사이드패널에서 바로 작동하는 원클릭 워크플로우를 제공합니다",
+        icon: Workflow,
         size: "small",
         image: "/images/features/templates.jpg"
     },
     {
-        title: "협업 기능",
-        description: "팀원들과 프롬프트를 공유하고 함께 개선할 수 있습니다",
-        icon: Users,
+        title: "1분 완성 워크플로우",
+        description: "아이디어 입력부터 완성된 결과물까지 1분 이내 완료되는 초고속 생산성 워크플로우입니다",
+        icon: Rocket,
         size: "small",
         image: "/images/features/collaboration.jpg"
     },
     {
-        title: "성과 분석",
-        description: "프롬프트 성능을 분석하고 개선점을 제안합니다",
+        title: "실시간 품질 검증",
+        description: "Before/After 비교를 통해 개선된 프롬프트의 품질을 즉시 확인하고 최적의 결과를 보장합니다",
         icon: Target,
         size: "large",
         image: "/images/features/analytics.jpg"
     },
     {
-        title: "빠른 응답",
-        description: "1분 이내 고품질 결과물을 생성합니다",
-        icon: Clock,
+        title: "전문가급 결과물 보장",
+        description: "초보자도 전문가 수준의 기획서, 제안서, 전략 문서를 생성할 수 있도록 지원합니다",
+        icon: Lightbulb,
         size: "small",
         image: "/images/features/speed.jpg"
     }

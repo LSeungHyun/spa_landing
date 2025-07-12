@@ -17,85 +17,85 @@ export const personas: Record<Persona, PersonaData> = {
     'pm-developer': {
         title: 'IT 스타트업 PM/개발자',
         subtitle: 'ChatGPT 옆에서 기획서 작성부터 기술 문서까지',
-        description: '브라우저에서 바로 사용하는 전문적인 프롬프트 생성으로 프로덕트 기획서와 기술 문서를 AI가 도와드립니다',
+        description: '복잡한 기술 요구사항을 상세한 기능명세서와 개발 로드맵으로 즉시 변환하는 전문 도구입니다',
         placeholder: '예: 구독 결제 기능을 추가하고 싶어요',
-        heroText: '복잡한 기술 요구사항을 명확한 기획서로 변환',
-        problemStatement: '아이디어만 있으면 충분합니다.',
-        solution: '초보 입력, 전문가 결과.',
+        heroText: '복잡한 기술 요구사항을 명확한 PRD와 개발 계획서로 변환',
+        problemStatement: '막연한 아이디어만 있으면 충분합니다.',
+        solution: '아이디어 → 실행 가능한 기술 문서',
         examples: [
-            '사용자 인증 시스템 구현',
-            '실시간 알림 기능 추가',
-            '데이터 분석 대시보드 설계'
+            '사용자 인증 시스템 → 상세 API 명세서',
+            '실시간 알림 기능 → 기술 아키텍처 설계서',
+            '데이터 분석 대시보드 → 4주 개발 로드맵'
         ]
     },
     'content-creator': {
         title: '디지털 콘텐츠 크리에이터',
         subtitle: 'ChatGPT 옆에서 유튜브부터 블로그까지',
-        description: '브라우저 확장 프로그램으로 매력적인 콘텐츠 기획안을 AI가 완성해드립니다',
+        description: '막연한 콘텐츠 아이디어를 완성된 기획안과 제작 가이드로 변환하는 크리에이터 전용 도구입니다',
         placeholder: '예: 유튜브 채널 기획안을 만들고 싶어요',
-        heroText: '막연한 콘텐츠 아이디어를 완성된 기획안으로 변환',
+        heroText: '막연한 콘텐츠 아이디어를 완성된 제작 기획서로 변환',
         problemStatement: '아이디어만 있으면 충분합니다.',
-        solution: '초보 입력, 전문가 결과.',
+        solution: '아이디어 → 완성된 콘텐츠 기획서',
         examples: [
-            '유튜브 채널 컨셉 기획',
-            '블로그 포스팅 시리즈',
-            '인스타그램 브랜딩 전략'
+            '유튜브 채널 컨셉 → 6개월 콘텐츠 로드맵',
+            '블로그 포스팅 아이디어 → 12편 시리즈 기획서',
+            '인스타그램 브랜딩 → 통합 마케팅 전략서'
         ]
     },
     'startup-founder': {
         title: '스타트업 창업자',
         subtitle: 'ChatGPT 옆에서 사업계획서부터 투자유치까지',
-        description: '브라우저에서 즉시 사용하는 창업 아이디어를 구체적인 사업 계획서로 변환합니다',
+        description: '창업 아이디어를 체계적인 사업계획서와 투자 제안서로 변환하는 창업자 필수 도구입니다',
         placeholder: '예: 배달음식 플랫폼 사업을 시작하고 싶어요',
-        heroText: '모호한 창업 아이디어를 체계적인 사업계획서로 변환',
+        heroText: '모호한 창업 아이디어를 체계적인 사업계획서와 투자 제안서로 변환',
         problemStatement: '창업 아이디어만 있으면 충분합니다.',
-        solution: '아이디어 → 전문 사업계획서',
+        solution: '아이디어 → 투자 가능한 사업계획서',
         examples: [
-            'AI 기반 헬스케어 서비스',
-            '친환경 배달 플랫폼',
-            'B2B SaaS 솔루션 기획'
+            'AI 헬스케어 아이디어 → 시장분석 포함 사업계획서',
+            '친환경 배달 플랫폼 → 투자유치용 피치덱',
+            'B2B SaaS 솔루션 → 3년 성장 로드맵'
         ]
     },
     'marketer': {
         title: '디지털 마케터',
         subtitle: 'ChatGPT 옆에서 캠페인 기획부터 전략 수립까지',
-        description: 'Chrome 확장 프로그램으로 효과적인 마케팅 캠페인과 전략을 AI가 설계해드립니다',
+        description: '마케팅 목표를 데이터 기반 캠페인 전략과 실행 계획서로 변환하는 마케터 전용 도구입니다',
         placeholder: '예: 신제품 론칭 마케팅 캠페인을 기획하고 싶어요',
-        heroText: '마케팅 아이디어를 데이터 기반 전략으로 변환',
+        heroText: '마케팅 아이디어를 데이터 기반 캠페인 전략서로 변환',
         problemStatement: '마케팅 목표만 있으면 충분합니다.',
-        solution: '목표 → 전문 마케팅 전략',
+        solution: '목표 → 실행 가능한 마케팅 전략서',
         examples: [
-            'SNS 바이럴 캠페인 기획',
-            '브랜드 인지도 향상 전략',
-            'ROI 최적화 광고 전략'
+            'SNS 바이럴 아이디어 → 4주 캠페인 실행계획서',
+            '브랜드 인지도 향상 → 통합 마케팅 전략서',
+            'ROI 최적화 목표 → 성과 측정 가능한 광고 전략'
         ]
     },
     'consultant': {
         title: '비즈니스 컨설턴트',
         subtitle: 'ChatGPT 옆에서 전략수립부터 프로세스 개선까지',
-        description: '브라우저 확장으로 복잡한 비즈니스 문제를 체계적인 해결책으로 변환합니다',
+        description: '복잡한 비즈니스 문제를 체계적인 솔루션과 실행 로드맵으로 변환하는 컨설팅 전문 도구입니다',
         placeholder: '예: 조직 효율성을 개선하는 방안을 찾고 싶어요',
-        heroText: '비즈니스 과제를 전문 컨설팅 보고서로 변환',
+        heroText: '비즈니스 과제를 전문 컨설팅 보고서와 실행 계획서로 변환',
         problemStatement: '문제 상황만 있으면 충분합니다.',
-        solution: '문제 → 전문 솔루션',
+        solution: '문제 → 실행 가능한 솔루션 보고서',
         examples: [
-            '디지털 전환 전략 수립',
-            '조직문화 개선 방안',
-            '비용 최적화 프로젝트'
+            '디지털 전환 과제 → 6개월 DX 로드맵',
+            '조직문화 개선 → 단계별 실행 가이드',
+            '비용 최적화 목표 → ROI 측정 가능한 개선 계획'
         ]
     },
     'freelancer': {
         title: '프리랜서',
         subtitle: 'ChatGPT 옆에서 제안서부터 포트폴리오까지',
-        description: 'Chrome 확장 프로그램으로 전문적인 제안서와 포트폴리오를 AI가 완성해드립니다',
+        description: '서비스 아이디어를 전문적인 제안서와 프로젝트 계획서로 변환하는 프리랜서 필수 도구입니다',
         placeholder: '예: 웹사이트 리뉴얼 제안서를 작성하고 싶어요',
-        heroText: '프리랜서 아이디어를 전문 제안서로 변환',
+        heroText: '프리랜서 아이디어를 전문 제안서와 프로젝트 계획서로 변환',
         problemStatement: '서비스 아이디어만 있으면 충분합니다.',
-        solution: '아이디어 → 전문 제안서',
+        solution: '아이디어 → 수주 가능한 전문 제안서',
         examples: [
-            '웹개발 프로젝트 제안서',
-            '브랜딩 디자인 포트폴리오',
-            '컨설팅 서비스 소개서'
+            '웹개발 아이디어 → 상세 견적서 포함 제안서',
+            '브랜딩 디자인 → 단계별 작업 계획서',
+            '컨설팅 서비스 → 성과 보장형 서비스 소개서'
         ]
     }
 };
@@ -263,7 +263,7 @@ export interface ChromeExtensionData {
 export const chromeExtensionData: ChromeExtensionData = {
     heroTitle: "🧠 ChatGPT가 더 똑똑해지는 마법",
     heroSubtitle: "📌 브라우저에서 즉시 작동하는 크롬 확장 프로그램",
-    heroDescription: "ChatGPT 옆에 딱 붙어 막연한 아이디어를 1분 안에 완성된 결과물로",
+    heroDescription: "ChatGPT 옆에 딱 붙어 막연한 아이디어를 1분 안에 실행 가능한 결과물로",
     ctaPrimary: "Chrome 확장 프로그램 출시 알림 받기",
     ctaSecondary: "👇 지금 바로 체험해보세요",
     trustElements: [

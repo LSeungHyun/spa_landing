@@ -1,241 +1,124 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { toast } from 'sonner';
-import { Container } from '@/components/ui/container';
+import { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
+import { toast } from 'sonner';
+import { 
+    Sparkles, 
+    Copy, 
+    RotateCcw, 
+    Zap,
+    ChevronDown,
+    ChevronUp
+} from 'lucide-react';
 
-import { Send, Wand2, Loader2, Sparkles, Users, Star, ArrowRight, CheckCircle, Menu, X, Mail, Gift, Zap, Clock, Copy, Check, Crown, type LucideProps } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { MobileNavBar } from '@/components/layout/mobile-nav-bar';
-import { EnhancedPreRegistrationForm } from '@/components/shared/enhanced-pre-registration-form';
-import { TypingAnimation } from '@/components/shared/typing-animation';
-import { EnhanceInterceptModal } from '@/components/shared/enhance-intercept-modal';
-import { RegistrationBanner } from '@/components/shared/registration-banner';
 import { BeforeAfterHeroSection } from '@/components/sections/before-after-hero-section';
-import { FeaturesSection } from '@/components/sections/features-section'
-import { EarlyBirdSection } from '@/components/sections/early-bird-section'
-import { PreRegistrationForm } from '@/components/spa/pre-registration-form'
-import FinalCTASection from '@/components/sections/final-cta-section'
-import { useAPIMonitoring } from '@/hooks/use-api-monitoring';
+import { FeaturesSection } from '@/components/sections/features-section';
+import { HowItWorksSection } from '@/components/sections/how-it-works-section';
+import { PricingSection } from '@/components/sections/pricing-section';
+import { PreRegistrationSection } from '@/components/sections/pre-registration-section';
+import { PromptComparison } from '@/components/shared/prompt-comparison';
+import { PromptScoreDisplay } from '@/components/shared/prompt-score-display';
+import { PersonaSelector } from '@/components/shared/persona-selector';
+import { getPersonaData, getAllPersonas, type Persona } from '@/components/data/landing-data';
+import { PromptImprovementService, DetailedPromptScore } from '@/lib/services/prompt-improvement-service';
 
-
-interface ChatMessage {
-    id: string;
-    type: 'user' | 'ai';
-    content: string;
-    timestamp: Date;
-    isTyping?: boolean;
+// 사용량 정보 인터페이스
+interface UsageInfo {
+    remainingCount: number;
+    usageCount: number;
+    resetTime: string;
+    maxUsageCount: number;
 }
 
-// API 응답 타입 정의
+// API 응답 인터페이스
 interface ImprovePromptResponse {
-    improvedPrompt?: string;
+    improvedPrompt: string;
+    usage: UsageInfo;
     error?: string;
-    usageInfo?: {
-        remainingCount: number;
-        usageCount: number;
-        resetTime: string;
-        maxUsageCount: number;
-    };
+}
+
+// 실시간 점수 계산을 위한 debounce hook
+function useDebounce<T>(value: T, delay: number): T {
+    const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedValue(value);
+        }, delay);
+
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [value, delay]);
+
+    return debouncedValue;
 }
 
 export default function HomePage() {
-    const { trackAPICall, trackTestImprovement } = useAPIMonitoring();
-    
+    // 기존 상태들
     const [inputText, setInputText] = useState('');
-    const [isTestLoading, setIsTestLoading] = useState(false);
+    const [improvedText, setImprovedText] = useState('');
     const [isImproveLoading, setIsImproveLoading] = useState(false);
-    const [isMounted, setIsMounted] = useState(false);
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const [showPreRegistration, setShowPreRegistration] = useState(false);
-    const [email, setEmail] = useState('');
-    const [isRegistering, setIsRegistering] = useState(false);
-    const [hasTriedDemo, setHasTriedDemo] = useState(false);
-    const [improveCount, setImproveCount] = useState(0);
-    const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
-    const [hasUsedImproveButton, setHasUsedImproveButton] = useState(false);
-    const [hasShownImproveSuggestion, setHasShownImproveSuggestion] = useState(false);
-    
-    // 새로운 상태들
-    const [showInterceptModal, setShowInterceptModal] = useState(false);
-    const [showRegistrationBanner, setShowRegistrationBanner] = useState(false);
-    const [bannerDismissed, setBannerDismissed] = useState(false);
+    const [isTestLoading, setIsTestLoading] = useState(false);
+    const [selectedPersona, setSelectedPersona] = useState<Persona>('pm-developer');
+    const [usageInfo, setUsageInfo] = useState<UsageInfo | null>(null);
 
-    
+    // 새로운 점수 시스템 상태들
+    const [currentScore, setCurrentScore] = useState<DetailedPromptScore | null>(null);
+    const [originalScore, setOriginalScore] = useState<DetailedPromptScore | null>(null);
+    const [improvedScore, setImprovedScore] = useState<DetailedPromptScore | null>(null);
+    const [showScorePanel, setShowScorePanel] = useState(false);
+    const [isScoreCalculating, setIsScoreCalculating] = useState(false);
 
-    const demoRef = useRef<HTMLDivElement>(null);
-    const preRegRef = useRef<HTMLDivElement>(null);
+    // 실시간 점수 계산을 위한 debounced 값
+    const debouncedInputText = useDebounce(inputText, 500);
+
+    // 서비스 인스턴스
+    const promptService = useRef(PromptImprovementService.getInstance());
     const textareaRef = useRef<HTMLTextAreaElement>(null);
-    const chatContainerRef = useRef<HTMLDivElement>(null);
-    const [isUserScrolling, setIsUserScrolling] = useState(false);
-    const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
-    const lastScrollTopRef = useRef<number>(0);
 
-    const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
-        {
-            id: '1',
-            type: 'ai',
-            content: '안녕하세요! 저는 SPA(Smart Prompt Assistant)입니다. 아래 샘플을 클릭하거나 직접 입력해서 프롬프트 개선 효과를 바로 체험해보세요! 🚀',
-            timestamp: new Date()
-        }
-    ]);
-
-    // Hydration 안전성을 위한 useEffect
+    // 실시간 점수 계산
     useEffect(() => {
-        setIsMounted(true);
-    }, []);
-
-    // 스마트 자동 스크롤 함수
-    const scrollToBottom = useCallback((force = false) => {
-        if (!chatContainerRef.current) return;
-        
-        const container = chatContainerRef.current;
-        const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 50;
-        
-        // 강제 스크롤이거나 사용자가 하단 근처에 있을 때만 자동 스크롤
-        if (force || (shouldAutoScroll && (isAtBottom || !isUserScrolling))) {
-            container.scrollTo({
-                top: container.scrollHeight,
-                behavior: 'smooth'
-            });
-        }
-    }, [shouldAutoScroll, isUserScrolling]);
-
-    // 사용자 스크롤 감지
-    useEffect(() => {
-        const container = chatContainerRef.current;
-        if (!container) return;
-
-        let scrollTimeout: NodeJS.Timeout;
-
-        const handleScroll = () => {
-            const currentScrollTop = container.scrollTop;
-            const maxScrollTop = container.scrollHeight - container.clientHeight;
-            const isAtBottom = currentScrollTop >= maxScrollTop - 10;
-
-            // 사용자가 위로 스크롤했는지 감지
-            if (currentScrollTop < lastScrollTopRef.current && !isAtBottom) {
-                setIsUserScrolling(true);
-                setShouldAutoScroll(false);
-            } else if (isAtBottom) {
-                setIsUserScrolling(false);
-                setShouldAutoScroll(true);
-            }
-
-            lastScrollTopRef.current = currentScrollTop;
-
-            // 스크롤 중 상태 관리
-            setIsUserScrolling(true);
-            clearTimeout(scrollTimeout);
-            scrollTimeout = setTimeout(() => {
-                setIsUserScrolling(false);
-            }, 150);
-        };
-
-        container.addEventListener('scroll', handleScroll, { passive: true });
-
-        return () => {
-            container.removeEventListener('scroll', handleScroll);
-            clearTimeout(scrollTimeout);
-        };
-    }, []);
-
-    // 채팅 메시지 변경 시 자동 스크롤
-    useEffect(() => {
-        if (chatMessages.length > 1) {
-            // 새 메시지 추가 시 강제 스크롤
-            setTimeout(() => scrollToBottom(true), 100);
-        }
-    }, [chatMessages, scrollToBottom]);
-
-    // 타이핑 진행 중 점진적 스크롤
-    const handleTypingProgress = useCallback((progress: number) => {
-        if (progress > 0.1 && shouldAutoScroll) { // 10% 이상 타이핑 진행 시
-            setTimeout(() => scrollToBottom(false), 50);
-        }
-    }, [scrollToBottom, shouldAutoScroll]);
-
-    // 3회 체험 후 자동으로 사전 등록 유도
-    useEffect(() => {
-        if (improveCount >= 3 && !showPreRegistration) {
+        if (debouncedInputText.trim()) {
+            setIsScoreCalculating(true);
+            
+            // 비동기로 점수 계산 (UI 블로킹 방지)
             setTimeout(() => {
-                setShowPreRegistration(true);
-                preRegRef.current?.scrollIntoView({ behavior: 'smooth' });
-            }, 1000);
-        }
-    }, [improveCount, showPreRegistration]);
-
-    // 3회 향상 후 등록 배너 표시
-    useEffect(() => {
-        if (improveCount >= 3 && !bannerDismissed) {
-            setTimeout(() => {
-                setShowRegistrationBanner(true);
-            }, 2000);
-        }
-    }, [improveCount, bannerDismissed]);
-
-
-
-    // 샘플 프롬프트 - 즉시 체험 유도
-    const samplePrompts = [
-        "고객에게 제품 소개 이메일을 작성해주세요.",
-        "마케팅 캠페인 아이디어를 브레인스토밍해주세요.",
-        "회의록을 정리하고 액션 아이템을 추출해주세요.",
-        "블로그 포스트 개요를 작성해주세요."
-    ];
-
-    const handleSampleClick = (sample: string) => {
-        setInputText(sample);
-        // 샘플 클릭 시 자동으로 데모 섹션으로 스크롤
-        setTimeout(() => {
-            demoRef.current?.scrollIntoView({ behavior: 'smooth' });
-        }, 100);
-    };
-
-    // 텍스트 영역 자동 크기 조절 함수
-    const adjustTextareaHeight = useCallback(() => {
-        if (textareaRef.current) {
-            requestAnimationFrame(() => {
-                const textarea = textareaRef.current;
-                if (!textarea) return;
+                const score = promptService.current.calculateDetailedScore(debouncedInputText);
+                setCurrentScore(score);
+                setIsScoreCalculating(false);
                 
-                textarea.style.height = 'auto';
-                const scrollHeight = textarea.scrollHeight;
-                const maxHeight = 200; // 최대 높이 200px
-                const minHeight = 60; // 최소 높이 60px
-                const targetHeight = Math.min(Math.max(scrollHeight, minHeight), maxHeight);
-                textarea.style.height = `${targetHeight}px`;
-                
-                // 최대 높이 도달 시 스크롤 표시
-                if (scrollHeight > maxHeight) {
-                    textarea.style.overflowY = 'auto';
-                } else {
-                    textarea.style.overflowY = 'hidden';
+                // 점수가 계산되면 패널 자동 표시
+                if (!showScorePanel && score.overall > 0) {
+                    setShowScorePanel(true);
                 }
-            });
+            }, 100);
+        } else {
+            setCurrentScore(null);
+            setIsScoreCalculating(false);
         }
-    }, []);
+    }, [debouncedInputText, showScorePanel]);
 
-    // inputText 변경 시 자동으로 텍스트 영역 크기 조절
-    useEffect(() => {
-        adjustTextareaHeight();
-    }, [inputText, adjustTextareaHeight]);
-
+    // 기존 함수들...
     const handleImprovePrompt = async () => {
         if (!inputText.trim()) {
             toast.error('프롬프트를 입력해주세요');
             return;
         }
 
+        // 개선 전 점수 저장
+        if (currentScore) {
+            setOriginalScore(currentScore);
+        }
+
         setIsImproveLoading(true);
-        setHasTriedDemo(true);
-        setHasUsedImproveButton(true); // 개선하기 버튼 사용 기록
 
         try {
-            // 실제 Gemini API를 사용한 프롬프트 개선
             const response = await fetch('/api/improve-prompt', {
                 method: 'POST',
                 headers: {
@@ -247,79 +130,50 @@ export default function HomePage() {
             const data: ImprovePromptResponse = await response.json();
 
             if (!response.ok) {
-                // 에러 상태 코드별 처리
                 if (response.status === 429) {
-                    // 사용 제한 초과 (실제 사용자 한도)
-                    toast.error(data.error || '일일 사용 한도(3회)를 초과했습니다.');
-                    // 사전 등록 유도 - 제거된 자동 스크롤
-                    setTimeout(() => {
-                        scrollToPreRegistration();
-                    }, 2000);
-                } else if (response.status === 503) {
-                    // API 키 설정 문제 또는 서비스 문제
-                    if (data.error && data.error.includes('API 키가 설정되지 않았습니다')) {
-                        toast.error('🔑 Gemini API 키가 설정되지 않았습니다', {
-                            description: '.env.local 파일에 GEMINI_API_KEY를 추가해주세요',
-                            duration: 5000,
-                        });
-                    } else {
-                        toast.warning('AI 서비스가 일시적으로 사용량이 많습니다. 잠시 후 다시 시도해주세요.', {
-                            description: '이는 사용자의 일일 한도와는 별개의 문제입니다.'
-                        });
-                    }
-                } else if (response.status === 401) {
-                    // API 키 유효성 문제
-                    toast.error('❌ API 키가 유효하지 않습니다', {
-                        description: 'Google AI Studio에서 새로운 키를 발급받아주세요',
-                        duration: 5000,
-                    });
+                    const resetDate = data.usage?.resetTime ? new Date(data.usage.resetTime) : new Date();
+                    const resetTimeStr = resetDate.toLocaleString('ko-KR');
+                    toast.error(`일일 사용 한도에 도달했습니다. ${resetTimeStr}에 초기화됩니다.`);
                 } else {
-                    toast.error(data.error || '프롬프트 향상에 실패했습니다');
+                    toast.error(data.error || '프롬프트 개선에 실패했습니다');
                 }
                 return;
             }
 
-            // 성공 응답 처리
             if (data.improvedPrompt) {
-                setInputText(data.improvedPrompt);
-                setImproveCount(prev => prev + 1);
-                // 자동 스크롤 제거 - 프롬프트 개선 후 페이지 이동 없음
+                setImprovedText(data.improvedPrompt);
+                setUsageInfo(data.usage);
+
+                // 개선된 프롬프트의 점수 계산
+                const improvedPromptScore = promptService.current.calculateDetailedScore(data.improvedPrompt);
+                setImprovedScore(improvedPromptScore);
+
+                toast.success('🎉 프롬프트가 개선되었습니다!');
             }
 
         } catch (error) {
-            toast.error('프롬프트 향상에 실패했습니다. 다시 시도해주세요.');
-            console.error(error);
+            console.error('Improve prompt error:', error);
+            toast.error('프롬프트 개선 중 오류가 발생했습니다');
         } finally {
             setIsImproveLoading(false);
         }
     };
 
-    // 테스트용 개선 함수 (API 호출 없이 고도화된 로컬 개선안 제공)
-    const handleTestImprovePrompt = async () => {
+    // 기존 테스트 개선 함수들...
+    const handleTestImprove = async () => {
         if (!inputText.trim()) {
             toast.error('프롬프트를 입력해주세요');
             return;
         }
 
-        // 3회 제한 체크 - 제한 초과 시 알림카드 표시하지 않음
-        if (improveCount >= 3) {
-            toast.error('일일 체험 한도(3회)를 모두 사용하셨습니다. 사전 등록하고 더 많은 기능을 이용해보세요!');
-            setTimeout(() => {
-                scrollToPreRegistration();
-            }, 1000);
-            return;
+        // 개선 전 점수 저장
+        if (currentScore) {
+            setOriginalScore(currentScore);
         }
 
-        const startTime = Date.now();
         setIsTestLoading(true);
-        setHasTriedDemo(true);
-        setHasUsedImproveButton(true); // 개선하기 버튼 사용 기록
-
-        // 로딩 시뮬레이션
-        await new Promise(resolve => setTimeout(resolve, 1500));
 
         try {
-            // Gemini 2.0 Flash (무료) API를 사용한 테스트 개선
             const response = await fetch('/api/test-improve-prompt', {
                 method: 'POST',
                 headers: {
@@ -331,67 +185,35 @@ export default function HomePage() {
             const data = await response.json();
 
             if (!response.ok) {
-                // 에러 상태 코드별 처리
-                if (response.status === 401) {
-                    toast.error(data.error || 'API 키가 유효하지 않습니다');
-                } else if (response.status === 503) {
-                    toast.error(data.error || 'API 서비스가 일시적으로 사용할 수 없습니다');
-                } else if (response.status === 429) {
-                    toast.error(data.error || 'API 사용량이 초과되었습니다');
-                } else {
-                    toast.error(data.error || '테스트 개선에 실패했습니다');
-                }
-                
-                // 폴백 처리
                 throw new Error(data.error || 'API 호출 실패');
             }
 
-            // 성공 응답 처리
             if (data.improvedPrompt) {
-                const originalLength = inputText.length;
-                const improvedLength = data.improvedPrompt.length;
-                const processingTime = Date.now() - startTime;
-                
                 setInputText(data.improvedPrompt);
-                setImproveCount(prev => prev + 1);
-                
-                // 모니터링 추적
-                trackTestImprovement(true, processingTime, originalLength, improvedLength);
+
+                // 개선된 프롬프트의 점수 계산
+                const improvedPromptScore = promptService.current.calculateDetailedScore(data.improvedPrompt);
+                setImprovedScore(improvedPromptScore);
                 
                 toast.success('🎉 프롬프트가 개선되었습니다! (Gemini 2.0 Flash - 무료)');
-                
-                // 추가 정보 표시
-                if (data.message) {
-                    setTimeout(() => {
-                        toast.info(data.message);
-                    }, 1500);
-                }
             }
 
         } catch (error) {
             console.error('Test improvement error:', error);
             
-            const processingTime = Date.now() - startTime;
-            const originalLength = inputText.length;
-            
             // 폴백: 로컬 개선 서비스 사용
             try {
-                const { PromptImprovementService } = await import('@/lib/services/prompt-improvement-service');
-                const improvementService = PromptImprovementService.getInstance();
-                const suggestion = improvementService.suggestImprovements(inputText);
-                
+                const suggestion = promptService.current.suggestImprovements(inputText);
                 setInputText(suggestion.improvedPrompt);
-                setImproveCount(prev => prev + 1);
                 
-                trackTestImprovement(false, processingTime, originalLength, suggestion.improvedPrompt.length);
+                // 개선된 프롬프트의 점수 계산
+                const improvedPromptScore = promptService.current.calculateDetailedScore(suggestion.improvedPrompt);
+                setImprovedScore(improvedPromptScore);
+                
                 toast.success('기본 개선이 적용되었습니다 (로컬 서비스)');
-            } catch (fallbackError) {
-                // 최종 폴백
+            } catch {
                 const fallbackImprovement = inputText + '\n\n[더 구체적인 요구사항을 추가하면 더 나은 결과를 얻을 수 있습니다]';
                 setInputText(fallbackImprovement);
-                setImproveCount(prev => prev + 1);
-                
-                trackTestImprovement(false, processingTime, originalLength, fallbackImprovement.length);
                 toast.success('기본 개선이 적용되었습니다');
             }
         } finally {
@@ -399,262 +221,53 @@ export default function HomePage() {
         }
     };
 
-    // Textarea 높이 리셋 함수
+    // 기존 유틸리티 함수들...
     const resetTextareaHeight = () => {
         if (textareaRef.current) {
-            textareaRef.current.style.height = '60px'; // 초기 높이로 리셋
+            textareaRef.current.style.height = '60px';
             textareaRef.current.style.overflowY = 'hidden';
         }
     };
 
-    const handleSendMessage = async () => {
-        if (!inputText.trim()) return;
-
-        // 향상 버튼을 사용하지 않은 경우 인터셉트 모달 표시
-        if (!hasUsedImproveButton && !hasShownImproveSuggestion) {
-            setShowInterceptModal(true);
-            return;
-        }
-
-        const userMessage: ChatMessage = {
-            id: Date.now().toString(),
-            type: 'user',
-            content: inputText,
-            timestamp: new Date()
-        };
-
-        setChatMessages(prev => [...prev, userMessage]);
-
-        // 입력 필드 초기화 및 로딩 상태 설정
-        const currentMessage = inputText;
-        setInputText('');
-        resetTextareaHeight();
-
+    const handleCopyToClipboard = async (text: string) => {
         try {
-            // AI 응답 생성을 위한 API 호출
-            const response = await fetch('/api/chat', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ message: currentMessage }),
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || '응답 생성에 실패했습니다.');
-            }
-
-            const data = await response.json();
-
-            // AI 응답을 채팅에 추가 (타이핑 애니메이션 적용)
-            const aiMessage: ChatMessage = {
-                id: (Date.now() + 1).toString(),
-                type: 'ai',
-                content: data.response,
-                timestamp: new Date(),
-                isTyping: true
-            };
-            setChatMessages(prev => [...prev, aiMessage]);
-
-        } catch (error) {
-            console.error('Chat API Error:', error);
-            
-            // 에러 발생 시 폴백 응답 제공
-            const fallbackMessage: ChatMessage = {
-                id: (Date.now() + 1).toString(),
-                type: 'ai',
-                content: '죄송합니다. 일시적으로 응답을 생성할 수 없습니다. 잠시 후 다시 시도해주세요. 🙏',
-                timestamp: new Date(),
-                isTyping: true
-            };
-            setChatMessages(prev => [...prev, fallbackMessage]);
-            
-            // 사용자에게 에러 알림
-            toast.error(error instanceof Error ? error.message : '응답 생성 중 오류가 발생했습니다.');
-        }
-
-        // 메시지 전송 후 향상 버튼 사용 상태 리셋
-        setHasUsedImproveButton(false);
-    };
-
-    // 실제 API를 사용하는 사전 등록 함수
-    const handlePreRegistration = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!email.trim()) {
-            toast.error('이메일을 입력해주세요');
-            return;
-        }
-
-        setIsRegistering(true);
-
-        try {
-            const response = await fetch('/api/pre-register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email: email.trim(),
-                }),
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                toast.success('🎉 사전 등록 완료! 출시 알림을 받으실 거예요.');
-                setEmail('');
-
-                // 성공 후 감사 메시지 (중복 방지를 위해 제거)
-                // setTimeout(() => {
-                //     toast.success('🎁 얼리버드 혜택이 적용되었습니다!');
-                // }, 1500);
-            } else if (response.status === 409) {
-                toast.error(data.error || '이미 등록된 이메일입니다');
-            } else {
-                toast.error(data.error || '등록에 실패했습니다. 다시 시도해주세요.');
-            }
-
-        } catch (error) {
-            console.error('Registration error:', error);
-            toast.error('네트워크 오류가 발생했습니다. 다시 시도해주세요.');
-        } finally {
-            setIsRegistering(false);
-        }
-    };
-
-    const handleEnhancedRegistrationSuccess = (data: any) => {
-        setShowPreRegistration(false);
-        // 토스트는 EnhancedPreRegistrationForm에서 이미 표시하므로 여기서는 제거
-        // 추가 혜택 토스트만 1.5초 후에 표시
-        setTimeout(() => {
-            toast.success('🎁 얼리버드 혜택이 적용되었습니다!');
-        }, 1500);
-    };
-
-    // 인터셉트 모달 핸들러들
-    const handleInterceptEnhance = () => {
-        setShowInterceptModal(false);
-        setHasShownImproveSuggestion(true);
-        handleImprovePrompt();
-    };
-
-    const handleInterceptSendAnyway = async () => {
-        setShowInterceptModal(false);
-        setHasShownImproveSuggestion(true);
-        
-        // 실제 메시지 전송 로직 실행
-        const userMessage: ChatMessage = {
-            id: Date.now().toString(),
-            type: 'user',
-            content: inputText,
-            timestamp: new Date()
-        };
-
-        setChatMessages(prev => [...prev, userMessage]);
-
-        // 입력 필드 초기화
-        const currentMessage = inputText;
-        setInputText('');
-        resetTextareaHeight();
-
-        try {
-            // AI 응답 생성을 위한 API 호출
-            const response = await fetch('/api/chat', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ message: currentMessage }),
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || '응답 생성에 실패했습니다.');
-            }
-
-            const data = await response.json();
-
-            // AI 응답을 채팅에 추가 (타이핑 애니메이션 적용)
-            const aiMessage: ChatMessage = {
-                id: (Date.now() + 1).toString(),
-                type: 'ai',
-                content: data.response,
-                timestamp: new Date(),
-                isTyping: true
-            };
-            setChatMessages(prev => [...prev, aiMessage]);
-
-        } catch (error) {
-            console.error('Chat API Error:', error);
-            
-            // 에러 발생 시 폴백 응답 제공
-            const fallbackMessage: ChatMessage = {
-                id: (Date.now() + 1).toString(),
-                type: 'ai',
-                content: '죄송합니다. 일시적으로 응답을 생성할 수 없습니다. 잠시 후 다시 시도해주세요. 🙏',
-                timestamp: new Date(),
-                isTyping: true
-            };
-            setChatMessages(prev => [...prev, fallbackMessage]);
-            
-            // 사용자에게 에러 알림
-            toast.error(error instanceof Error ? error.message : '응답 생성 중 오류가 발생했습니다.');
-        }
-
-        // 메시지 전송 후 향상 버튼 사용 상태 리셋
-        setHasUsedImproveButton(false);
-    };
-
-    // 등록 배너 핸들러들
-    const handleBannerJoinBeta = () => {
-        setShowRegistrationBanner(false);
-        scrollToPreRegistration();
-    };
-
-    const handleBannerClose = () => {
-        setShowRegistrationBanner(false);
-        setBannerDismissed(true);
-    };
-
-    const scrollToDemo = () => {
-        demoRef.current?.scrollIntoView({ behavior: 'smooth' });
-    };
-
-    // 사전 등록 섹션으로 스크롤하는 함수
-    const scrollToPreRegistration = () => {
-        if (!showPreRegistration) {
-            setShowPreRegistration(true);
-        }
-        setTimeout(() => {
-            preRegRef.current?.scrollIntoView({ behavior: 'smooth' });
-        }, 100);
-    };
-
-    // 메시지 복사 기능
-    const handleCopyMessage = async (messageId: string, content: string) => {
-        try {
-            await navigator.clipboard.writeText(content);
-            setCopiedMessageId(messageId);
-            toast.success('메시지가 복사되었습니다', {
-                duration: 2000,
-            });
-            
-            // 2초 후 복사 상태 초기화
-            setTimeout(() => {
-                setCopiedMessageId(null);
-            }, 2000);
-        } catch (error) {
+            await navigator.clipboard.writeText(text);
+            toast.success('클립보드에 복사되었습니다');
+        } catch {
             toast.error('복사에 실패했습니다');
-            console.error('Copy failed:', error);
         }
     };
+
+    const handleReset = () => {
+        setInputText('');
+        setImprovedText('');
+        setCurrentScore(null);
+        setOriginalScore(null);
+        setImprovedScore(null);
+        setShowScorePanel(false);
+        resetTextareaHeight();
+        toast.success('초기화되었습니다');
+    };
+
+    const handlePersonaChange = (persona: Persona) => {
+        setSelectedPersona(persona);
+        const personaData = getPersonaData(persona);
+        setInputText(personaData.placeholder);
+        
+        // 새로운 페르소나 선택 시 점수 초기화
+        setCurrentScore(null);
+        setOriginalScore(null);
+        setImprovedScore(null);
+        setShowScorePanel(false);
+    };
+
+    const personaData = getPersonaData(selectedPersona);
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 smooth-scroll">
             {/* Header */}
             <header className="border-b border-white/10 bg-slate-900/90 backdrop-blur-xl fixed top-0 w-full z-50">
-                <Container>
+                <div className="container mx-auto px-4">
                     <div className="flex items-center justify-between h-16">
                         <div className="flex items-center space-x-3">
                             <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
@@ -675,13 +288,23 @@ export default function HomePage() {
                         {/* Desktop Navigation */}
                         <nav className="hidden md:flex items-center space-x-6">
                             <button
-                                onClick={scrollToDemo}
+                                onClick={() => {
+                                    const demoSection = document.getElementById('demo-section');
+                                    if (demoSection) {
+                                        demoSection.scrollIntoView({ behavior: 'smooth' });
+                                    }
+                                }}
                                 className="text-blue-200 hover:text-white transition-colors text-sm font-medium hover:underline underline-offset-4"
                             >
                                 ⚡ 1분 체험
                             </button>
                             <button
-                                onClick={scrollToPreRegistration}
+                                onClick={() => {
+                                    const preRegSection = document.getElementById('pre-registration-section');
+                                    if (preRegSection) {
+                                        preRegSection.scrollIntoView({ behavior: 'smooth' });
+                                    }
+                                }}
                                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105 shadow-lg flex items-center space-x-2"
                             >
                                 <Sparkles size={16} />
@@ -693,545 +316,353 @@ export default function HomePage() {
                         {/* Mobile Menu Button */}
                         <button
                             className="md:hidden p-2 text-white"
-                            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                            onClick={() => {
+                                const mobileMenu = document.querySelector('.mobile-menu-content');
+                                if (mobileMenu) {
+                                    mobileMenu.classList.toggle('hidden');
+                                }
+                            }}
                             aria-label="메뉴 열기"
                         >
-                            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                            {/* Mobile menu icon will be added here */}
                         </button>
                     </div>
 
                     {/* Mobile Menu */}
-                    {mobileMenuOpen && (
-                        <div className="md:hidden border-t border-white/10 py-4 animate-slide-down">
-                            <nav className="flex flex-col space-y-4">
-                                <button
-                                    onClick={() => {
-                                        scrollToDemo();
-                                        setMobileMenuOpen(false);
-                                    }}
-                                    className="text-blue-200 hover:text-white transition-colors text-sm font-medium text-left px-4 py-2 rounded-lg hover:bg-white/10"
-                                >
-                                    ⚡ 1분 체험하기
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        scrollToPreRegistration();
-                                        setMobileMenuOpen(false);
-                                    }}
-                                    className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 text-left flex items-center space-x-2"
-                                >
-                                    <span>🎁</span>
-                                    <span>무료 사전등록</span>
-                                </button>
+                    <div className="md:hidden border-t border-white/10 py-4 animate-slide-down mobile-menu-content hidden">
+                        <nav className="flex flex-col space-y-4">
+                            <button
+                                onClick={() => {
+                                    const demoSection = document.getElementById('demo-section');
+                                    if (demoSection) {
+                                        demoSection.scrollIntoView({ behavior: 'smooth' });
+                                    }
+                                    document.querySelector('.mobile-menu-content')?.classList.add('hidden');
+                                }}
+                                className="text-blue-200 hover:text-white transition-colors text-sm font-medium text-left px-4 py-2 rounded-lg hover:bg-white/10"
+                            >
+                                ⚡ 1분 체험하기
+                            </button>
+                            <button
+                                onClick={() => {
+                                    const preRegSection = document.getElementById('pre-registration-section');
+                                    if (preRegSection) {
+                                        preRegSection.scrollIntoView({ behavior: 'smooth' });
+                                    }
+                                    document.querySelector('.mobile-menu-content')?.classList.add('hidden');
+                                }}
+                                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 text-left flex items-center space-x-2"
+                            >
+                                <span>🎁</span>
+                                <span>무료 사전등록</span>
+                            </button>
 
-                            </nav>
-                        </div>
-                    )}
-                </Container>
+                        </nav>
+                    </div>
+                </div>
             </header>
 
             {/* Hero Section */}
             <BeforeAfterHeroSection 
-                onTransformClick={scrollToDemo}
-                onPreRegisterClick={() => setShowPreRegistration(true)}
+                onTransformClick={() => {
+                    const demoSection = document.getElementById('demo-section');
+                    if (demoSection) {
+                        demoSection.scrollIntoView({ behavior: 'smooth' });
+                    }
+                }}
+                onPreRegisterClick={() => {
+                    const preRegSection = document.getElementById('pre-registration-section');
+                    if (preRegSection) {
+                        preRegSection.scrollIntoView({ behavior: 'smooth' });
+                    }
+                }}
                 showMetrics={true}
                 className="pt-16"
             />
 
             {/* Demo Section */}
-            <section id="demo-section" ref={demoRef} data-section="demo" className="py-16 px-4 sm:px-6 lg:px-8">
-                <Container>
+            <section id="demo-section" className="py-16 px-4 sm:px-6 lg:px-8">
+                <div className="container mx-auto px-4">
                     <div className="max-w-4xl mx-auto">
                         {/* 섹션 헤더 */}
                         <div className="text-center mb-12">
-                            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                                클릭 한번에 프롬프트 개선 체험 🚀
+                            <Badge variant="secondary" className="mb-4">
+                                실시간 체험
+                            </Badge>
+                            <h2 className="text-3xl font-bold mb-4">
+                                AI 프롬프트 개선을 직접 체험해보세요
                             </h2>
-                            <p className="text-xl text-blue-100 max-w-2xl mx-auto">
-                                프롬프트를 입력한 후, 직접 버튼을 눌러 AI가 어떻게 더 나은 문장으로 다듬는지 확인해보세요.
+                            <p className="text-gray-600 text-lg">
+                                실시간 점수 확인과 함께 프롬프트가 어떻게 개선되는지 확인해보세요
                             </p>
                         </div>
 
-                        {/* GPT 스타일 입력 섹션 */}
-                        <div className="bg-[#212121] rounded-2xl shadow-xl border border-gray-700/50 animate-slide-up overflow-hidden">
-                            {/* 헤더 */}
-                            <div className="bg-[#171717] px-6 py-3 border-b border-gray-600/50">
-                                <div className="flex items-center justify-between">
-                                    <h4 className="font-medium">
-                                        <span className="text-white">ChatGPT</span>
-                                        <span className="text-gray-400 ml-1">(with Smart Prompt Assistant)</span>
-                                    </h4>
-                                    <div className="flex items-center space-x-2 text-sm text-gray-400">
-                                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                                        <span>온라인</span>
-                                    </div>
-                                </div>
-                            </div>
+                        {/* 페르소나 선택 */}
+                        <PersonaSelector
+                            selectedPersona={selectedPersona}
+                            onPersonaChange={handlePersonaChange}
+                            personas={getAllPersonas()}
+                        />
 
-                            {/* 대화 메시지 영역 */}
-                            <div ref={chatContainerRef} className="p-4 space-y-4 min-h-[200px] max-h-[400px] overflow-y-auto scroll-smooth relative">
-                                {chatMessages.map((message) => (
-                                    <div
-                                        key={message.id}
-                                        className={cn(
-                                            "flex group",
-                                            message.type === 'user' ? 'justify-end' : 'justify-start'
-                                        )}
-                                    >
-                                        <div
-                                            className={cn(
-                                                "max-w-[80%] px-3 pt-2 rounded-2xl text-white relative",
-                                                message.type === 'user'
-                                                    ? 'bg-[#303030] ml-auto'
-                                                    : 'bg-[#171717] mr-auto'
-                                            )}
-                                        >
-                                            <div className="text-sm leading-relaxed whitespace-pre-wrap pr-8">
-                                                {message.type === 'ai' && message.isTyping ? (
-                                                    <TypingAnimation
-                                                        text={message.content}
-                                                        speed={30}
-                                                        showCursor={true}
-                                                        startDelay={500}
-                                                        className="text-white"
-                                                        onProgress={handleTypingProgress}
-                                                    />
-                                                ) : (
-                                                    message.content
+                        {/* 메인 입력 영역 */}
+                        <Card className="mb-6">
+                            <CardContent className="p-6">
+                                <div className="space-y-4">
+                                    {/* 입력 텍스트 영역과 점수 패널 */}
+                                    <div className="grid lg:grid-cols-3 gap-6">
+                                        {/* 입력 영역 */}
+                                        <div className="lg:col-span-2">
+                                            <div className="flex items-center justify-between mb-3">
+                                                <label className="text-sm font-medium text-gray-700">
+                                                    {personaData.title} 프롬프트 입력
+                                                </label>
+                                                <div className="flex items-center gap-2">
+                                                    {isScoreCalculating && (
+                                                        <div className="flex items-center gap-1 text-xs text-blue-600">
+                                                            <div className="w-3 h-3 border border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                                                            점수 계산 중
+                                                        </div>
+                                                    )}
+                                                    {currentScore && (
+                                                        <Badge 
+                                                            variant="secondary" 
+                                                            className="text-xs cursor-pointer"
+                                                            onClick={() => setShowScorePanel(!showScorePanel)}
+                                                        >
+                                                            점수: {currentScore.overall}/100
+                                                            {showScorePanel ? <ChevronUp className="w-3 h-3 ml-1" /> : <ChevronDown className="w-3 h-3 ml-1" />}
+                                                        </Badge>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <Textarea
+                                                ref={textareaRef}
+                                                value={inputText}
+                                                onChange={(e) => setInputText(e.target.value)}
+                                                placeholder={personaData.placeholder}
+                                                className="min-h-[120px] resize-none"
+                                                onInput={(e) => {
+                                                    const target = e.target as HTMLTextAreaElement;
+                                                    target.style.height = 'auto';
+                                                    target.style.height = Math.max(120, target.scrollHeight) + 'px';
+                                                }}
+                                            />
+                                        </div>
+
+                                        {/* 실시간 점수 패널 */}
+                                        <div className="lg:col-span-1">
+                                            <AnimatePresence>
+                                                {showScorePanel && currentScore && (
+                                                    <motion.div
+                                                        initial={{ opacity: 0, height: 0 }}
+                                                        animate={{ opacity: 1, height: 'auto' }}
+                                                        exit={{ opacity: 0, height: 0 }}
+                                                        transition={{ duration: 0.3 }}
+                                                    >
+                                                        <PromptScoreDisplay
+                                                            score={currentScore}
+                                                            compact={true}
+                                                            showAnimation={false}
+                                                        />
+                                                    </motion.div>
                                                 )}
-                                            </div>
-                                            <div className="flex items-center justify-between mt-1">
-                                                <div className="text-xs text-gray-400">
-                                                    {message.timestamp.toLocaleTimeString([], { 
-                                                        hour: '2-digit', 
-                                                        minute: '2-digit' 
-                                                    })}
-                                                </div>
-                                                {/* 복사 버튼 - 모바일 최적화 */}
-                                                <button
-                                                    onClick={() => handleCopyMessage(message.id, message.content)}
-                                                    className={cn(
-                                                        // 모바일에서는 항상 표시, 데스크톱에서는 호버 시 표시
-                                                        "opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all duration-200",
-                                                        "p-2 md:p-1 rounded hover:bg-gray-600/50 text-gray-400 hover:text-white",
-                                                        "focus:opacity-100 focus:outline-none focus:ring-1 focus:ring-gray-500",
-                                                        // 터치 타겟 크기 최적화 (44px 최소)
-                                                        "min-w-[44px] min-h-[44px] md:min-w-auto md:min-h-auto",
-                                                        "flex items-center justify-center"
-                                                    )}
-                                                    title="메시지 복사"
-                                                    aria-label="메시지 복사하기"
-                                                >
-                                                    {copiedMessageId === message.id ? (
-                                                        <Check size={16} className="text-green-400" />
-                                                    ) : (
-                                                        <Copy size={16} />
-                                                    )}
-                                                </button>
-                                            </div>
+                                            </AnimatePresence>
                                         </div>
                                     </div>
-                                ))}
-                                
-                                {/* 로딩 상태 */}
-                                {(isTestLoading || isImproveLoading) && (
-                                    <div className="flex justify-start">
-                                        <div className="bg-[#171717] px-4 py-3 rounded-2xl">
-                                            <div className="flex items-center space-x-2">
-                                                <div className="flex space-x-1">
-                                                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                                                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                                                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                                                </div>
-                                                <span className="text-xs text-gray-400">AI가 생각하고 있어요...</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
 
-                            {/* GPT 스타일 입력 영역 */}
-                            <div className="p-4 pb-6">
-                                <div className="relative">
-                                    <textarea
-                                        ref={textareaRef}
-                                        id="prompt-input"
-                                        className="w-full bg-[#2f2f2f] border border-gray-600 rounded-xl px-4 py-3 pr-48 md:pr-40 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[60px] transition-all duration-150 ease-out no-underline"
-                                        value={inputText}
-                                        onChange={(e) => {
-                                            setInputText(e.target.value);
-                                            // adjustTextareaHeight는 useEffect에서 자동으로 호출됨
-                                        }}
-                                        onInput={(e) => {
-                                            // 입력 이벤트 시에도 즉시 크기 조절
-                                            adjustTextareaHeight();
-                                        }}
-                                        onKeyDown={(e) => {
-                                            if (e.key === 'Enter' && !e.shiftKey) {
-                                                if (inputText.trim() && inputText.length <= 10000) {
-                                                    e.preventDefault();
-                                                    // 향상 버튼을 사용하지 않았다면 인터셉트 모달 표시
-                                                    if (!hasUsedImproveButton && !hasShownImproveSuggestion) {
-                                                        setShowInterceptModal(true);
-                                                    } else {
-                                                        handleSendMessage();
-                                                    }
-                                                }
-                                            }
-                                            if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-                                                e.preventDefault();
-                                                handleImprovePrompt();
-                                            }
-                                            if (e.key === 'Enter' && e.shiftKey && (e.ctrlKey || e.metaKey)) {
-                                                e.preventDefault();
-                                                handleTestImprovePrompt();
-                                            }
-                                        }}
-                                        placeholder="프롬프트를 입력하세요"
-                                        disabled={isTestLoading || isImproveLoading}
-                                        maxLength={10000}
-                                        spellCheck={false}
-                                        autoComplete="off"
-                                        autoCorrect="off"
-                                        autoCapitalize="off"
-                                        style={{ 
-                                            resize: 'none', 
-                                            overflowY: 'hidden',
-                                            transition: 'height 0.15s ease-out, border-color 0.2s ease-out',
-                                            textDecoration: 'none',
-                                            textDecorationLine: 'none',
-                                            textUnderlineOffset: 'unset',
-                                            borderBottom: 'none',
-                                            boxShadow: 'none'
-                                        }}
-                                    />
-                                    
-                                    {/* 입력 필드 내부 버튼 그룹 - 모바일 최적화 */}
-                                    <div className="absolute right-6 md:right-6 bottom-3 flex items-center space-x-2 md:space-x-1">
-                                        
-                                        {/* 테스트 버튼 - 모바일 최적화 */}
-                                        <button
-                                            type="button"
-                                            onClick={handleTestImprovePrompt}
-                                            disabled={isTestLoading || isImproveLoading || !inputText.trim() || inputText.length > 10000 || improveCount >= 3}
-                                            className={cn(
-                                                "rounded-lg p-2 md:p-2 text-white transition-all duration-200",
-                                                improveCount >= 3 
-                                                    ? "bg-gray-500 cursor-not-allowed" 
-                                                    : "bg-gray-600 hover:bg-gray-500",
-                                                "disabled:opacity-50 disabled:cursor-not-allowed",
-                                                "flex items-center justify-center",
-                                                "focus:outline-none focus:ring-2 focus:ring-gray-400",
-                                                // 모바일 터치 타겟 최적화
-                                                "min-w-[44px] min-h-[44px] md:min-w-auto md:min-h-auto"
-                                            )}
-                                            title={improveCount >= 3 ? "일일 체험 한도 초과 (3/3)" : "테스트 개선 (Shift+Ctrl+Enter)"}
-                                            aria-label="테스트 개선하기"
-                                        >
-                                            {isTestLoading ? (
-                                                <div className="animate-spin">
-                                                    <Loader2 size={16} />
-                                                </div>
-                                            ) : (
-                                                <span className="text-sm">🧪</span>
-                                            )}
-                                        </button>
-
-                                        {/* 마법봉 버튼 (프롬프트 개선) - 모바일 최적화 */}
-                                        <button
-                                            type="button"
+                                    {/* 액션 버튼들 */}
+                                    <div className="flex flex-wrap gap-3">
+                                        <Button
                                             onClick={handleImprovePrompt}
-                                            disabled={isTestLoading || isImproveLoading || !inputText.trim() || inputText.length > 10000}
-                                            className={cn(
-                                                "rounded-lg p-2 md:p-2 text-white transition-all duration-200",
-                                                "bg-purple-600 hover:bg-purple-700",
-                                                "disabled:opacity-50 disabled:cursor-not-allowed",
-                                                "flex items-center justify-center",
-                                                "focus:outline-none focus:ring-2 focus:ring-purple-500",
-                                                // 모바일 터치 타겟 최적화
-                                                "min-w-[44px] min-h-[44px] md:min-w-auto md:min-h-auto"
-                                            )}
-                                            title="프롬프트 개선 (Ctrl+Enter)"
-                                            aria-label="프롬프트 개선하기"
+                                            disabled={isImproveLoading || !inputText.trim()}
+                                            className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                                         >
                                             {isImproveLoading ? (
-                                                <div className="animate-spin">
-                                                    <Loader2 size={16} />
-                                                </div>
+                                                <>
+                                                    <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                                                    개선 중...
+                                                </>
                                             ) : (
-                                                <Wand2 size={16} />
+                                                <>
+                                                    <Sparkles className="w-4 h-4" />
+                                                    프롬프트 개선하기
+                                                </>
                                             )}
-                                        </button>
+                                        </Button>
 
-                                        {/* 전송 버튼 - 모바일 최적화 */}
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                // 향상 버튼을 사용하지 않았다면 인터셉트 모달 표시
-                                                if (!hasUsedImproveButton && !hasShownImproveSuggestion) {
-                                                    setShowInterceptModal(true);
-                                                } else {
-                                                    handleSendMessage();
-                                                }
-                                            }}
-                                            disabled={isTestLoading || isImproveLoading || !inputText.trim() || inputText.length > 10000}
-                                            className={cn(
-                                                "rounded-lg p-2 md:p-2 text-white transition-all duration-200",
-                                                "bg-blue-600 hover:bg-blue-700",
-                                                "disabled:opacity-50 disabled:cursor-not-allowed",
-                                                "flex items-center justify-center",
-                                                "focus:outline-none focus:ring-2 focus:ring-blue-500",
-                                                // 모바일 터치 타겟 최적화
-                                                "min-w-[44px] min-h-[44px] md:min-w-auto md:min-h-auto"
-                                            )}
-                                            title="메시지 전송 (Enter)"
-                                            aria-label="메시지 전송하기"
+                                        <Button
+                                            onClick={handleTestImprove}
+                                            disabled={isTestLoading || !inputText.trim()}
+                                            variant="outline"
+                                            className="flex items-center gap-2"
                                         >
-                                            <Send size={16} />
-                                        </button>
-                                    </div>
-                                </div>
-                                
-                                {/* 키보드 단축키 안내 */}
-                                <div className="flex justify-end items-center mt-2">
-                                    <div className="text-xs text-gray-500">
-                                        Enter: 전송 | Ctrl+Enter: 개선 | Shift+Ctrl+Enter: 테스트
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                                            {isTestLoading ? (
+                                                <>
+                                                    <div className="w-4 h-4 border-2 border-gray-400 border-t-gray-800 rounded-full animate-spin" />
+                                                    테스트 중...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Zap className="w-4 h-4" />
+                                                    무료 테스트
+                                                </>
+                                            )}
+                                        </Button>
 
-                        {/* 작성 팁 섹션 - 다크 테마 */}
-                        <div className="mt-6">
-                                {inputText.length === 0 && (
-                                    <div className="mt-6 p-4 bg-gradient-to-r from-gray-800 to-gray-700 rounded-xl border border-gray-600/50">
-                                        <h5 className="text-sm font-semibold text-blue-300 mb-2 flex items-center">
-                                            <span className="mr-2">💡</span>
-                                            효과적인 프롬프트 작성 팁
-                                        </h5>
-                                        <div className="grid sm:grid-cols-2 gap-3 text-xs text-gray-300">
-                                            <div className="flex items-start space-x-2">
-                                                <span className="text-blue-400 font-bold">1.</span>
-                                                <span>구체적인 목적과 상황을 명시하세요</span>
-                                            </div>
-                                            <div className="flex items-start space-x-2">
-                                                <span className="text-blue-400 font-bold">2.</span>
-                                                <span>원하는 결과물의 형식을 설명하세요</span>
-                                            </div>
-                                            <div className="flex items-start space-x-2">
-                                                <span className="text-blue-400 font-bold">3.</span>
-                                                <span>대상 독자나 사용자를 고려하세요</span>
-                                            </div>
-                                            <div className="flex items-start space-x-2">
-                                                <span className="text-blue-400 font-bold">4.</span>
-                                                <span>톤앤매너나 스타일을 지정하세요</span>
-                                            </div>
+                                        <Button
+                                            onClick={handleReset}
+                                            variant="outline"
+                                            className="flex items-center gap-2"
+                                        >
+                                            <RotateCcw className="w-4 h-4" />
+                                            초기화
+                                        </Button>
+                                    </div>
+
+                                    {/* 사용량 정보 */}
+                                    {usageInfo && (
+                                        <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
+                                            남은 사용량: {usageInfo.remainingCount}/{usageInfo.maxUsageCount}
+                                            {usageInfo.remainingCount === 0 && (
+                                                <span className="text-red-600 ml-2">
+                                                    • 다음 초기화: {new Date(usageInfo.resetTime).toLocaleString('ko-KR')}
+                                                </span>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* 개선 결과 표시 */}
+                        {improvedText && (
+                            <Card className="mb-6">
+                                <CardContent className="p-6">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h3 className="text-lg font-semibold text-green-700">
+                                            ✨ 개선된 프롬프트
+                                        </h3>
+                                        <Button
+                                            onClick={() => handleCopyToClipboard(improvedText)}
+                                            variant="outline"
+                                            size="sm"
+                                            className="flex items-center gap-2"
+                                        >
+                                            <Copy className="w-4 h-4" />
+                                            복사
+                                        </Button>
+                                    </div>
+                                    <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                                        <p className="text-gray-800 whitespace-pre-wrap">{improvedText}</p>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        )}
+
+                        {/* 점수 비교 표시 */}
+                        {originalScore && improvedScore && (
+                            <Card className="mb-6">
+                                <CardContent className="p-6">
+                                    <h3 className="text-lg font-semibold mb-4">📊 점수 비교</h3>
+                                    <div className="grid md:grid-cols-2 gap-6">
+                                        <div>
+                                            <h4 className="font-medium mb-2 text-gray-600">개선 전</h4>
+                                            <PromptScoreDisplay
+                                                score={originalScore}
+                                                compact={true}
+                                                showAnimation={false}
+                                            />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-medium mb-2 text-green-600">개선 후</h4>
+                                            <PromptScoreDisplay
+                                                score={improvedScore}
+                                                compact={true}
+                                                showAnimation={false}
+                                            />
                                         </div>
                                     </div>
-                                )}
-
-                                {/* 샘플 프롬프트 섹션 - 작성 팁과 동일한 색상 테마 */}
-                                <div className="mt-6 p-4 bg-gradient-to-r from-gray-800 to-gray-700 rounded-xl border border-gray-600/50">
-                                    <h5 className="text-sm font-semibold text-blue-300 mb-3 flex items-center">
-                                        <span className="mr-2">🚀</span>
-                                        빠른 시작 샘플
-                                    </h5>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                        {samplePrompts.map((prompt, index) => (
-                                            <button
-                                                key={index}
-                                                onClick={() => handleSampleClick(prompt)}
-                                                className="text-left p-3 bg-gray-700/50 hover:bg-gray-600/50 rounded-lg border border-gray-600/30 hover:border-gray-500/50 transition-all duration-200 text-xs text-gray-300 hover:text-white touch-friendly group"
-                                                aria-label={`샘플 프롬프트: ${prompt}`}
-                                            >
-                                                <div className="flex items-center justify-between">
-                                                    <span className="leading-relaxed">{prompt}</span>
-                                                    <span className="opacity-0 group-hover:opacity-100 transition-opacity text-blue-400 flex-shrink-0 ml-2"><ArrowRight size={16} /></span>
-                                                </div>
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                {/* 체험 후 혜택 안내 - 다크 테마 (3회 이하에서만 표시) */}
-                                {hasTriedDemo && improveCount <= 3 && (
-                                    <div className={`mt-6 p-4 rounded-xl animate-fade-in ${
-                                        improveCount === 1 
-                                            ? 'bg-gradient-to-r from-blue-900/50 to-cyan-900/50 border border-blue-600/50'
-                                            : improveCount === 2
-                                            ? 'bg-gradient-to-r from-purple-900/50 to-pink-900/50 border border-purple-600/50'
-                                            : improveCount === 3
-                                            ? 'bg-gradient-to-r from-yellow-900/50 to-orange-900/50 border border-yellow-600/50'
-                                            : 'bg-gradient-to-r from-green-900/50 to-emerald-900/50 border border-green-600/50'
-                                    }`}>
-                                        <div className="flex items-center space-x-2 mb-2">
-                                            {improveCount === 1 && (
-                                                <>
-                                                    <div className="text-blue-400"><CheckCircle size={20} /></div>
-                                                    <span className="font-medium text-blue-400">프롬프트 개선 완료!</span>
-                                                </>
-                                            )}
-                                            {improveCount === 2 && (
-                                                <>
-                                                    <div className="text-purple-400"><CheckCircle size={20} /></div>
-                                                    <span className="font-medium text-purple-400">프롬프트 개선 완료!</span>
-                                                </>
-                                            )}
-                                            {improveCount === 3 && (
-                                                <>
-                                                    <div className="text-yellow-400"><CheckCircle size={20} /></div>
-                                                    <span className="font-medium text-yellow-400">프롬프트 개선 완료!</span>
-                                                </>
-                                            )}
-
-                                        </div>
-                                        <p className="text-sm text-gray-300 leading-relaxed">
-                                            {improveCount === 1 && (
-                                                '🚀 프롬프트가 향상되었습니다! 2번 더 체험해보세요.'
-                                            )}
-                                            {improveCount === 2 && (
-                                                '🔥 프롬프트가 더욱 향상되었습니다! 1번 더 체험해보세요.'
-                                            )}
-                                            {improveCount === 3 && (
-                                                '✨ 프롬프트가 완벽하게 개선되었습니다!'
-                                            )}
-
+                                    <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                                        <p className="text-sm text-blue-800">
+                                            <strong>점수 향상: +{improvedScore.overall - originalScore.overall}점</strong>
+                                            {improvedScore.overall > originalScore.overall && " 🎉"}
                                         </p>
-                                        {improveCount >= 3 && (
-                                            <div className="mt-2 text-xs text-green-300">
-                                                🎯 사전 등록하고 더 강력한 AI 기능을 경험해보세요!
-                                            </div>
-                                        )}
-                                        {improveCount === 1 && (
-                                            <div className="mt-2 text-xs text-blue-300">
-                                                💡 계속 개선하면 더욱 강력한 프롬프트가 됩니다!
-                                            </div>
-                                        )}
-                                        {improveCount === 2 && (
-                                            <div className="mt-2 text-xs text-purple-300">
-                                                🔮 이제 절반 이상 개선되었어요! 계속해보세요!
-                                            </div>
-                                        )}
                                     </div>
-                                )}
-                        </div>
+                                </CardContent>
+                            </Card>
+                        )}
+
+                        {/* 프롬프트 비교 (기존 코드 유지) */}
+                        {inputText && improvedText && (
+                            <PromptComparison
+                                originalPrompt={inputText}
+                                improvedPrompt={improvedText}
+                                improvements={[
+                                    "명확한 목표와 맥락 정보 추가",
+                                    "구체적인 요구사항과 제약조건 명시",
+                                    "체계적인 구조로 재구성",
+                                    "실행 가능한 결과물 형태 제시"
+                                ]}
+                                isVisible={true}
+                                originalScore={originalScore}
+                                improvedScore={improvedScore}
+                            />
+                        )}
                     </div>
-                </Container>
+                </div>
             </section>
 
+            {/* Features Section */}
+            <FeaturesSection />
 
+            {/* How It Works Section */}
+            <HowItWorksSection />
 
-            {/* Pre-Registration Section - 기존 폼 (3회 체험 후에만 표시) */}
-            {(showPreRegistration || improveCount >= 3) && (
-                <section ref={preRegRef} data-section="pre-registration" className="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-purple-900/50 to-blue-900/50 animate-fade-in">
-                    <Container>
-                        <div className="max-w-4xl mx-auto">
-                            <div className="text-center mb-8">
-                                                            <div className="inline-flex items-center space-x-2 bg-yellow-500/20 text-yellow-300 px-4 py-2 rounded-full text-sm font-medium mb-4">
-                                <Crown size={16} />
-                                <span>First Mover Club 초대</span>
-                            </div>
-                            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                                First Mover Club에 초대합니다 🚀
-                            </h2>
-                            <p className="text-xl text-blue-100 mb-6">
-                                당신의 목소리로 제품을 완성해주세요
-                            </p>
-                            </div>
-
-                            {/* 혜택 리스트 */}
-                            <div className="grid md:grid-cols-3 gap-4 mb-8">
-                                <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20 hover:bg-white/15 transition-all duration-300 group">
-                                    <div className="text-3xl mb-3 group-hover:scale-110 transition-transform duration-300">💬</div>
-                                    <h3 className="font-bold text-white mb-2 text-lg">실질적인 제품 영향력</h3>
-                                    <p className="text-sm text-blue-200 mb-3">비공개 베타 우선 초대, 신기능 투표, 개발자 직접 소통 채널 참여</p>
-                                </div>
-                                <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20 hover:bg-white/15 transition-all duration-300 group">
-                                    <div className="text-3xl mb-3 group-hover:scale-110 transition-transform duration-300">🏆</div>
-                                    <h3 className="font-bold text-white mb-2 text-lg">영구적인 명예와 인정</h3>
-                                    <p className="text-sm text-blue-200 mb-3">'명예의 전당(Hall of Fame)'에 닉네임 등재 및 전용 디지털 뱃지 제공</p>
-                                </div>
-                                <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20 hover:bg-white/15 transition-all duration-300 group">
-                                    <div className="text-3xl mb-3 group-hover:scale-110 transition-transform duration-300">🎁</div>
-                                    <h3 className="font-bold text-white mb-2 text-lg">감사의 웰컴 리워드</h3>
-                                    <p className="text-sm text-blue-200 mb-3">정식 출시 후 첫 결제 시 사용 가능한 ₩10,000 웰컴 크레딧 제공</p>
-                                </div>
-                            </div>
-
-                            {/* 추가 혜택 및 긴급감 조성 */}
-                            <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 rounded-xl p-6 mb-8 border border-yellow-400/30">
-                                <div className="text-center">
-                                    <div className="flex items-center justify-center space-x-2 mb-3">
-                                        <span className="text-2xl">👑</span>
-                                        <span className="text-yellow-300 font-bold text-lg">VIP 독점 혜택</span>
-                                    </div>
-                                    <p className="text-white font-semibold mb-2">
-                                        First Mover Club 특별 혜택
-                                    </p>
-                                    <div className="flex items-center justify-center space-x-4 text-sm text-yellow-200">
-                                        <div className="flex items-center space-x-1">
-                                            <Users size={16} />
-                                            <span>현재 87명 참여</span>
-                                        </div>
-                                        <div className="flex items-center space-x-1">
-                                            <Clock size={16} />
-                                            <span>13자리 남음</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* 사전 등록 폼 */}
-                            <EnhancedPreRegistrationForm
-                                onSuccess={handleEnhancedRegistrationSuccess}
-                                className="w-full"
-                            />
-
-                            {/* 사회적 증거 */}
-
-                        </div>
-                    </Container>
-                </section>
-            )}
-
-            {/* 간단한 푸터 */}
-            <footer className="py-8 px-4 sm:px-6 lg:px-8 border-t border-white/10">
-                <Container>
-                    <div className="text-center text-blue-200 text-sm">
-                        <p>© 2025 Smart Prompt Assistant. 더 스마트한 AI 활용의 시작.</p>
-                    </div>
-                </Container>
-            </footer>
-
-            {/* 모바일 네비게이션 바 */}
-            <MobileNavBar
-                hasTriedDemo={hasTriedDemo}
-                improveCount={improveCount}
-                showPreRegistration={showPreRegistration}
-                onNavigate={(section) => {
-                    // 네비게이션 이벤트 처리
-                    if (section === 'demo') {
-                        scrollToDemo();
-                    } else if (section === 'pre-registration') {
-                        scrollToPreRegistration();
+            {/* Pricing Section */}
+            <PricingSection 
+                plans={[
+                    {
+                        name: "무료",
+                        description: "개인 사용자를 위한 기본 플랜",
+                        price: "₩0",
+                        features: [
+                            { text: "일 3회 프롬프트 개선", included: true },
+                            { text: "기본 페르소나 템플릿", included: true },
+                            { text: "실시간 점수 확인", included: true },
+                            { text: "우선 지원", included: false },
+                            { text: "무제한 사용", included: false }
+                        ]
+                    },
+                    {
+                        name: "프로",
+                        description: "전문가를 위한 고급 플랜",
+                        price: "₩9,900",
+                        popular: true,
+                        features: [
+                            { text: "무제한 프롬프트 개선", included: true },
+                            { text: "모든 페르소나 템플릿", included: true },
+                            { text: "고급 점수 분석", included: true },
+                            { text: "우선 지원", included: true },
+                            { text: "히스토리 저장", included: true }
+                        ]
+                    },
+                    {
+                        name: "팀",
+                        description: "팀과 기업을 위한 플랜",
+                        price: "₩29,900",
+                        features: [
+                            { text: "팀 공유 기능", included: true },
+                            { text: "관리자 대시보드", included: true },
+                            { text: "API 액세스", included: true },
+                            { text: "24/7 지원", included: true },
+                            { text: "커스텀 통합", included: true }
+                        ]
                     }
-                }}
+                ]}
             />
 
-            {/* Enhance Intercept Modal */}
-            <EnhanceInterceptModal
-                isOpen={showInterceptModal}
-                onClose={() => setShowInterceptModal(false)}
-                onEnhanceNow={handleInterceptEnhance}
-                onSendAnyway={handleInterceptSendAnyway}
-            />
-
-            {/* Registration Banner */}
-            <RegistrationBanner
-                isVisible={showRegistrationBanner}
-                onClose={handleBannerClose}
-                onJoinBeta={handleBannerJoinBeta}
-            />
+            {/* Pre-Registration Section */}
+            <PreRegistrationSection />
         </div>
     );
 } 
