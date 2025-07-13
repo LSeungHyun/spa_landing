@@ -24,6 +24,8 @@ import { PreRegistrationSection } from '@/components/sections/pre-registration-s
 import { PromptComparison } from '@/components/shared/prompt-comparison';
 import { PromptScoreDisplay } from '@/components/shared/prompt-score-display';
 import { PersonaSelector } from '@/components/shared/persona-selector';
+import { AIModelSelector } from '@/components/shared/ai-model-selector';
+import { ModelComparisonResults } from '@/components/shared/model-comparison-results';
 import { getPersonaData, getAllPersonas, type Persona } from '@/components/data/landing-data';
 import { PromptImprovementService, DetailedPromptScore } from '@/lib/services/prompt-improvement-service';
 
@@ -74,6 +76,13 @@ export default function HomePage() {
     const [improvedScore, setImprovedScore] = useState<DetailedPromptScore | null>(null);
     const [showScorePanel, setShowScorePanel] = useState(false);
     const [isScoreCalculating, setIsScoreCalculating] = useState(false);
+
+    // 다중 모델 비교 상태들
+    const [selectedModels, setSelectedModels] = useState<string[]>(['gemini-2.5-flash']);
+    const [taskType, setTaskType] = useState<'creative' | 'technical' | 'business' | 'educational'>('business');
+    const [isComparing, setIsComparing] = useState(false);
+    const [comparisonResults, setComparisonResults] = useState<any>(null);
+    const [showComparison, setShowComparison] = useState(false);
 
     // 실시간 점수 계산을 위한 debounced 값
     const debouncedInputText = useDebounce(inputText, 500);
@@ -259,6 +268,50 @@ export default function HomePage() {
         setOriginalScore(null);
         setImprovedScore(null);
         setShowScorePanel(false);
+    };
+
+    const handleCompareModels = async () => {
+        if (!inputText.trim() || selectedModels.length < 2) {
+            toast.error('프롬프트를 입력하고 최소 2개 모델을 선택해주세요');
+            return;
+        }
+
+        setIsComparing(true);
+        setShowComparison(false);
+
+        try {
+            const response = await fetch('/api/ai-models/compare', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    prompt: inputText,
+                    modelIds: selectedModels,
+                    taskType: taskType,
+                    options: {
+                        prioritizeQuality: true,
+                        prioritizeSpeed: false,
+                        prioritizeCost: true,
+                    },
+                }),
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                setComparisonResults(data.data);
+                setShowComparison(true);
+                toast.success(`${selectedModels.length}개 모델 비교 완료!`);
+            } else {
+                throw new Error(data.error || '모델 비교에 실패했습니다');
+            }
+        } catch (error) {
+            console.error('Model comparison error:', error);
+            toast.error('모델 비교 중 오류가 발생했습니다');
+        } finally {
+            setIsComparing(false);
+        }
     };
 
     const personaData = getPersonaData(selectedPersona);
@@ -607,6 +660,46 @@ export default function HomePage() {
                                 originalScore={originalScore}
                                 improvedScore={improvedScore}
                             />
+                        )}
+                    </div>
+                </div>
+            </section>
+
+            {/* AI Model Comparison Section */}
+            <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-50">
+                <div className="container mx-auto px-4">
+                    <div className="max-w-6xl mx-auto">
+                        <AIModelSelector
+                            selectedModels={selectedModels}
+                            onModelSelectionChange={setSelectedModels}
+                            taskType={taskType}
+                            onTaskTypeChange={setTaskType}
+                            onCompare={handleCompareModels}
+                            isComparing={isComparing}
+                        />
+                        
+                        {showComparison && comparisonResults && (
+                            <div className="mt-12">
+                                <ModelComparisonResults
+                                    results={comparisonResults.comparison.map((result: any) => ({
+                                        ...result,
+                                        modelName: result.modelId === 'gemini-2.5-flash' ? 'Gemini 2.5 Flash' :
+                                                  result.modelId === 'gemini-2.0-flash' ? 'Gemini 2.0 Flash' :
+                                                  result.modelId === 'gpt-4o' ? 'GPT-4o' :
+                                                  result.modelId === 'claude-3.5-sonnet' ? 'Claude 3.5 Sonnet' :
+                                                  result.modelId === 'llama-3.3-70b' ? 'Llama 3.3 70B' : result.modelId,
+                                        provider: result.modelId.includes('gemini') ? 'Google' :
+                                                 result.modelId.includes('gpt') ? 'OpenAI' :
+                                                 result.modelId.includes('claude') ? 'Anthropic' :
+                                                 result.modelId.includes('llama') ? 'Meta' : 'Unknown'
+                                    }))}
+                                    recommendation={comparisonResults.recommendation}
+                                    originalPrompt={inputText}
+                                    taskType={taskType}
+                                    isVisible={true}
+                                    onCopyPrompt={handleCopyToClipboard}
+                                />
+                            </div>
                         )}
                     </div>
                 </div>
