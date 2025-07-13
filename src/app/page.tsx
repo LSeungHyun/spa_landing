@@ -19,6 +19,7 @@ import {
 import { BeforeAfterHeroSection } from '@/components/sections/before-after-hero-section';
 import { FeaturesSection } from '@/components/sections/features-section';
 import { HowItWorksSection } from '@/components/sections/how-it-works-section';
+import { CollaborativeSection } from '@/components/sections/collaborative-section';
 import { PricingSection } from '@/components/sections/pricing-section';
 import { PreRegistrationSection } from '@/components/sections/pre-registration-section';
 import { PromptComparison } from '@/components/shared/prompt-comparison';
@@ -710,6 +711,9 @@ export default function HomePage() {
 
             {/* How It Works Section */}
             <HowItWorksSection />
+
+            {/* Collaborative Section */}
+            <CollaborativeSection />
 
             {/* Pricing Section */}
             <PricingSection 
