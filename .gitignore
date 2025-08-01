@@ -48,6 +48,11 @@ Thumbs.db
 logs
 *.log
 
+# Tool-specific configurations
+.cursor/
+.cursorignore
+.vooster/
+
 # Runtime data
 pids
 *.pid
