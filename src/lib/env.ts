@@ -13,9 +13,18 @@ interface ServerEnv {
 
 // 클라이언트 환경 변수 (브라우저에서 접근 가능)
 export const client: ClientEnv = {
-    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mtowbsogtkpxvysnbdau.supabase.co',
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im10b3dic29ndGtweHZ5c25iZGF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAyNDgxODQsImV4cCI6MjA2NTgyNDE4NH0.pLu1dN6nMzEfm-zrHjPn4natPoN5sARvvKzsNXnIh_I',
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
 };
+
+// 클라이언트 환경 변수 검증
+if (!client.NEXT_PUBLIC_SUPABASE_URL) {
+    throw new Error('NEXT_PUBLIC_SUPABASE_URL environment variable is required');
+}
+
+if (!client.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    throw new Error('NEXT_PUBLIC_SUPABASE_ANON_KEY environment variable is required');
+}
 
 // 서버 환경 변수 (서버에서만 접근 가능)
 export const server: ServerEnv = {
@@ -57,4 +66,4 @@ export const env = {
     isProduction,
     isRedisEnabled,
     validateRequiredEnvVars,
-}; 
+};

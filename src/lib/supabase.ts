@@ -1,8 +1,16 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Supabase 설정
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mtowbsogtkpxvysnbdau.supabase.co';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im10b3dic29ndGtweHZ5c25iZGF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAyNDgxODQsImV4cCI6MjA2NTgyNDE4NH0.pLu1dN6nMzEfm-zrHjPn4natPoN5sARvvKzsNXnIh_I';
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl) {
+    throw new Error('NEXT_PUBLIC_SUPABASE_URL environment variable is required');
+}
+
+if (!supabaseAnonKey) {
+    throw new Error('NEXT_PUBLIC_SUPABASE_ANON_KEY environment variable is required');
+}
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
@@ -329,4 +337,4 @@ export const utils = {
     }
 };
 
-export default supabase; 
+export default supabase;

@@ -9,8 +9,16 @@ import {
 import { createClient } from '@supabase/supabase-js';
 
 // Supabase 설정
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://mtowbsogtkpxvysnbdau.supabase.co';
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im10b3dic29ndGtweHZ5c25iZGF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAyNDgxODQsImV4cCI6MjA2NTgyNDE4NH0.pLu1dN6nMzEfm-zrHjPn4natPoN5sARvvKzsNXnIh_I';
+const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+if (!SUPABASE_URL) {
+    throw new Error('SUPABASE_URL or NEXT_PUBLIC_SUPABASE_URL environment variable is required');
+}
+
+if (!SUPABASE_ANON_KEY) {
+    throw new Error('SUPABASE_ANON_KEY or NEXT_PUBLIC_SUPABASE_ANON_KEY environment variable is required');
+}
 
 // Supabase 클라이언트 생성
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -555,4 +563,4 @@ class SupabaseMCPServer {
 }
 
 const server = new SupabaseMCPServer();
-server.run().catch(console.error); 
+server.run().catch(console.error);
