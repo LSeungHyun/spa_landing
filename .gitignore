@@ -57,3 +57,8 @@ pids
 # Temporary folders
 tmp/
 temp/
+
+# IDE & Tool Configurations
+.cursor/
+.cursorignore
+.vooster/
